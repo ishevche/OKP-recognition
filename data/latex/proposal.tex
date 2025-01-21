@@ -1,0 +1,79 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[backend=bibtex,style=numeric,natbib=true,sorting=none]{biblatex}
+\addbibresource{bib}
+
+\title{Recognition of outer k-planar graphs}
+\author{Ivan Shevchenko}
+\date{November 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Background and motivation}
+
+Many different processes and concepts can be represented in the modern world using planar graphs. Throughout this field's long history, many efficient algorithms were developed for computers to deal with this abstraction.
+
+Planarity, though, imposes massive restrictions on the graph, so the generalization to the graphs that are ``almost'' planar can be valuable. In the case of this work, the generalization to \(k\)-planar graphs is considered. A graph is \(k\)-planar if it can be drawn on the plane with each edge having at most \(k\) intersections. 
+
+Unfortunately, the task of recognizing even \(1\)-planar graphs is known to be \(\mathcal{NP}\)-hard~\cite{NP-hard-1p}, so it is not possible to efficiently test whether a graph is 1-planar or not.
+
+Outerplanar graphs are a specialization of planar graphs in which all vertices lie on the same (outer) face. This subclass is interesting as some of the problems known to be \(\mathcal{NP}\)-complete for planar graphs can be solved for outer planar in polynomial time. Among them are chromatic number, Hamiltonian path and Hamiltonian circuit.
+
+\section{Problem formulation}
+
+There is an algorithm that tests outer \(k\)-planarity in \(\mathcal{O}(k!\cdot n^{3k+\mathcal{O}(1)})\) time~\cite{okp}. There are, however, the linear time algorithms for testing outer planarity~\cite{linear-op} and outer \(1\)-planarity~\cite{linear-o1p, linear-o1p_}, which use some insights from low values of \(k\), which is a significant improvement compared to the general algorithm.
+
+For the value of \(k\) as small as two, testing would require at least \(\mathcal{O}(n^6)\), which could be unbearable for big graphs. 
+
+Furthermore, all existing algorithms are purely combinatorial, thus gaining nothing from optimizations already discovered for solving other similar \(\mathcal{NP}\)-hard problems such as satisfiability (SAT) or integer linear programming (ILP).
+
+\section{Project aims and deliverables}
+
+This thesis aims to reduce the asymptotic time complexity of such tests for small values of \(k\). 
+
+Another approach that will be discovered in the thesis is to transform the outer k-planar test into a satisfiability (SAT) and an integer linear programming (ILP) problem for which highly optimized solvers exist. The results can be compared afterwards to combinatorial methods.
+
+A possible extension to this problem could be a modification of outer \(k\)-planar straight-line drawings to use simple curves (e.g. quadratic Bézier curves) for edges to separate the intersections.
+
+\section{Project timeline}
+
+\begin{itemize}
+    \item Early December
+    \begin{itemize}
+        \item Familiarize with the topic.
+        \item Review the literature.
+        \item Explore existing algorithms.
+    \end{itemize}
+    \item Late December
+    \begin{itemize}
+        \item Implement existing algorithms that will be used for comparison.
+        \item Begin formulating an algorithm for \(k = 2\).
+    \end{itemize}
+    \item January
+    \begin{itemize}
+        \item Finish implementation of the test for \(k = 2\).
+        \item Discover generalization opportunities for bigger values (e.g. \(k=3\)).
+        \item Begin formulating a transformation of the test into a SAT problem.
+    \end{itemize}
+    \item February
+    \begin{itemize}
+        \item Finish implementation of the SAT transformation.
+        \item Begin formulating a transformation of the test into an ILP problem. 
+    \end{itemize}
+    \item March
+    \begin{itemize}
+        \item Finish implementation of the ILP transformation.
+        \item Conduct comparison tests between all methods.
+    \end{itemize}
+    \item April
+    \begin{itemize}
+        \item Finalize the thesis document.
+        \item Refactor the implementations of the methods.
+    \end{itemize}
+\end{itemize}
+
+\printbibliography[heading=bibintoc]
+
+\end{document}

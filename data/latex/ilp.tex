@@ -1,0 +1,15 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage[backend=bibtex,style=numeric,natbib=true,sorting=none]{biblatex}
+\addbibresource{bib}
+
+\begin{document}
+
+The result of the integral linear program should be an arrangement of the vertices on a line. In this scenario, two edges $uv$ and $st$ cross if and only if one of $u$ and $v$ is located between $s$ and $t$ and the other one is on the right or the left of both of them.
+
+The first idea is to represent this order using ''ordering`` variables. For every pair of vertices $u$ and $v$, we create a binary variable $a_{u, v}$ that defines the order between these vertices. If $a_{u, v} =1$, $u$ is located before $v$ and vise versa otherwise.
+
+For these variables, it is crucial to ensure transitivity. Namely if $a_{u, v} = a_{v, s}$, then $a_{u, s}$ must have the same value. It can be ensured by the following constraint: $a_{u, s} \neq 1-\frac{a_{u,v} + a_{v,s}}{2}$. If  $a_{u, v} = a_{v, s}$, the fraction on the right side equals this value, and constraint prevents $a_{u,s}$ from having an opposite value. Otherwise, the fraction and, consequently, the whole right side of the constraint equals $0.5$, imposing no constraints on the variable $a_{u,s}$.
+
+\end{document}
