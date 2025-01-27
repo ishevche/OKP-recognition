@@ -49,7 +49,7 @@ int ILPSolver(const ogdf::Graph &graph, ogdf::NodeArray<int> &ordering) {
     }
 
     GRBLinExpr crossing_upper_bound = model.addVar(0, GRB_INFINITY, 0, GRB_INTEGER, "k");
-    ogdf::EdgeArray<GRBLinExpr> edge_crossing_number(graph, 0);
+    ogdf::EdgeArray<GRBLinExpr> edge_crossing_numbers(graph, 0);
 
     // Edge crossings variables definition
     for (const ogdf::edge &edge1: graph.edges) {
@@ -66,8 +66,8 @@ int ILPSolver(const ogdf::Graph &graph, ogdf::NodeArray<int> &ordering) {
                     "_cross_e" + std::to_string(edge2->index())
             );
 
-            edge_crossing_number[edge1] += do_cross;
-            edge_crossing_number[edge2] += do_cross;
+            edge_crossing_numbers[edge1] += do_cross;
+            edge_crossing_numbers[edge2] += do_cross;
 
             {
                 model.addConstr(do_cross >= variables[u][s] + variables[s][v] + variables[v][t] - 2);
@@ -81,9 +81,19 @@ int ILPSolver(const ogdf::Graph &graph, ogdf::NodeArray<int> &ordering) {
             }
         }
         model.addConstr(crossing_upper_bound >=
-                        edge_crossing_number[edge1]);
+                        edge_crossing_numbers[edge1]);
     }
+
+#ifndef ILP_CROSSING_SUM_OPTIMIZATION
     model.setObjective(crossing_upper_bound, GRB_MINIMIZE);
+#else
+    GRBLinExpr crossing_sum = 0;
+    for (const GRBLinExpr &edge_sum: edge_crossing_numbers) {
+        crossing_sum += edge_sum;
+    }
+    int factor = graph.numberOfEdges() * graph.numberOfEdges();
+    model.setObjective(crossing_upper_bound + crossing_sum / factor, GRB_MINIMIZE);
+#endif
 
     model.optimize();
 
