@@ -1,15 +1,74 @@
 \documentclass{article}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{amssymb}
 \usepackage[backend=bibtex,style=numeric,natbib=true,sorting=none]{biblatex}
 \addbibresource{bib}
 
 \begin{document}
 
-The result of the integral linear program should be an arrangement of the vertices on a line. In this scenario, two edges $uv$ and $st$ cross if and only if one of $u$ and $v$ is located between $s$ and $t$ and the other one is on the right or the left of both of them.
+    \subsubsection{ILP Solver}\label{subsubsec:ILP-def}
 
-The first idea is to represent this order using ''ordering`` variables. For every pair of vertices $u$ and $v$, we create a binary variable $a_{u, v}$ that defines the order between these vertices. If $a_{u, v} =1$, $u$ is located before $v$ and vise versa otherwise.
+    The result of the integral linear program should be an arrangement of vertices on a line.
+    Given the arrangement of the vertices, we can definitively identify whether two edges cross each other.
+    Indeed, consider two edges, $uv$ and $st$.
+    Without loss of generality, we can assume that $u$ is located before $v$ in the arrangement, $s$ before $t$, and $u$ before $s$.
+    Under these assumptions, the edges $uv$ and $st$ cross if and only if $s$ is located before $v$ and $t$ after $v$.
+    % Image?
 
-For these variables, it is crucial to ensure transitivity. Namely if $a_{u, v} = a_{v, s}$, then $a_{u, s}$ must have the same value. It can be ensured by the following constraint: $a_{u, s} \neq 1-\frac{a_{u,v} + a_{v,s}}{2}$. If  $a_{u, v} = a_{v, s}$, the fraction on the right side equals this value, and constraint prevents $a_{u,s}$ from having an opposite value. Otherwise, the fraction and, consequently, the whole right side of the constraint equals $0.5$, imposing no constraints on the variable $a_{u,s}$.
+    The arrangement is represented using the so-called ``ordering variables''.
+    For every pair of vertices $u$ and $v$, we create a binary variable $a_{u, v}$ that defines the order in which they appear in the arrangement.
+    $a_{u, v} = 1$ indicates that $u$ is located before $v$ and vice versa, and $a_{u, v} = 0$ indicates that $v$ is located before $u$ or $u$ and $v$ is the same vertex.
+
+    For these variables, it is crucial to ensure transitivity.
+    That is, if $a_{u, v} = 1$ and $a_{v, w} = 1$ which means $u$ is located before $v$ and $v$ is located before $w$, then $u$ must be located before $w$, so the following should hold $a_{u, w} = 1$.
+    This can be ensured by the following constraint: $a_{u, w} \geqslant a_{u, v} + a_{v, w} - 1$.
+    This constraint will restrict the value of $a_{u, w}$ if and only if both $a_{u, v}$ and $a_{v, w}$ equal $1$.
+    Otherwise, the constraint will have no impact on the system at all.
+
+    Having the arrangement of the vertices, we can now deduce for each pair of edges $uv$ and $st$ whether they intersect or not.
+    Naturally, there are 24 different arrangements of the vertices, as demonstrated in figure~\ref{fig:edge_crossings}.
+    Among them, there are only eight in which the edges intersect.
+    Thus, the edge $uv$ crosses the edge $st$ if and only if one of the following holds:
+    \begin{itemize}[noitemsep]
+        \item $a_{u,s} = 1$, $a_{s,v} = 1$, and $a_{v,t} = 1$
+        \item $a_{u,t} = 1$, $a_{t,v} = 1$, and $a_{v,s} = 1$
+        \item $a_{v,s} = 1$, $a_{s,u} = 1$, and $a_{u,t} = 1$
+        \item $a_{v,t} = 1$, $a_{t,u} = 1$, and $a_{u,s} = 1$
+        \item $a_{s,u} = 1$, $a_{u,t} = 1$, and $a_{t,v} = 1$
+        \item $a_{t,u} = 1$, $a_{u,s} = 1$, and $a_{s,v} = 1$
+        \item $a_{s,v} = 1$, $a_{v,t} = 1$, and $a_{t,u} = 1$
+        \item $a_{t,v} = 1$, $a_{v,s} = 1$, and $a_{s,u} = 1$
+    \end{itemize}
+
+    To describe this in the linear program, we create a binary variable $c_{uv, st}$ for every pair of edges $uv$ and $st$.
+    $c_{uv, st} = 0$ indicates that the edge $uv$ does not cross $st$.
+    To ensure the correctness of these values, we impose eight constraints on each variable, one for each case from above.
+    For example, considering the case $a_{u,s} = 1$, $a_{s,v} = 1$, and $a_{v,t} = 1$, we impose the following restriction: $c_{uv, st} \geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2$, which ensures that $c_{uv, st}$ equals $1$ whenever the vertices are ordered as $usvt$.
+    Making this for each case restricts $c_{uv, st}$ to the value $1$ if the vertices are arranged in one of the eight ``intersecting'' configurations, ensuring that $c_{uv, st} = 0$ is possible only if $uv$ does not cross $st$.
+
+    The algorithm's objective is to minimize the maximal number of crossings per edge.
+    This value can be written as follows: $\max_{uv \in E(G)} \sum_{st \in E(G)} c_{uv, st}$.
+    Unfortunately, it cannot represent an objective function for a linear program as the $\max$ operation is not linear.
+    To solve this, we introduce a new integer variable $k$.
+    To ensure that it is equal to the objective value, we impose the following constraint on $k$: $k \geqslant \sum_{st \in E(G)} c_{uv, st}$ for each edge $uv \in E(G)$.
+
+    So, the integer linear program can be described as follows:
+    \begin{align*}
+        \textbf{minimize}\quad&k\\
+        \textbf{subject to}\quad&k \geqslant \sum_{st \in E(G)} c_{uv, st},&&\forall uv \in E(G)\\
+        &c_{uv, st} \geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2,&&\forall uv, st \in E(G)\\
+        &c_{uv, st} \geqslant a_{u,t} + a_{t,v} + a_{v,s} - 2,&&\forall uv, st \in E(G)\\
+        &c_{uv, st} \geqslant a_{v,s} + a_{s,u} + a_{u,t} - 2,&&\forall uv, st \in E(G)\\
+        &c_{uv, st} \geqslant a_{v,t} + a_{t,u} + a_{u,s} - 2,&&\forall uv, st \in E(G)\\
+        &c_{uv, st} \geqslant a_{s,u} + a_{u,t} + a_{t,v} - 2,&&\forall uv, st \in E(G)\\
+        &c_{uv, st} \geqslant a_{t,u} + a_{u,s} + a_{s,v} - 2,&&\forall uv, st \in E(G)\\
+        &c_{uv, st} \geqslant a_{s,v} + a_{v,t} + a_{t,u} - 2,&&\forall uv, st \in E(G)\\
+        &c_{uv, st} \geqslant a_{t,v} + a_{v,s} + a_{s,u} - 2,&&\forall uv, st \in E(G)\\
+        &a_{u, w} \geqslant a_{u, v} + a_{v, w} - 1,&&\forall u, v, w \in V(G)\\
+        &c_{uv, st} \in \{0, 1\},&&\forall uv, st \in E(G)\\
+        &a_{u, v} \in \{0, 1\},&&\forall u, v \in V(G)\\
+    \end{align*}
 
 \end{document}
