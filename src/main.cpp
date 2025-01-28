@@ -30,38 +30,39 @@ int main() {
         auto end = get_current_time_fenced();
 
         std::cout << "ILP: " << ILP_bound << " " << to_ns(end-start) << std::endl;
+        std::cout << "SAT: 0 0 0\nSAT: 0 0 0\n" << std::endl;
 
-        ogdf::NodeArray<int> SAT_order(graph);
-        start = get_current_time_fenced();
-        bool found_solution = SATSolver(graph, ILP_bound, SAT_order);
-        end = get_current_time_fenced();
-        std::cout << "SAT: " << ILP_bound << " " << found_solution << " " << to_ns(end-start) << std::endl;
-        if (!found_solution && ILP_bound < 7) {
-            draw(graph, ILP_order, graph_string, "ILP(" + std::to_string(ILP_bound) + ").svg");
-            while (!found_solution) {
-                start = get_current_time_fenced();
-                found_solution = SATSolver(graph, ++ILP_bound, SAT_order);
-                end = get_current_time_fenced();
-                std::cout << "SAT: " << ILP_bound << " " << found_solution << " " << to_ns(end-start) << std::endl;
-            }
-            draw(graph, SAT_order, graph_string, "SAT(" + std::to_string(ILP_bound) + ").svg");
-        } else {
-            start = get_current_time_fenced();
-            found_solution = SATSolver(graph, --ILP_bound, SAT_order);
-            end = get_current_time_fenced();
-            std::cout << "SAT: " << ILP_bound << " " << found_solution << " " << to_ns(end-start) << std::endl;
-            if (found_solution) {
-                draw(graph, ILP_order, graph_string, "ILP(" + std::to_string(ILP_bound) + ").svg");
-                while (found_solution) {
-                    draw(graph, SAT_order, graph_string, "SAT(" + std::to_string(ILP_bound) + ").svg");
-                    start = get_current_time_fenced();
-                    found_solution = SATSolver(graph, --ILP_bound, SAT_order);
-                    end = get_current_time_fenced();
-                    std::cout << "SAT: " << ILP_bound << " " << found_solution << " " << to_ns(end-start) << std::endl;
-                }
-            }
-        }
-        std::cout << std::endl;
+//        ogdf::NodeArray<int> SAT_order(graph);
+//        start = get_current_time_fenced();
+//        bool found_solution = SATSolver(graph, ILP_bound, SAT_order);
+//        end = get_current_time_fenced();
+//        std::cout << "SAT: " << ILP_bound << " " << found_solution << " " << to_ns(end-start) << std::endl;
+//        if (!found_solution && ILP_bound < 7) {
+//            draw(graph, ILP_order, graph_string, "ILP(" + std::to_string(ILP_bound) + ").svg");
+//            while (!found_solution) {
+//                start = get_current_time_fenced();
+//                found_solution = SATSolver(graph, ++ILP_bound, SAT_order);
+//                end = get_current_time_fenced();
+//                std::cout << "SAT: " << ILP_bound << " " << found_solution << " " << to_ns(end-start) << std::endl;
+//            }
+//            draw(graph, SAT_order, graph_string, "SAT(" + std::to_string(ILP_bound) + ").svg");
+//        } else {
+//            start = get_current_time_fenced();
+//            found_solution = SATSolver(graph, --ILP_bound, SAT_order);
+//            end = get_current_time_fenced();
+//            std::cout << "SAT: " << ILP_bound << " " << found_solution << " " << to_ns(end-start) << std::endl;
+//            if (found_solution) {
+//                draw(graph, ILP_order, graph_string, "ILP(" + std::to_string(ILP_bound) + ").svg");
+//                while (found_solution) {
+//                    draw(graph, SAT_order, graph_string, "SAT(" + std::to_string(ILP_bound) + ").svg");
+//                    start = get_current_time_fenced();
+//                    found_solution = SATSolver(graph, --ILP_bound, SAT_order);
+//                    end = get_current_time_fenced();
+//                    std::cout << "SAT: " << ILP_bound << " " << found_solution << " " << to_ns(end-start) << std::endl;
+//                }
+//            }
+//        }
+//        std::cout << std::endl;
     }
     return 0;
 }
