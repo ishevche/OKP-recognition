@@ -1,2 +1,102 @@
 \chapter{Proposed Solution}
+
+
 \section{Problem Formulation}
+
+\subsection{ILP Solver}\label{subsec:ILP-def}
+
+The result of the integral linear program should be an arrangement of vertices on a line.
+Given the arrangement of the vertices, we can definitively identify whether two edges cross each other.
+Indeed, consider two edges, $uv$ and $st$.
+Without loss of generality, we can assume that $u$ is located before $v$ in the arrangement, $s$ before $t$, and $u$ before $s$.
+Under these assumptions, the edges $uv$ and $st$ cross if and only if $s$ is located before $v$ and $t$ after $v$.
+% Image?
+
+The arrangement is represented using the so-called ``ordering variables''.
+For every pair of vertices $u$ and $v$, we create a binary variable $a_{u, v}$ that defines the order in which they appear in the arrangement.
+$a_{u, v} = 1$ indicates that $u$ is located before $v$ and vice versa, and $a_{u, v} = 0$ indicates that $v$ is located before $u$ or $u$ and $v$ is the same vertex.
+
+For these variables, it is crucial to ensure transitivity.
+That is, if $a_{u, v} = 1$ and $a_{v, w} = 1$ which means $u$ is located before $v$ and $v$ is located before $w$, then $u$ must be located before $w$, so the following should hold $a_{u, w} = 1$.
+This can be ensured by the following constraint: $a_{u, w} \geqslant a_{u, v} + a_{v, w} - 1$.
+This constraint will restrict the value of $a_{u, w}$ if and only if both $a_{u, v}$ and $a_{v, w}$ equal $1$.
+Otherwise, the constraint will have no impact on the system at all.
+
+Having the arrangement of the vertices, we can now deduce for each pair of edges $uv$ and $st$ whether they intersect or not.
+Naturally, there are 24 different arrangements of the vertices, as demonstrated in figure~\ref{fig:edge_crossings}.
+Among them, there are only eight in which the edges intersect.
+Thus, the edge $uv$ crosses the edge $st$ if and only if one of the following holds:
+\begin{itemize}[noitemsep]
+    \item $a_{u,s} = 1$, $a_{s,v} = 1$, and $a_{v,t} = 1$
+    \item $a_{u,t} = 1$, $a_{t,v} = 1$, and $a_{v,s} = 1$
+    \item $a_{v,s} = 1$, $a_{s,u} = 1$, and $a_{u,t} = 1$
+    \item $a_{v,t} = 1$, $a_{t,u} = 1$, and $a_{u,s} = 1$
+    \item $a_{s,u} = 1$, $a_{u,t} = 1$, and $a_{t,v} = 1$
+    \item $a_{t,u} = 1$, $a_{u,s} = 1$, and $a_{s,v} = 1$
+    \item $a_{s,v} = 1$, $a_{v,t} = 1$, and $a_{t,u} = 1$
+    \item $a_{t,v} = 1$, $a_{v,s} = 1$, and $a_{s,u} = 1$
+\end{itemize}
+
+To describe this in the linear program, we create a binary variable $c_{uv, st}$ for every pair of edges $uv$ and $st$.
+$c_{uv, st} = 0$ indicates that the edge $uv$ does not cross $st$.
+To ensure the correctness of these values, we impose eight constraints on each variable, one for each case from above.
+For example, considering the case $a_{u,s} = 1$, $a_{s,v} = 1$, and $a_{v,t} = 1$, we impose the following restriction: $c_{uv, st} \geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2$, which ensures that $c_{uv, st}$ equals $1$ whenever the vertices are ordered as $usvt$.
+Making this for each case restricts $c_{uv, st}$ to the value $1$ if the vertices are arranged in one of the eight ``intersecting'' configurations, ensuring that $c_{uv, st} = 0$ is possible only if $uv$ does not cross $st$.
+
+The algorithm's objective is to minimize the maximal number of crossings per edge.
+This value can be written as follows: $\max_{uv \in E(G)} \sum_{st \in E(G)} c_{uv, st}$.
+Unfortunately, it cannot represent an objective function for a linear program as the $\max$ operation is not linear.
+To solve this, we introduce a new integer variable $k$.
+To ensure that it is equal to the objective value, we impose the following constraint on $k$: $k \geqslant \sum_{st \in E(G)} c_{uv, st}$ for each edge $uv \in E(G)$.
+
+So, the integer linear program can be described as follows:
+\begin{align*}
+    \textbf{minimize}\quad&k\\
+    \textbf{subject to}\quad&k \geqslant \sum_{st \in E(G)} c_{uv, st},&&\forall uv \in E(G)\\
+    &c_{uv, st} \geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2,&&\forall uv, st \in E(G)\\
+    &c_{uv, st} \geqslant a_{u,t} + a_{t,v} + a_{v,s} - 2,&&\forall uv, st \in E(G)\\
+    &c_{uv, st} \geqslant a_{v,s} + a_{s,u} + a_{u,t} - 2,&&\forall uv, st \in E(G)\\
+    &c_{uv, st} \geqslant a_{v,t} + a_{t,u} + a_{u,s} - 2,&&\forall uv, st \in E(G)\\
+    &c_{uv, st} \geqslant a_{s,u} + a_{u,t} + a_{t,v} - 2,&&\forall uv, st \in E(G)\\
+    &c_{uv, st} \geqslant a_{t,u} + a_{u,s} + a_{s,v} - 2,&&\forall uv, st \in E(G)\\
+    &c_{uv, st} \geqslant a_{s,v} + a_{v,t} + a_{t,u} - 2,&&\forall uv, st \in E(G)\\
+    &c_{uv, st} \geqslant a_{t,v} + a_{v,s} + a_{s,u} - 2,&&\forall uv, st \in E(G)\\
+    &a_{u, w} \geqslant a_{u, v} + a_{v, w} - 1,&&\forall u, v, w \in V(G)\\
+    &c_{uv, st} \in \{0, 1\},&&\forall uv, st \in E(G)\\
+    &a_{u, v} \in \{0, 1\},&&\forall u, v \in V(G)\\
+\end{align*}
+
+\subsection{SAT Solver}
+
+Another approach to solving this problem is to check for a specific $k$ whether the given graph is outer-$k$-planar.
+This check can be encoded as a boolean satisfiability problem.
+This problem asks whether it is possible to assign logic values $\textsc{True}$ or $\textsc{False}$ so that all disjunctive clauses are satisfied.
+A disjunctive clause is a single literal or a disjunction of several.
+Literal is either a variable or a negation of a variable, with the former being the positive and the latter the negative literal.
+
+
+Similarly to the ILP algorithm described in~\ref{subsec:ILP-def}, this algorithm uses the same ``ordering variables'' $a_{u, v}$ for each pair of vertices $u$ and $v$ that represent the arrangement of the vertices.
+If the boolean variable $a_{u, v}$ is $\textsc{True}$, the vertex $u$ is located before the vertex $v$ and vice versa otherwise.
+
+Similarly, these variables must account for transitivity, which means that for every triple of vertices $u$, $v$, and $w$ $a_{u, v} \equiv \textsc{True}$ and $a_{v, w} \equiv \textsc{True}$ implies $a_{u, w} \equiv \textsc{True}$.
+This can be written as follows: $a_{u, v} \land a_{v, w} \rightarrow a_{u, w}$.
+Expanding the implication, this transforms into $\overline{a_{u, v} \land a_{v, w}} \lor a_{u, w}$.
+After applying De Morgan's law, we receive $\overline{a_{u, v}} \lor \overline{a_{v, w}} \lor a_{u, w}$, which represents a clause in the SAT problem.
+
+The next step is to represent the crossing variables $c_{uv, st}$ in terms of the ordering ones for each pair of edges $uv$ and $st$.
+Similarly to the ILP algorithm, we can restrict $c_{uv, st}$ to $\textsc{True}$ if $uv$ and $st$ cross by adding new clauses to the problem.
+The clauses are constructed by making the implications for each of the eight intersecting cases shown in figure~\ref{fig:edge_crossings}, expanding them, and applying De Morgan's law.
+For example, for the case $a_{u,s} = 1$, $a_{s,v} = 1$, and $a_{v,t} = 1$, we start with the logical equation as follows: $a_{u,s} \land a_{s,v} \land a_{v,t} \rightarrow c_{uv, st}$.
+Afterwards, we expand the implication: $\overline{a_{u,s} \land a_{s,v} \land a_{v,t}} \lor c_{uv, st}$.
+Finally, we apply De Morgan's law: $\overline{a_{u,s}} \lor \overline{a_{s,v}} \lor \overline{a_{v,t}} \lor c_{uv, st}$ receiving one of the eight clauses for $c_{uv, st}$.
+
+% Help
+The last step in the construction of the problem is to count the number of crossings for each edge.
+The goal of this solver is to check whether the number of crossings can be smaller or equal to some constant $k$ for each edge.
+To ensure this, we can build a set of clauses that prevent the problem from being satisfiable if the value $k$ is too small.
+To do so, for every edge $e_0$, we consider all combinations of $e_1, e_2, \dots, e_{k+1}$ for each of which we construct the following clause: $\overline{c_{e_0, e_1}} \lor \overline{c_{e_0, e_2}} \lor \cdots\lor \overline{c_{e_0, e_{k+1}}}$.
+Doing so, we ensure that for each edge $e_0$, no $k + 1$ different edges intersect $e_0$, which effectively means that each edge has at most $k$ crossings if all clauses are satisfied.
+
+% TODO: implementation details (iterate over all permutations, finding minimal k)
+% TODO: possible optimizations (2k + 2, equivalence instead of implication for c_{...}, eliminating c_{...} at all)
+
