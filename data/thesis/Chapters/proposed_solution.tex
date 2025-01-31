@@ -52,18 +52,18 @@ To ensure that it is equal to the objective value, we impose the following const
 So, the integer linear program can be described as follows:
 \begin{align*}
     \textbf{minimize}\quad&k\\
-    \textbf{subject to}\quad&k \geqslant \sum_{st \in E(G)} c_{uv, st},&&\forall uv \in E(G)\\
-    &c_{uv, st} \geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2,&&\forall uv, st \in E(G)\\
-    &c_{uv, st} \geqslant a_{u,t} + a_{t,v} + a_{v,s} - 2,&&\forall uv, st \in E(G)\\
-    &c_{uv, st} \geqslant a_{v,s} + a_{s,u} + a_{u,t} - 2,&&\forall uv, st \in E(G)\\
-    &c_{uv, st} \geqslant a_{v,t} + a_{t,u} + a_{u,s} - 2,&&\forall uv, st \in E(G)\\
-    &c_{uv, st} \geqslant a_{s,u} + a_{u,t} + a_{t,v} - 2,&&\forall uv, st \in E(G)\\
-    &c_{uv, st} \geqslant a_{t,u} + a_{u,s} + a_{s,v} - 2,&&\forall uv, st \in E(G)\\
-    &c_{uv, st} \geqslant a_{s,v} + a_{v,t} + a_{t,u} - 2,&&\forall uv, st \in E(G)\\
-    &c_{uv, st} \geqslant a_{t,v} + a_{v,s} + a_{s,u} - 2,&&\forall uv, st \in E(G)\\
-    &a_{u, w} \geqslant a_{u, v} + a_{v, w} - 1,&&\forall u, v, w \in V(G)\\
-    &c_{uv, st} \in \{0, 1\},&&\forall uv, st \in E(G)\\
-    &a_{u, v} \in \{0, 1\},&&\forall u, v \in V(G)\\
+    \textbf{subject to}\quad&&k &\geqslant \sum_{st \in E(G)} c_{uv, st},&&\forall uv \in E(G)\\
+    &&c_{uv, st} &\geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2,&&\forall uv, st \in E(G)\\
+    &&c_{uv, st} &\geqslant a_{u,t} + a_{t,v} + a_{v,s} - 2,&&\forall uv, st \in E(G)\\
+    &&c_{uv, st} &\geqslant a_{v,s} + a_{s,u} + a_{u,t} - 2,&&\forall uv, st \in E(G)\\
+    &&c_{uv, st} &\geqslant a_{v,t} + a_{t,u} + a_{u,s} - 2,&&\forall uv, st \in E(G)\\
+    &&c_{uv, st} &\geqslant a_{s,u} + a_{u,t} + a_{t,v} - 2,&&\forall uv, st \in E(G)\\
+    &&c_{uv, st} &\geqslant a_{t,u} + a_{u,s} + a_{s,v} - 2,&&\forall uv, st \in E(G)\\
+    &&c_{uv, st} &\geqslant a_{s,v} + a_{v,t} + a_{t,u} - 2,&&\forall uv, st \in E(G)\\
+    &&c_{uv, st} &\geqslant a_{t,v} + a_{v,s} + a_{s,u} - 2,&&\forall uv, st \in E(G)\\
+    &&a_{u, w} &\geqslant a_{u, v} + a_{v, w} - 1,&&\forall u, v, w \in V(G)\\
+    &&c_{uv, st} &\in \{0, 1\},&&\forall uv, st \in E(G)\\
+    &&a_{u, v} &\in \{0, 1\},&&\forall u, v \in V(G)\\
 \end{align*}
 
 \subsection{SAT Solver}
