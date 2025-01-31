@@ -8,8 +8,15 @@ void add_crossing_clauses(kissat *sat_solver, ogdf::edge edge1, ogdf::edge edge2
                           const ogdf::NodeArray<ogdf::NodeArray<int>> &order_vars,
                           int crossing_var);
 
-bool SATSolver(const ogdf::Graph &graph, int number_of_crossings, ogdf::NodeArray<int> &ordering) {
-    if (number_of_crossings >= 7) return false;
+void SATSolver(SolverParams &solverParams) {
+    const ogdf::Graph &graph = solverParams.graph;
+    ogdf::NodeArray<int> &ordering = solverParams.ordering;
+    int number_of_crossings = solverParams.number_of_crossings;
+
+    if (number_of_crossings >= 7) {
+        solverParams.converged = false;
+        return;
+    }
     kissat *sat_solver = kissat_init();
     kissat_set_option(sat_solver, "quiet", 1);
 
@@ -96,11 +103,13 @@ bool SATSolver(const ogdf::Graph &graph, int number_of_crossings, ogdf::NodeArra
 
     if (result == 20) {
         kissat_release(sat_solver);
-        return false;
+        solverParams.converged = false;
+        return;
     } else if (result != 10) {
         std::cout << "SAT solver undefined result" << std::endl;
         kissat_release(sat_solver);
-        return false;
+        solverParams.converged = false;
+        return;
     }
 
     std::vector<ogdf::node> nodes;
@@ -117,7 +126,7 @@ bool SATSolver(const ogdf::Graph &graph, int number_of_crossings, ogdf::NodeArra
         ordering[nodes[i]] = i;
     }
 
-    return true;
+    solverParams.converged = true;
 }
 
 #define ADD_CLAUSE4(solver, a, b, c, d) {kissat_add(solver, a);kissat_add(solver, b);kissat_add(solver, c);kissat_add(solver, d);kissat_add(solver, 0);}

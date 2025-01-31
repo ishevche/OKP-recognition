@@ -25,11 +25,12 @@ int main() {
         ogdf::GraphIO::readGraph6(graph, graph_ss);
 
         ogdf::NodeArray<int> ILP_order(graph);
+        SolverParams params{graph, ILP_order};
         auto start = get_current_time_fenced();
-        int ILP_bound = ILPSolver(graph, ILP_order);
+        ILPSolver(params);
         auto end = get_current_time_fenced();
 
-        std::cout << "ILP: " << ILP_bound << " " << to_ns(end-start) << std::endl;
+        std::cout << "ILP: " << params.number_of_crossings << " " << to_ns(end-start) << std::endl;
         std::cout << "SAT: 0 0 0\nSAT: 0 0 0\n" << std::endl;
 
 //        ogdf::NodeArray<int> SAT_order(graph);
