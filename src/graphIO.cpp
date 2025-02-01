@@ -1,4 +1,3 @@
-#include <vector>
 #include <ogdf/basic/GraphAttributes.h>
 #include <ogdf/fileformats/SvgPrinter.h>
 #include "graphIO.h"
@@ -53,11 +52,14 @@ int count_crossing(const ogdf::edge &edge, const ogdf::Graph &graph, const ogdf:
 }
 
 void drawSVG(std::ostream &out, const ogdf::Graph &G,
-             const ogdf::NodeArray<int> &node_order) {
+             const std::vector<ogdf::node> &ordering) {
     ogdf::GraphAttributes GA(G);
+    ogdf::NodeArray<int> node_order(G);
     GA.directed() = false;
-    for (const ogdf::node &node: G.nodes) {
-        GA.x(node) = node_order[node] * 100;
+
+    for (int i = 0; i < ordering.size(); ++i) {
+        node_order[ordering[i]] = i;
+        GA.x(ordering[i]) = node_order[ordering[i]] * 100;
     }
 
     ogdf::EdgeArray<int> crossing_number(G);
@@ -69,7 +71,7 @@ void drawSVG(std::ostream &out, const ogdf::Graph &G,
     }
 
     GA.addAttributes(ogdf::GraphAttributes::edgeStyle);
-    for (const ogdf::edge &edge: G.edges) {
+    for (ogdf::edge edge: G.edges) {
         double source_x = GA.x(edge->source());
         double target_x = GA.x(edge->target());
         ogdf::DPoint source_point(source_x, 0);

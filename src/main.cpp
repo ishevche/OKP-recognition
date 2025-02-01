@@ -5,7 +5,7 @@
 #include "solvers.h"
 #include "timer.h"
 
-void draw(const ogdf::Graph &graph, const ogdf::NodeArray<int> &ordering, const std::string &graph_string,
+void draw(const ogdf::Graph &graph, const std::vector<ogdf::node> &ordering, const std::string &graph_string,
           const std::string &file_name);
 
 int main() {
@@ -24,7 +24,7 @@ int main() {
         std::stringstream graph_ss(graph_string);
         ogdf::GraphIO::readGraph6(graph, graph_ss);
 
-        ogdf::NodeArray<int> ILP_order(graph);
+        std::vector<ogdf::node> ILP_order;
         SolverParams params{graph, ILP_order};
         auto start = get_current_time_fenced();
         ILPSolver(params);
@@ -68,7 +68,7 @@ int main() {
     return 0;
 }
 
-void draw(const ogdf::Graph &graph, const ogdf::NodeArray<int> &ordering,
+void draw(const ogdf::Graph &graph, const std::vector<ogdf::node> &ordering,
           const std::string &graph_string, const std::string &file_name) {
     std::filesystem::create_directories("data/out/" + graph_string);
     std::ofstream out{"out/" + graph_string + "/" + file_name};

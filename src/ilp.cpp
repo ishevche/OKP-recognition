@@ -15,7 +15,6 @@ void ILPSolver(SolverParams &solverParams) {
     GRBModel model = GRBModel(env);
 
     const ogdf::Graph &graph = solverParams.graph;
-    ogdf::NodeArray<int> &ordering = solverParams.ordering;
 
     // Order variables initialization
     ogdf::NodeArray<ogdf::NodeArray<GRBLinExpr>> variables(graph);
@@ -101,17 +100,15 @@ void ILPSolver(SolverParams &solverParams) {
     model.optimize();
     solverParams.converged = true;
 
-    std::vector<ogdf::node> nodes;
+    std::vector<ogdf::node> &ordering = solverParams.ordering;
+    ordering.clear();
+    ordering.reserve(graph.numberOfNodes());
     for (const ogdf::node &node: graph.nodes) {
-        nodes.push_back(node);
+        ordering.push_back(node);
     }
-    std::sort(nodes.begin(), nodes.end(), [&variables](const ogdf::node &u, const ogdf::node &v) {
+    std::sort(ordering.begin(), ordering.end(), [&variables](const ogdf::node &u, const ogdf::node &v) {
         return variables[u][v].getValue();
     });
-
-    for (int i = 0; i < nodes.size(); ++i) {
-        ordering[nodes[i]] = i;
-    }
 
     solverParams.number_of_crossings = crossing_upper_bound.getValue();
 }

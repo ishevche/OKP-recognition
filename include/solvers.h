@@ -2,8 +2,16 @@
 #define OKP_RECOGNITION_SOLVERS_H
 
 #include <ogdf/basic/Graph.h>
+#include <vector>
 
-int ILPSolver(const ogdf::Graph &graph, ogdf::NodeArray<int> &ordering);
-bool SATSolver(const ogdf::Graph &graph, int number_of_crossings, ogdf::NodeArray<int> &ordering);
+struct SolverParams {
+    const ogdf::Graph &graph;
+    std::vector<ogdf::node> &ordering;
+    int number_of_crossings;
+    bool converged;
+};
+
+void ILPSolver(SolverParams &params);
+void SATSolver(SolverParams &params);
 
 #endif //OKP_RECOGNITION_SOLVERS_H

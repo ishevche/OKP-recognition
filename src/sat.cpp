@@ -10,7 +10,6 @@ void add_crossing_clauses(kissat *sat_solver, ogdf::edge edge1, ogdf::edge edge2
 
 void SATSolver(SolverParams &solverParams) {
     const ogdf::Graph &graph = solverParams.graph;
-    ogdf::NodeArray<int> &ordering = solverParams.ordering;
     int number_of_crossings = solverParams.number_of_crossings;
 
     if (number_of_crossings >= 7) {
@@ -112,19 +111,17 @@ void SATSolver(SolverParams &solverParams) {
         return;
     }
 
-    std::vector<ogdf::node> nodes;
+    std::vector<ogdf::node> &ordering = solverParams.ordering;
+    ordering.clear();
+    ordering.reserve(graph.numberOfNodes());
     for (const ogdf::node &node: graph.nodes) {
-        nodes.push_back(node);
+        ordering.push_back(node);
     }
-    std::sort(nodes.begin(), nodes.end(), [&order_variables, &sat_solver](const ogdf::node &u, const ogdf::node &v) {
+    std::sort(ordering.begin(), ordering.end(), [&order_variables, &sat_solver](const ogdf::node &u, const ogdf::node &v) {
         return kissat_value(sat_solver, order_variables[u][v]) > 0;
     });
 
     kissat_release(sat_solver);
-
-    for (int i = 0; i < nodes.size(); ++i) {
-        ordering[nodes[i]] = i;
-    }
 
     solverParams.converged = true;
 }
