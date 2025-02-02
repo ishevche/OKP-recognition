@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.31.1)
 project(okp-recognition CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CXX ON)
 
 
@@ -12,12 +12,17 @@ add_executable(okp-recognition
         src/graphIO.cpp
         src/ilp.cpp
         src/sat.cpp
+        src/bcTree.cpp
 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(OGDF CONFIG PATHS ${OGDF_CONFIG_SEARCH_PATH} REQUIRED)
 find_package(GUROBI REQUIRED)
-find_library(KISSAT_LIBRARY kissat "${CMAKE_SOURCE_DIR}/../kissat/build" REQUIRED)
+find_library(KISSAT_LIBRARY
+        NAMES kissat
+        HINTS "${CMAKE_SOURCE_DIR}/../kissat/build"
+        REQUIRED
+)
 
 target_include_directories(okp-recognition PRIVATE
         ${GUROBI_INCLUDE_DIRS}

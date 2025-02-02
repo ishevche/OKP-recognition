@@ -5,8 +5,8 @@
 #include <vector>
 
 struct SolverParams {
-    const ogdf::Graph &graph;
-    std::vector<ogdf::node> &ordering;
+    const ogdf::Graph graph;
+    std::vector<ogdf::node> ordering;
     int number_of_crossings;
     bool converged;
 };
