@@ -27,6 +27,10 @@ int main() {
         ogdf::Graph graph;
         std::stringstream graph_ss(graph_string);
         ogdf::GraphIO::readGraph6(graph, graph_ss);
+
+        std::vector<ogdf::node> ILP_order;
+        SolverParams params{graph, ILP_order};
+	
         auto start = get_current_time_fenced();
         int components = process(params, ILPSolver);
         auto end = get_current_time_fenced();
