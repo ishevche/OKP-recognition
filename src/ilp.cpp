@@ -7,6 +7,13 @@
 
 
 void ILPSolver(SolverParams &solverParams) {
+    if (solverParams.graph.numberOfNodes() <= 3) {
+        for (ogdf::node node: solverParams.graph.nodes) {
+            solverParams.ordering.push_back(node);
+        }
+        return;
+    }
+
     GRBEnv env = GRBEnv(true);
     env.set("LogFile", "test.log");
     env.set("OutputFlag", "0");

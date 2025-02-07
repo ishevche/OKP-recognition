@@ -9,6 +9,13 @@ void add_crossing_clauses(kissat *sat_solver, ogdf::edge edge1, ogdf::edge edge2
                           int crossing_var);
 
 void SATSolver(SolverParams &solverParams) {
+    if (solverParams.graph.numberOfNodes() <= 3) {
+        for (ogdf::node node: solverParams.graph.nodes) {
+            solverParams.ordering.push_back(node);
+        }
+        return;
+    }
+
     const ogdf::Graph &graph = solverParams.graph;
     int number_of_crossings = solverParams.number_of_crossings;
 

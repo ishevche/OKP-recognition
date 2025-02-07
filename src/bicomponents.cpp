@@ -1,12 +1,9 @@
 #include <ogdf/decomposition/BCTree.h>
 #include <stack>
-#include "bcTree.h"
+#include "bicomponents.h"
 
-SolverParams solve_biconnected_component(ogdf::BCTree &bc_tree, ogdf::node b_component,
-                                         const SolverParams &solverParams,
-                                         const std::function<void(SolverParams &)> &solve);
-
-int process(SolverParams &solverParams, const std::function<void(SolverParams &)> &solver) {
+int solve_for_each_component(SolverParams &solverParams,
+                             const std::function<void(SolverParams &)> &solver) {
     ogdf::Graph graph = solverParams.graph;
     ogdf::BCTree bcTree(graph);
 
@@ -94,13 +91,7 @@ SolverParams solve_biconnected_component(ogdf::BCTree &bc_tree, ogdf::node b_com
     }
 
     SolverParams params{component, {}, solverParams.number_of_crossings, false};
-    if (component.numberOfNodes() <= 2) {
-        for (ogdf::node node: component.nodes) {
-            params.ordering.push_back(node);
-        }
-    } else {
-        solve(params);
-    }
+    solve(params);
     std::vector<ogdf::node> original_ordering;
     original_ordering.reserve(component.numberOfNodes());
     for (ogdf::node new_node: params.ordering) {

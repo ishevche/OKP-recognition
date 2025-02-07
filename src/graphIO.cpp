@@ -1,6 +1,7 @@
 #include <ogdf/basic/GraphAttributes.h>
 #include <ogdf/fileformats/SvgPrinter.h>
 #include "graphIO.h"
+#include "process_graph.h"
 
 std::istream &operator>>(std::istream &in, ogdf::Graph &G) {
     G.clear();
@@ -20,11 +21,11 @@ std::istream &operator>>(std::istream &in, ogdf::Graph &G) {
 }
 
 
-void addBezierCurve(ogdf::GraphAttributes &GA, ogdf::edge e,
-                    const ogdf::DPoint &start_point,
-                    const ogdf::DPoint &control_point,
-                    const ogdf::DPoint &end_point,
-                    int segments) {
+void add_bezier_curve(ogdf::GraphAttributes &GA, ogdf::edge e,
+                      const ogdf::DPoint &start_point,
+                      const ogdf::DPoint &control_point,
+                      const ogdf::DPoint &end_point,
+                      int segments) {
     ogdf::DPolyline &bends = GA.bends(e);
     for (int i = 1; i < segments; ++i) {
         double t = i / static_cast<double>(segments);
@@ -34,25 +35,9 @@ void addBezierCurve(ogdf::GraphAttributes &GA, ogdf::edge e,
     }
 }
 
-int count_crossing(const ogdf::edge &edge, const ogdf::Graph &graph, const ogdf::NodeArray<int> &node_order) {
-    int result = 0;
-    int edge_src = node_order[edge->source()];
-    int edge_trg = node_order[edge->target()];
-    if (edge_src > edge_trg) { std::swap(edge_src, edge_trg); }
-    for (const ogdf::edge &other: graph.edges) {
-        int other_src = node_order[other->source()];
-        int other_trg = node_order[other->target()];
-        if (other_src > other_trg) { std::swap(other_src, other_trg); }
-        bool src_between = edge_src < other_src && other_src < edge_trg;
-        bool trg_between = edge_src < other_trg && other_trg < edge_trg;
-        result += (src_between && other_trg > edge_trg) ||
-                  (trg_between && other_src < edge_src);
-    }
-    return result;
-}
-
-void drawSVG(std::ostream &out, const ogdf::Graph &G,
-             const std::vector<ogdf::node> &ordering) {
+void draw_svg(std::string &file, const ogdf::Graph &G,
+              const std::vector<ogdf::node> &ordering) {
+    std::ofstream out{file};
     ogdf::GraphAttributes GA(G);
     ogdf::NodeArray<int> node_order(G);
     GA.directed() = false;
@@ -65,7 +50,7 @@ void drawSVG(std::ostream &out, const ogdf::Graph &G,
     ogdf::EdgeArray<int> crossing_number(G);
     int maximal_local_crossing = 0;
     for (ogdf::edge edge: G.edges) {
-        int crossings = count_crossing(edge, G, node_order);
+        int crossings = count_edge_crossing(edge, G, node_order);
         crossing_number[edge] = crossings;
         maximal_local_crossing = std::max(maximal_local_crossing, crossings);
     }
@@ -78,7 +63,7 @@ void drawSVG(std::ostream &out, const ogdf::Graph &G,
         ogdf::DPoint control_point((source_x + target_x) / 2,
                                    std::abs(source_x - target_x) / 2);
         ogdf::DPoint target_point(target_x, 0);
-        addBezierCurve(GA, edge, source_point, control_point, target_point, 20);
+        add_bezier_curve(GA, edge, source_point, control_point, target_point, 20);
         if (crossing_number[edge] == maximal_local_crossing) {
             GA.strokeColor(edge) = ogdf::Color::Name::Red;
         }
@@ -87,4 +72,5 @@ void drawSVG(std::ostream &out, const ogdf::Graph &G,
     ogdf::GraphIO::SVGSettings svgSettings;
     ogdf::SvgPrinter printer(GA, svgSettings);
     printer.draw(out);
+    out.close();
 }
