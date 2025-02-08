@@ -18,8 +18,7 @@ add_executable(okp-recognition
 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-find_package(OGDF CONFIG PATHS ${OGDF_CONFIG_SEARCH_PATH} REQUIRED)
-find_package(Boost COMPONENTS program_options system REQUIRED)
+find_package(Boost COMPONENTS graph program_options system REQUIRED)
 find_package(GUROBI REQUIRED)
 find_library(KISSAT_LIBRARY
         NAMES kissat
