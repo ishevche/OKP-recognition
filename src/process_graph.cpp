@@ -68,3 +68,17 @@ int max_local_crossing(const Graph &graph) {
     return result;
 }
 
+
+void fill_vertex_idx(Graph &graph) {
+    size_t i = 0;
+    for (Vertex e: boost::make_iterator_range(boost::vertices(graph))) {
+        graph[e].idx = i++;
+    }
+}
+
+void fill_edge_idx(Graph &graph) {
+    size_t i = 0;
+    for (Edge e: boost::make_iterator_range(boost::edges(graph))) {
+        graph[e].idx = i++;
+    }
+}

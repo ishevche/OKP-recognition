@@ -1,23 +1,29 @@
 #include "solvers.h"
+#include "process_graph.h"
 
 extern "C" {
 #include <kissat.h>
 }
 
-void add_crossing_clauses(kissat *sat_solver, ogdf::edge edge1, ogdf::edge edge2,
-                          const ogdf::NodeArray<ogdf::NodeArray<int>> &order_vars,
+void add_crossing_clauses(kissat *sat_solver, Edge edge1, Edge edge2, const Graph &graph,
+                          const std::vector<std::vector<int>> &order_vars,
                           int crossing_var);
 
 void SATSolver(SolverParams &solverParams) {
-    if (solverParams.graph.numberOfNodes() <= 3) {
-        for (ogdf::node node: solverParams.graph.nodes) {
-            solverParams.ordering.push_back(node);
+    Graph &graph = solverParams.graph;
+    std::vector<Vertex> &ordering = solverParams.ordering;
+    int number_of_crossings = solverParams.number_of_crossings;
+
+    unsigned long num_vertices = boost::num_vertices(graph);
+    ordering.clear();
+
+    if (num_vertices <= 3) {
+        for (Vertex node: boost::make_iterator_range(boost::vertices(graph))) {
+            ordering.push_back(node);
         }
+        solverParams.converged = true;
         return;
     }
-
-    const ogdf::Graph &graph = solverParams.graph;
-    int number_of_crossings = solverParams.number_of_crossings;
 
     if (number_of_crossings >= 7) {
         solverParams.converged = false;
@@ -26,38 +32,35 @@ void SATSolver(SolverParams &solverParams) {
     kissat *sat_solver = kissat_init();
     kissat_set_option(sat_solver, "quiet", 1);
 
-    // First variable is TRUE
-    kissat_add(sat_solver, 1);
-    kissat_add(sat_solver, 0);
-    // Second variable is FALSE
-    kissat_add(sat_solver, -2);
+    // First variable is FALSE
+    kissat_add(sat_solver, -1);
     kissat_add(sat_solver, 0);
 
-    int variable_count = 2;
+    int variable_count = 1;
 
     // Order variables initialization
-    ogdf::NodeArray<ogdf::NodeArray<int>> order_variables(graph);
-    for (const ogdf::node &node: graph.nodes) {
-        order_variables[node].init(graph, 0);
+    std::vector<std::vector<int>> order_variables(num_vertices);
+    for (int i = 0; i < num_vertices; ++i) {
+        order_variables[i].resize(num_vertices, 0);
     }
 
-    for (const ogdf::node &start: graph.nodes) {
-        for (const ogdf::node &end: graph.nodes) {
-            if (ogdf::NodeElement::equal(*start, *end)) {
-                order_variables[start][end] = 2;
-            } else if (order_variables[end][start] != 0) {
-                order_variables[start][end] = -order_variables[end][start];
+    for (int i = 0; i < num_vertices; ++i) {
+        for (int j = 0; j < num_vertices; ++j) {
+            if (i == j) {
+                order_variables[i][j] = 2;
+            } else if (order_variables[j][i] != 0) {
+                order_variables[i][j] = -order_variables[j][i];
             } else {
-                order_variables[start][end] = ++variable_count;
+                order_variables[i][j] = ++variable_count;
             }
         }
     }
 
     // Transitivity constraints
     // (sm && me) -> se   <=>   -sm || -me || se
-    for (const ogdf::node &start: graph.nodes) {
-        for (const ogdf::node &end: graph.nodes) {
-            for (const ogdf::node &middle: graph.nodes) {
+    for (int start = 0; start < num_vertices; ++start) {
+        for (int middle = 0; middle < num_vertices; ++middle) {
+            for (int end = 0; end < num_vertices; ++end) {
                 kissat_add(sat_solver, -order_variables[start][middle]);
                 kissat_add(sat_solver, -order_variables[middle][end]);
                 kissat_add(sat_solver, order_variables[start][end]);
@@ -67,39 +70,44 @@ void SATSolver(SolverParams &solverParams) {
     }
 
     // Edge crossings variables definition
-    ogdf::EdgeArray<ogdf::EdgeArray<int>> crossing_variables(graph);
-    for (const ogdf::edge &edge: graph.edges) {
-        crossing_variables[edge].init(graph, 0);
+    size_t num_edges = boost::num_edges(graph);
+    fill_vertex_idx(graph);
+    fill_edge_idx(graph);
+    std::vector<std::vector<int>> crossing_variables(num_edges);
+    for (int i = 0; i < num_edges; ++i) {
+        crossing_variables[i].resize(num_edges, 0);
     }
 
-    for (const ogdf::edge &edge1: graph.edges) {
-        for (const ogdf::edge &edge2: graph.edges) {
-            if (ogdf::EdgeElement::equal(*edge1, *edge2)) {
-                crossing_variables[edge1][edge2] = 2;
-            } else if (crossing_variables[edge2][edge1] != 0) {
-                crossing_variables[edge1][edge2] = crossing_variables[edge2][edge1];
+    for (Edge edge1: boost::make_iterator_range(boost::edges(graph))) {
+        size_t edge1_idx = graph[edge1].idx;
+        for (Edge edge2: boost::make_iterator_range(boost::edges(graph))) {
+            size_t edge2_idx = graph[edge2].idx;
+            if (edge1_idx == edge2_idx) {
+                crossing_variables[edge1_idx][edge2_idx] = 2;
+            } else if (crossing_variables[edge2_idx][edge1_idx] != 0) {
+                crossing_variables[edge1_idx][edge2_idx] =
+                        crossing_variables[edge2_idx][edge1_idx];
             } else {
                 int crossing_var = ++variable_count;
-                crossing_variables[edge1][edge2] = crossing_var;
-                add_crossing_clauses(sat_solver, edge1, edge2, order_variables, crossing_var);
+                crossing_variables[edge1_idx][edge2_idx] = crossing_var;
+                add_crossing_clauses(sat_solver, edge1, edge2, graph, order_variables, crossing_var);
             }
         }
     }
 
-    std::vector<ogdf::edge> edges_vector;
-    edges_vector.reserve(graph.numberOfEdges());
-    for (ogdf::edge edge: graph.edges) {
-        edges_vector.push_back(edge);
-    }
-
     // Restricting number of crossings for every edge
-    for (ogdf::edge edge: graph.edges) {
+    for (Edge edge: boost::make_iterator_range(boost::edges(graph))) {
         std::string crossings(number_of_crossings + 1, 1);
-        crossings.resize(graph.numberOfEdges(), 0);
+        size_t edge_idx = graph[edge].idx;
+        crossings.resize(num_edges, 0);
         do {
-            for (int i = 0; i < graph.numberOfEdges(); ++i) {
-                if (crossings[i])
-                    kissat_add(sat_solver, -crossing_variables[edge][edges_vector[i]]);
+            size_t i = 0;
+            for (Edge other: boost::make_iterator_range(boost::edges(graph))) {
+                if (crossings[i++]) {
+                    size_t other_idx = graph[other].idx;
+                    kissat_add(sat_solver,
+                               -crossing_variables[edge_idx][other_idx]);
+                }
             }
             kissat_add(sat_solver, 0);
         } while (std::prev_permutation(crossings.begin(), crossings.end()));
@@ -118,15 +126,12 @@ void SATSolver(SolverParams &solverParams) {
         return;
     }
 
-    std::vector<ogdf::node> &ordering = solverParams.ordering;
     ordering.clear();
-    ordering.reserve(graph.numberOfNodes());
-    for (const ogdf::node &node: graph.nodes) {
-        ordering.push_back(node);
-    }
-    std::sort(ordering.begin(), ordering.end(), [&order_variables, &sat_solver](const ogdf::node &u, const ogdf::node &v) {
-        return kissat_value(sat_solver, order_variables[u][v]) > 0;
-    });
+    ordering.insert(ordering.end(), boost::vertices(graph).first, boost::vertices(graph).second);
+    std::sort(ordering.begin(), ordering.end(),
+              [&order_variables, &sat_solver, &graph](Vertex u, Vertex v) {
+                  return kissat_value(sat_solver, order_variables[graph[u].idx][graph[v].idx]) > 0;
+              });
 
     kissat_release(sat_solver);
 
@@ -135,13 +140,13 @@ void SATSolver(SolverParams &solverParams) {
 
 #define ADD_CLAUSE4(solver, a, b, c, d) {kissat_add(solver, a);kissat_add(solver, b);kissat_add(solver, c);kissat_add(solver, d);kissat_add(solver, 0);}
 
-void add_crossing_clauses(kissat *sat_solver, ogdf::edge edge1, ogdf::edge edge2,
-                          const ogdf::NodeArray<ogdf::NodeArray<int>> &order_vars,
+void add_crossing_clauses(kissat *sat_solver, Edge edge1, Edge edge2, const Graph &graph,
+                          const std::vector<std::vector<int>> &order_vars,
                           int crossing_var) {
-    ogdf::node u = edge1->source();
-    ogdf::node v = edge1->target();
-    ogdf::node s = edge2->source();
-    ogdf::node t = edge2->target();
+    size_t u = graph[boost::source(edge1, graph)].idx;
+    size_t v = graph[boost::target(edge1, graph)].idx;
+    size_t s = graph[boost::source(edge2, graph)].idx;
+    size_t t = graph[boost::target(edge2, graph)].idx;
     ADD_CLAUSE4(sat_solver, -order_vars[u][s], -order_vars[s][v], -order_vars[v][t], crossing_var)
     ADD_CLAUSE4(sat_solver, -order_vars[u][t], -order_vars[t][v], -order_vars[v][s], crossing_var)
     ADD_CLAUSE4(sat_solver, -order_vars[v][s], -order_vars[s][u], -order_vars[u][t], crossing_var)

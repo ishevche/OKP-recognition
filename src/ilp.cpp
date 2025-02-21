@@ -3,10 +3,7 @@
 #include <algorithm>
 #include <gurobi_c++.h>
 #include "solvers.h"
-
-void set_vertex_idx(Graph &graph);
-
-void set_edge_idx(Graph &graph);
+#include "process_graph.h"
 
 void ILPSolver(SolverParams &solverParams) {
     Graph &graph = solverParams.graph;
@@ -67,20 +64,20 @@ void ILPSolver(SolverParams &solverParams) {
 
     size_t num_edges = boost::num_edges(graph);
     GRBLinExpr crossing_upper_bound = model.addVar(0, GRB_INFINITY, 0, GRB_INTEGER, "k");
-    set_vertex_idx(graph);
-    set_edge_idx(graph);
+    fill_vertex_idx(graph);
+    fill_edge_idx(graph);
     std::vector<GRBLinExpr> edge_crossing_numbers(num_edges);
 
     // Edge crossings variables definition
-    for (Edge edge1 : boost::make_iterator_range(boost::edges(graph))) {
+    for (Edge edge1: boost::make_iterator_range(boost::edges(graph))) {
         size_t u = graph[boost::source(edge1, graph)].idx;
         size_t v = graph[boost::target(edge1, graph)].idx;
-        for (Edge edge2 : boost::make_iterator_range(boost::edges(graph)))  {
+        for (Edge edge2: boost::make_iterator_range(boost::edges(graph))) {
             if (graph[edge1].idx >= graph[edge2].idx) continue;
             size_t s = graph[boost::source(edge2, graph)].idx;
             size_t t = graph[boost::target(edge2, graph)].idx;
 
-            GRBVar do_cross = model.addVar(0, 1, 0, GRB_BINARY,"");
+            GRBVar do_cross = model.addVar(0, 1, 0, GRB_BINARY, "");
 
             edge_crossing_numbers[graph[edge1].idx] += do_cross;
             edge_crossing_numbers[graph[edge2].idx] += do_cross;
@@ -115,25 +112,13 @@ void ILPSolver(SolverParams &solverParams) {
     solverParams.converged = true;
     ordering.insert(ordering.end(), boost::vertices(graph).first, boost::vertices(graph).second);
 
-    std::sort(ordering.begin(), ordering.end(), [&variables, &graph](Vertex u, Vertex v) {
-        return variables[graph[u].idx][graph[v].idx].getValue();
-    });
+    std::sort(ordering.begin(), ordering.end(),
+              [&variables, &graph](Vertex u, Vertex v) {
+                  return variables[graph[u].idx][graph[v].idx].getValue();
+              });
 
     solverParams.number_of_crossings = crossing_upper_bound.getValue();
 }
 
-void set_vertex_idx(Graph &graph) {
-    size_t i = 0;
-    for (Vertex e: boost::make_iterator_range(boost::vertices(graph))) {
-        graph[e].idx = i++;
-    }
-}
-
-void set_edge_idx(Graph &graph) {
-    size_t i = 0;
-    for (Edge e: boost::make_iterator_range(boost::edges(graph))) {
-        graph[e].idx = i++;
-    }
-}
 
 
