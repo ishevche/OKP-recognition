@@ -1,10 +1,14 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <cmath>
 #include <boost/property_map/dynamic_property_map.hpp>
 #include "graph.h"
 #include "process_graph.h"
 #include "argument_parser.h"
+#include "graphIO.h"
+#include "solvers.h"
+#include "timer.h"
 
 
 std::vector<std::string> split(const std::string &string, const std::string &delimiter) {
@@ -30,16 +34,26 @@ int main(int ac, char **av) {
     std::vector<std::string> graph_strings = split(file_data, "graph G {");
 
     for (int i = 0; i < graph_strings.size(); ++i) {
-        Graph g;
+        Graph graph;
 
-        boost::read_graphviz(
-                graph_strings[i], g,
-                boost::dynamic_properties()
-                        .property("name", boost::get(&Vertex::name, g))
-        );
+        boost::dynamic_properties graph_props;
+        graph_props.property("node_id", boost::get(&VertexStruct::name, graph));
+        graph_props.property("pos", boost::get(&VertexStruct::location, graph));
+        graph_props.property("color", boost::get(&EdgeStruct::color, graph));
+        boost::read_graphviz(graph_strings[i], graph, graph_props);
 
-        std::cout << std::setw(4) << i + 1 << ": " << graph_strings[i];
-//        process_graph(g);
+        std::vector<Vertex> ILP_order;
+        SolverParams params{graph, ILP_order};
+
+        auto start = get_current_time_fenced();
+        ILPSolver(params);
+        auto end = get_current_time_fenced();
+
+        std::cout << i << "/776:\nILP: " << params.number_of_crossings <<
+                  " " << to_ns(end - start) << std::endl;
+
+        save_dot("data/out/" + std::to_string(i) + ".dot", graph,
+                 ILP_order, params.number_of_crossings, graph_props);
     }
     return 0;
 }

@@ -1,12 +1,12 @@
 #ifndef OKP_RECOGNITION_SOLVERS_H
 #define OKP_RECOGNITION_SOLVERS_H
 
-#include <ogdf/basic/Graph.h>
 #include <vector>
+#include "graph.h"
 
 struct SolverParams {
-    const ogdf::Graph graph;
-    std::vector<ogdf::node> ordering;
+    Graph &graph;
+    std::vector<Vertex> &ordering;
     int number_of_crossings;
     bool converged;
 };
