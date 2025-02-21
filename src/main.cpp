@@ -34,6 +34,7 @@ int main(int ac, char **av) {
     std::vector<std::string> graph_strings = split(file_data, "graph G {");
 
     for (int i = 0; i < graph_strings.size(); ++i) {
+        std::cout << i << "/776:\n";
         Graph graph;
 
         boost::dynamic_properties graph_props;
@@ -43,17 +44,59 @@ int main(int ac, char **av) {
         boost::read_graphviz(graph_strings[i], graph, graph_props);
 
         std::vector<Vertex> ILP_order;
-        SolverParams params{graph, ILP_order};
+        SolverParams ILP_params{graph, ILP_order};
 
         auto start = get_current_time_fenced();
-        ILPSolver(params);
+        ILPSolver(ILP_params);
         auto end = get_current_time_fenced();
 
-        std::cout << i << "/776:\nILP: " << params.number_of_crossings <<
-                  " " << to_ns(end - start) << std::endl;
+        std::cout << "ILP: " << ILP_params.number_of_crossings << " " << to_ns(end - start) << std::endl;
 
-        save_dot("data/out/" + std::to_string(i) + ".dot", graph,
-                 ILP_order, params.number_of_crossings, graph_props);
+        std::vector<Vertex> SAT_order;
+        SolverParams SAT_params{graph, SAT_order, ILP_params.number_of_crossings};
+        start = get_current_time_fenced();
+        SATSolver(SAT_params);
+        end = get_current_time_fenced();
+        std::cout << "SAT: " << SAT_params.number_of_crossings << " " << SAT_params.converged << " "
+                  << to_ns(end - start) << std::endl;
+        if (!SAT_params.converged && SAT_params.number_of_crossings < 7) {
+            save_dot("data/out/" + std::to_string(i) + "_SAT" + std::to_string(ILP_params.number_of_crossings) + ".dot",
+                     graph, ILP_order, ILP_params.number_of_crossings, graph_props);
+            while (!SAT_params.converged) {
+                SAT_params.number_of_crossings++;
+                start = get_current_time_fenced();
+                SATSolver(SAT_params);
+                end = get_current_time_fenced();
+                std::cout << "SAT: " << SAT_params.number_of_crossings << " " << SAT_params.converged << " "
+                          << to_ns(end - start) << std::endl;
+            }
+            save_dot("data/out/" + std::to_string(i) + "_SAT" + std::to_string(SAT_params.number_of_crossings) + ".dot",
+                     graph, SAT_order, SAT_params.number_of_crossings, graph_props);
+        } else {
+            SAT_params.number_of_crossings--;
+            start = get_current_time_fenced();
+            SATSolver(SAT_params);
+            end = get_current_time_fenced();
+            std::cout << "SAT: " << SAT_params.number_of_crossings << " " << SAT_params.converged << " "
+                      << to_ns(end - start) << std::endl;
+            if (SAT_params.converged) {
+                save_dot("data/out/" + std::to_string(i) + "_SAT" + std::to_string(ILP_params.number_of_crossings) +
+                         ".dot",
+                         graph, ILP_order, ILP_params.number_of_crossings, graph_props);
+                while (SAT_params.converged) {
+                    save_dot("data/out/" + std::to_string(i) + "_SAT" + std::to_string(SAT_params.number_of_crossings) +
+                             ".dot",
+                             graph, SAT_order, SAT_params.number_of_crossings, graph_props);
+                    SAT_params.number_of_crossings--;
+                    start = get_current_time_fenced();
+                    SATSolver(SAT_params);
+                    end = get_current_time_fenced();
+                    std::cout << "SAT: " << SAT_params.number_of_crossings << " " << SAT_params.converged << " "
+                              << to_ns(end - start) << std::endl;
+                }
+            }
+        }
+        std::cout << std::endl;
     }
     return 0;
 }
