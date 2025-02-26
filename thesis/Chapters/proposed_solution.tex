@@ -1,9 +1,6 @@
 \chapter{Proposed Solution}
 
-
-\section{Problem Formulation}
-
-\subsection{ILP Solver}\label{subsec:ILP-def}
+\section{ILP Formulation}\label{subsec:ILP-def}
 
 The result of the integral linear program should be an arrangement of vertices on a line.
 Given the arrangement of the vertices, we can definitively identify whether two edges cross each other.
@@ -66,7 +63,7 @@ So, the integer linear program can be described as follows:
     &&a_{u, v} &\in \{0, 1\},&&\forall u, v \in V(G)\\
 \end{align*}
 
-\subsection{SAT Solver}
+\section{SAT Formulation}
 
 Another approach to solving this problem is to check for a specific $k$ whether the given graph is outer-$k$-planar.
 This check can be encoded as a boolean satisfiability problem.
