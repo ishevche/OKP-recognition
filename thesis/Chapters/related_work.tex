@@ -4,7 +4,8 @@ Already in the 1980s, researchers in the field of graph drawing acknowledged the
 
 The ideal form of crossing minimising drawings -- planar ones, has been focused on by the research community for a long time, with the first of linear-time algorithms for recognising planar graphs presented already in 1974~\cite{linear-p}. However, requiring the drawing to be completely crossing free imposes severe limitations on an underlying graph. While providing a clean structure, these restrictions are often too constraining for many real-world graphs, especially large ones. This has led to a growing interest in exploring graphs close to being planar; see the survey by Didimo et al.~\cite{beyond-planarity-survey}. Such graphs allow a limited number of crossings while still retaining some of the beneficial structural properties of planar graphs.
 
-\section{Difficulty of dealing with beyond-planar graphs}\label{sec:hardness-of-relaxation}
+
+\section{Difficulty of dealing with beyond-planar graphs}
 
 Most relaxations of strict planarity dramatically increase the complexity of recognising such graphs. So, the general problem of minimising edge crossings in a graph drawing was known to be computationally intractable already in 1983 when Garey and Johnson~\cite{cr_NPC} demonstrated that the \textsc{Crossing Number} problem determining whether a given graph can be drawn with at most \(k\) crossings, is NP-hard. Their proof relies on a reduction from the \textsc{Optimal Linear Arrangement} problem, which is known to be NP-hard.
 
@@ -12,7 +13,8 @@ Minimising the number of local crossings is also hard. Korzhik and Mohar~\cite{1
 
 Given the complexity of recognising \(k\)-planarity, researchers considered exploring more restrictive classes of graphs, hoping that imposed limitations could simplify the recognition. One of the considered classes is the class of outer \(k\)-planar graphs, a subclass of \(k\)-planar graphs that admit drawings where all vertices lie on the outer face.
 
-\section{Efficient recognition of some outer \(k\)-planar graph}\label{sec:efficient-recognition-of-some-outer-(k)-planar-graph}
+
+\section{Efficient recognition of some outer \(k\)-planar graph}
 
 Although the general recognition problem for outer \(k\)-planar graphs is NP-hard, efficient algorithms have been developed for specific values of \(k\).
 
@@ -20,11 +22,12 @@ For \(k = 0\), the recognition task simplifies to an outerplanarity test. Regocn
 
 In the case of \(k = 1\), two research groups independently presented linear-time algorithms~\cite{linear-o1p_, linear-o1p}. Both algorithms use the SPQR decomposition of a graph for the test. Notably, the latter solution extends the graph to a maximal outer \(1\)-planar configuration if such a drawing exists, unlike the former, which employs a bottom-up strategy which does not require any transformations of the original graph.
 
-For all other values of \(k\), no research had been conducted until recently when a group of researchers proposed an algorithm for the general case, which we discuss in the next section.
+Considering a special case of this problem, Hong and Nagamochi~\cite{linear-full-o2p} proposed a linear-time algorithm for recognising full outer \(2\)-planar graphs. An outer \(k\)-planar drawing is \emph{full} if no crossings lie on the boundary of the outer face. Later, Chaplick et al.~\cite{linear-full-okp} extended their result by introducing an algorithm for recognising full outer \(k\)-planar graphs for every \(k\). Their algorithm runs in \(O(f(k) \cdot n)\) time, where \(f\) is a computable function.
 
-Considering more relaxed versions of this problem, interesting results were presented by Hong and Nagamochi~\cite{linear-full-o2p}, who proposed a linear time algorithm for recognising full outer \(2\)-planar graphs. The outer \(k\)-planar drawing is full if no crossings lie on the boundary of the outer face. Later, Chaplick et al.~\cite{linear-full-okp} extended their results by introducing the algorithm for testing full outer \(k\)-planar graphs for every \(k\) that requires \(O(f(k) \cdot n)\) time for a computable function \(f\).
+For the general version of the problem and values of \(k > 1\), no research had been conducted until recently when a group of researchers proposed an algorithm for the general case, which we discuss in the next section.
 
-\section{Recognizing general outer \(k\)-planar graphs}\label{sec:recognizing-general-outer-(k)-planar-graphs}
+
+\section{Recognizing general outer \(k\)-planar graphs}
 
 For a given outer \(k\)-planar drawing of a graph, Firman et al.~\cite{triangulations} proposed a method for constructing a triangulation with the property that each edge of the triangulation is crossed by at most \(k\) edges of the graph drawing. Since the edges of the triangulation do not necessarily belong to the original graph, they are termed \emph{links} to distinguish them from the original graph edges. The construction is done recursively.
 
@@ -36,6 +39,7 @@ Moreover, instead of relying on recursion, the method utilises a dynamic program
 
 Using the restriction on the number of edges crossing each link, the authors demonstrated that for a fixed \(k\), the number of possible right subgraphs grows only polynomially with respect to the size of the graph. They proceeded by arguing that the overall time complexity of the algorithm is \(2^{O(k \log k)}n^{3k + O(1)}\), showing that the algorithm is efficient for any fixed parameter \(k\).
 
-\section{Our contribution}\label{sec:our-contribution}
 
-A common drawback of the methods described above is the lack of practical validation. Although these algorithms have been analysed and discussed in a theoretical context, they have not been implemented or empirically tested. This thesis addresses this gap by implementing the most recent recognition algorithm and introducing two alternative approaches based on Integer Linear Programming (ILP) and Satisfiability (SAT) formulations. While it is NP-hard to solve the ILP or to find a satisfying truth statement, there are very advanced solvers for such formulations which could allow us to find an exact solution for small- to medium-sized instances within an acceptable amount of time. The performance and efficiency of these methods are then evaluated, demonstrating their practical applicability and limitations.
+\section{Our contribution}
+
+A common drawback of the methods described above is the lack of practical validation. Although these algorithms have been analysed and discussed in a theoretical context, they have not been implemented or empirically tested. We address this gap by implementing the most recent recognition algorithm and introducing two alternative approaches based on Integer Linear Programming (ILP) and Satisfiability (SAT) formulations. While it is NP-hard to solve the general integer linear program or to find a satisfying truth assigment for general Boolean formulas, there are very advanced solvers for such formulations that could allow us to find exact solutions for small- to medium-sized instances within an acceptable amount of time. Then we evaluate the performance and efficiency of these methods, demonstrating their practical applicability and limitations.
