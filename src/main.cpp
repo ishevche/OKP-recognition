@@ -48,35 +48,19 @@ int main(int ac, char **av) {
             graph[*ei].idx = edge_id++;
         }
 
-        bctree_t bctree = decompose(graph);
-        for (auto [vi, vi_end] = boost::vertices(bctree); vi != vi_end; ++ vi) {
-            const auto& node = bctree[*vi];
-            std::cout << *vi << ": " << ((node.node_type == B_NODE) ? "B" : "C") << std::endl;
-        }
-        for (auto [ei, ei_end] = boost::edges(bctree); ei != ei_end; ++ei) {
-            std::cout << boost::source(*ei, bctree) << " -- " << boost::target(*ei, bctree) << std::endl;
+        std::vector<Vertex> ordering;
+        SolverParams params{graph, ordering};
+        bicomponent_solver(params, [](SolverParams &p) {
+            p.ordering.clear();
+            p.converged = true;
+            for (auto [vi, vi_end] = boost::vertices(p.graph); vi != vi_end; ++vi) {
+                p.ordering.push_back(*vi);
+            }
+        });
+        for (Vertex v : ordering) {
+            std::cout << " " << v;
         }
         std::cout << std::endl;
-        for (auto [vi, vi_end] = boost::vertices(bctree); vi != vi_end; ++ vi) {
-            const auto& node = bctree[*vi];
-            std::cout << *vi << " ";
-            if (node.node_type == C_NODE) {
-                std::cout << "C: " << graph[node.articulation_point].name << std::endl;
-                continue;
-            }
-            auto vertex_index_map = boost::get(boost::vertex_index, node.bi_component);
-            std::cout << "B:";
-            for (auto [ui, ui_end] = boost::vertices(node.bi_component); ui != ui_end; ++ ui) {
-                Vertex global_u = node.original_vertices[boost::get(vertex_index_map, *ui)];
-                std::cout << " " << graph[global_u].name;
-            }
-            std::cout << std::endl;
-            for (auto [ei, ei_end] = boost::edges(node.bi_component); ei != ei_end; ++ei) {
-                Vertex global_source = node.original_vertices[boost::get(vertex_index_map, boost::source(*ei, bctree))];
-                Vertex global_target = node.original_vertices[boost::get(vertex_index_map, boost::target(*ei, bctree))];
-                std::cout << graph[global_source].name << " -- " << graph[global_target].name << std::endl;
-            }
-        }
     }
     return 0;
 }
