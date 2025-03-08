@@ -6,6 +6,7 @@
 #include "graph.h"
 #include "process_graph.h"
 #include "argument_parser.h"
+#include "bicomponents.h"
 #include "graphIO.h"
 #include "solvers.h"
 #include "timer.h"
@@ -34,7 +35,6 @@ int main(int ac, char **av) {
     std::vector<std::string> graph_strings = split(file_data, "graph G {");
 
     for (int i = 0; i < graph_strings.size(); ++i) {
-        std::cout << i << "/776:\n";
         Graph graph;
 
         boost::dynamic_properties graph_props;
@@ -43,60 +43,40 @@ int main(int ac, char **av) {
         graph_props.property("color", boost::get(&EdgeStruct::color, graph));
         boost::read_graphviz(graph_strings[i], graph, graph_props);
 
-        std::vector<Vertex> ILP_order;
-        SolverParams ILP_params{graph, ILP_order};
+        int edge_id = 0;
+        for (auto [ei, ei_end] = boost::edges(graph); ei != ei_end; ++ei) {
+            graph[*ei].idx = edge_id++;
+        }
 
-        auto start = get_current_time_fenced();
-        ILPSolver(ILP_params);
-        auto end = get_current_time_fenced();
-
-        std::cout << "ILP: " << ILP_params.number_of_crossings << " " << to_ns(end - start) << std::endl;
-
-        std::vector<Vertex> SAT_order;
-        SolverParams SAT_params{graph, SAT_order, ILP_params.number_of_crossings};
-        start = get_current_time_fenced();
-        SATSolver(SAT_params);
-        end = get_current_time_fenced();
-        std::cout << "SAT: " << SAT_params.number_of_crossings << " " << SAT_params.converged << " "
-                  << to_ns(end - start) << std::endl;
-        if (!SAT_params.converged && SAT_params.number_of_crossings < 7) {
-            save_dot("data/out/" + std::to_string(i) + "_SAT" + std::to_string(ILP_params.number_of_crossings) + ".dot",
-                     graph, ILP_order, ILP_params.number_of_crossings, graph_props);
-            while (!SAT_params.converged) {
-                SAT_params.number_of_crossings++;
-                start = get_current_time_fenced();
-                SATSolver(SAT_params);
-                end = get_current_time_fenced();
-                std::cout << "SAT: " << SAT_params.number_of_crossings << " " << SAT_params.converged << " "
-                          << to_ns(end - start) << std::endl;
-            }
-            save_dot("data/out/" + std::to_string(i) + "_SAT" + std::to_string(SAT_params.number_of_crossings) + ".dot",
-                     graph, SAT_order, SAT_params.number_of_crossings, graph_props);
-        } else {
-            SAT_params.number_of_crossings--;
-            start = get_current_time_fenced();
-            SATSolver(SAT_params);
-            end = get_current_time_fenced();
-            std::cout << "SAT: " << SAT_params.number_of_crossings << " " << SAT_params.converged << " "
-                      << to_ns(end - start) << std::endl;
-            if (SAT_params.converged) {
-                save_dot("data/out/" + std::to_string(i) + "_SAT" + std::to_string(ILP_params.number_of_crossings) +
-                         ".dot",
-                         graph, ILP_order, ILP_params.number_of_crossings, graph_props);
-                while (SAT_params.converged) {
-                    save_dot("data/out/" + std::to_string(i) + "_SAT" + std::to_string(SAT_params.number_of_crossings) +
-                             ".dot",
-                             graph, SAT_order, SAT_params.number_of_crossings, graph_props);
-                    SAT_params.number_of_crossings--;
-                    start = get_current_time_fenced();
-                    SATSolver(SAT_params);
-                    end = get_current_time_fenced();
-                    std::cout << "SAT: " << SAT_params.number_of_crossings << " " << SAT_params.converged << " "
-                              << to_ns(end - start) << std::endl;
-                }
-            }
+        bctree_t bctree = decompose(graph);
+        for (auto [vi, vi_end] = boost::vertices(bctree); vi != vi_end; ++ vi) {
+            const auto& node = bctree[*vi];
+            std::cout << *vi << ": " << ((node.node_type == B_NODE) ? "B" : "C") << std::endl;
+        }
+        for (auto [ei, ei_end] = boost::edges(bctree); ei != ei_end; ++ei) {
+            std::cout << boost::source(*ei, bctree) << " -- " << boost::target(*ei, bctree) << std::endl;
         }
         std::cout << std::endl;
+        for (auto [vi, vi_end] = boost::vertices(bctree); vi != vi_end; ++ vi) {
+            const auto& node = bctree[*vi];
+            std::cout << *vi << " ";
+            if (node.node_type == C_NODE) {
+                std::cout << "C: " << graph[node.articulation_point].name << std::endl;
+                continue;
+            }
+            auto vertex_index_map = boost::get(boost::vertex_index, node.bi_component);
+            std::cout << "B:";
+            for (auto [ui, ui_end] = boost::vertices(node.bi_component); ui != ui_end; ++ ui) {
+                Vertex global_u = node.original_vertices[boost::get(vertex_index_map, *ui)];
+                std::cout << " " << graph[global_u].name;
+            }
+            std::cout << std::endl;
+            for (auto [ei, ei_end] = boost::edges(node.bi_component); ei != ei_end; ++ei) {
+                Vertex global_source = node.original_vertices[boost::get(vertex_index_map, boost::source(*ei, bctree))];
+                Vertex global_target = node.original_vertices[boost::get(vertex_index_map, boost::target(*ei, bctree))];
+                std::cout << graph[global_source].name << " -- " << graph[global_target].name << std::endl;
+            }
+        }
     }
     return 0;
 }

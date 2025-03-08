@@ -1,17 +1,23 @@
 #ifndef OKP_RECOGNITION_PREPROCESS_H
 #define OKP_RECOGNITION_PREPROCESS_H
 
-#include <functional>
-#include <ogdf/basic/Graph.h>
-#include <ogdf/decomposition/BCTree.h>
-#include "solvers.h"
+#include <vector>
+#include "graph.h"
 
-int solve_for_each_component(SolverParams &solverParams,
-                             const std::function<void(SolverParams &)> &solver);
+enum bctree_node_type_t {
+    B_NODE, C_NODE
+};
 
-SolverParams solve_biconnected_component(ogdf::BCTree &bc_tree, ogdf::node b_component,
-                                         const SolverParams &solverParams,
-                                         const std::function<void(SolverParams &)> &solve);
+struct bctree_vertex_t {
+    bctree_node_type_t node_type;
+    Graph bi_component;
+    std::vector<Vertex> original_vertices;
+    Vertex articulation_point;
+};
 
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, bctree_vertex_t> bctree_t;
+typedef bctree_t::vertex_descriptor bctree_vertex;
+
+bctree_t decompose(const Graph &graph);
 
 #endif //OKP_RECOGNITION_PREPROCESS_H

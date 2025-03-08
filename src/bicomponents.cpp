@@ -1,102 +1,73 @@
-#include <ogdf/decomposition/BCTree.h>
-#include <stack>
+#include <boost/graph/biconnected_components.hpp>
+
 #include "bicomponents.h"
 
-int solve_for_each_component(SolverParams &solverParams,
-                             const std::function<void(SolverParams &)> &solver) {
-    ogdf::Graph graph = solverParams.graph;
-    ogdf::BCTree bcTree(graph);
+bctree_t decompose(const Graph &graph) {
+    typedef boost::property_map<Graph, size_t EdgeStruct::*>::const_type edge_index_map_t;
+    edge_index_map_t edge_index_map = boost::get(&EdgeStruct::idx, graph);
 
-     if (bcTree.numberOfBComps() == 1) {
-        //solver(solverParams);
-        return 1;
+    std::vector<size_t> edge_component(boost::num_edges(graph));
+    std::vector<Vertex> articulation_points;
+    auto [num_components, _] = boost::biconnected_components(
+            graph,
+            boost::make_iterator_property_map(edge_component.begin(), edge_index_map),
+            std::back_inserter(articulation_points)
+    );
+
+    bctree_t tree;
+
+    std::vector<bctree_vertex> b_nodes;
+    std::unordered_map<Vertex, bctree_vertex> c_nodes;
+    for (int i = 0; i < num_components; ++i) {
+        bctree_vertex node = boost::add_vertex(tree);
+        tree[node].node_type = B_NODE;
+        b_nodes.push_back(node);
+    }
+    for (const Vertex &articulation_point: articulation_points) {
+        bctree_vertex node = boost::add_vertex(tree);
+        tree[node].node_type = C_NODE;
+        tree[node].articulation_point = articulation_point;
+        c_nodes.insert({articulation_point, node});
     }
 
-   ogdf::node root_c_node = nullptr;
-    for (ogdf::node node: bcTree.bcTree().nodes) {
-        if (bcTree.typeOfBNode(node) == ogdf::BCTree::BNodeType::CComp) {
-            root_c_node = node;
-            break;
+    std::vector<std::unordered_map<Vertex, Vertex>> vertex_mappings(num_components);
+    for (auto [ei, ei_end] = boost::edges(graph); ei != ei_end; ++ei) {
+        size_t component_id = edge_component[boost::get(edge_index_map, *ei)];
+        bctree_vertex b_node = b_nodes[component_id];
+        auto &component = tree[b_node].bi_component;
+        Vertex source = boost::source(*ei, graph);
+        Vertex target = boost::target(*ei, graph);
+
+        auto &vertex_mapping = vertex_mappings[component_id];
+        if (!vertex_mapping.contains(source)) {
+            vertex_mapping.insert({source, boost::add_vertex(component)});
+            if (c_nodes.contains(source)) {
+                boost::add_edge(b_node, c_nodes[source], tree);
+            }
         }
-    }
-
-    std::vector<ogdf::node> &ordering = solverParams.ordering;
-    ordering.clear();
-    ordering.reserve(graph.numberOfNodes());
-    ordering.push_back(bcTree.original(bcTree.cutVertex(root_c_node, root_c_node)));
-
-    std::stack<ogdf::node> dfs_stack;
-    ogdf::NodeArray<bool> visited(graph, false);
-    dfs_stack.push(root_c_node);
-
-    while (!dfs_stack.empty()) {
-        ogdf::node current = dfs_stack.top();
-        dfs_stack.pop();
-
-        ogdf::node previous = nullptr;
-        for (ogdf::adjEntry adjEntry: current->adjEntries) {
-            ogdf::node neighbour = adjEntry->twinNode();
-            if (visited[neighbour]) {
-                previous = neighbour;
-            } else {
-                dfs_stack.push(neighbour);
+        if (!vertex_mapping.contains(target)) {
+            vertex_mapping.insert({target, boost::add_vertex(component)});
+            if (c_nodes.contains(target)) {
+                boost::add_edge(b_node, c_nodes[target], tree);
             }
         }
 
-        if (bcTree.typeOfBNode(current) == ogdf::BCTree::BNodeType::BComp) {
-            SolverParams partial_solution = solve_biconnected_component(bcTree, current, solverParams, solver);
-            solverParams.number_of_crossings = std::max(solverParams.number_of_crossings,
-                                                        partial_solution.number_of_crossings);
-
-            std::vector<ogdf::node> &part_ord = partial_solution.ordering;
-            ogdf::node orig_cut_node = bcTree.original(bcTree.cutVertex(previous, previous));
-
-            auto insert_iter = std::find(ordering.begin(), ordering.end(), orig_cut_node) + 1;
-            auto rotate_iter = std::find(part_ord.begin(), part_ord.end(), orig_cut_node);
-            std::rotate(part_ord.begin(), rotate_iter, part_ord.end());
-            ordering.insert(insert_iter, part_ord.begin() + 1, part_ord.end());
-        }
-        visited[current] = true;
+        boost::add_edge(vertex_mapping[source], vertex_mapping[target], component);
     }
 
-    return bcTree.numberOfBComps();
-}
+    for (size_t component_id = 0; component_id < num_components; ++component_id) {
+        typedef boost::property_map<Graph, boost::vertex_index_t>::type vertex_index_map_t;
 
-SolverParams solve_biconnected_component(ogdf::BCTree &bc_tree, ogdf::node b_component,
-                                         const SolverParams &solverParams,
-                                         const std::function<void(SolverParams &)> &solve) {
-    const ogdf::Graph &originalGraph = solverParams.graph;
-    ogdf::Graph component;
-    ogdf::NodeArray<ogdf::node> mapping_comp_to_gr(component, nullptr);
-    ogdf::NodeArray<ogdf::node> mapping_gr_to_comp(originalGraph, nullptr);
+        const Graph &component = tree[b_nodes[component_id]].bi_component;
+        vertex_index_map_t vertex_index_map = boost::get(boost::vertex_index, component);
+        std::vector<size_t> &backwards_mapping = tree[b_nodes[component_id]].original_vertices;
+        backwards_mapping.resize(boost::num_vertices(component));
 
-    for (ogdf::edge edge: bc_tree.hEdges(b_component)) {
-        ogdf::node src = bc_tree.original(edge->source());
-        ogdf::node trg = bc_tree.original(edge->target());
-
-        ogdf::node new_src = mapping_gr_to_comp[src];
-        ogdf::node new_trg = mapping_gr_to_comp[trg];
-        if (!new_src) {
-            new_src = component.newNode();
-            mapping_gr_to_comp[src] = new_src;
-            mapping_comp_to_gr[new_src] = src;
+        for (const auto &[global_v, local_v]: vertex_mappings[component_id]) {
+            size_t local_v_index = boost::get(vertex_index_map, local_v);
+            backwards_mapping[local_v_index] = global_v;
         }
-        if (!new_trg) {
-            new_trg = component.newNode();
-            mapping_gr_to_comp[trg] = new_trg;
-            mapping_comp_to_gr[new_trg] = trg;
-        }
-
-        component.newEdge(new_src, new_trg);
     }
 
-    SolverParams params{component, {}, solverParams.number_of_crossings, false};
-    solve(params);
-    std::vector<ogdf::node> original_ordering;
-    original_ordering.reserve(component.numberOfNodes());
-    for (ogdf::node new_node: params.ordering) {
-        original_ordering.push_back(mapping_comp_to_gr[new_node]);
-    }
-    params.ordering = original_ordering;
-    return params;
+    return tree;
 }
