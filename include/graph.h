@@ -9,13 +9,12 @@ struct VertexStruct {
     std::string name;
     std::string location;
     size_t order;
-    size_t idx;
 };
 struct EdgeStruct {
     std::string color;
-    size_t idx;
 };
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, VertexStruct, EdgeStruct> Graph;
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
+        VertexStruct, boost::property<boost::edge_index_t, size_t, EdgeStruct>> Graph;
 typedef Graph::vertex_descriptor Vertex;
 typedef Graph::edge_descriptor Edge;
 

@@ -3,8 +3,8 @@
 #include "bicomponents.h"
 
 bctree_t decompose(const Graph &graph) {
-    typedef boost::property_map<Graph, size_t EdgeStruct::*>::const_type edge_index_map_t;
-    edge_index_map_t edge_index_map = boost::get(&EdgeStruct::idx, graph);
+    typedef boost::property_map<Graph, boost::edge_index_t>::const_type edge_index_map_t;
+    edge_index_map_t edge_index_map = boost::get(boost::edge_index, graph);
 
     std::vector<size_t> edge_component(boost::num_edges(graph));
     std::vector<Vertex> articulation_points;
@@ -52,7 +52,7 @@ bctree_t decompose(const Graph &graph) {
             }
         }
 
-        boost::add_edge(vertex_mapping[source], vertex_mapping[target], component);
+        boost::add_edge(vertex_mapping[source], vertex_mapping[target], boost::num_edges(component), component);
     }
 
     for (size_t component_id = 0; component_id < num_components; ++component_id) {

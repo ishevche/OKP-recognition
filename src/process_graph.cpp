@@ -3,7 +3,7 @@
 #include <ogdf/fileformats/GraphIO.h>
 #include "process_graph.h"
 //#include "bicomponents.h"
-#include "solvers.h"
+#include "solver.h"
 #include "timer.h"
 
 //void process_graph(const std::string& graph_string) {
@@ -66,19 +66,4 @@ int max_local_crossing(const Graph &graph) {
         result = std::max(result, edge_crossings);
     }
     return result;
-}
-
-
-void fill_vertex_idx(Graph &graph) {
-    size_t i = 0;
-    for (Vertex e: boost::make_iterator_range(boost::vertices(graph))) {
-        graph[e].idx = i++;
-    }
-}
-
-void fill_edge_idx(Graph &graph) {
-    size_t i = 0;
-    for (Edge e: boost::make_iterator_range(boost::edges(graph))) {
-        graph[e].idx = i++;
-    }
 }
