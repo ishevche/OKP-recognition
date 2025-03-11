@@ -15,6 +15,7 @@ add_executable(okp-recognition
         src/bicomponents.cpp
         src/argument_parser.cpp
         src/process_graph.cpp
+        src/okp_solver.cpp
 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
