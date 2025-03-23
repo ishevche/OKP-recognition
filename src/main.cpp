@@ -1,17 +1,13 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include <cmath>
+#include <okp_solver.h>
 #include <boost/property_map/dynamic_property_map.hpp>
 #include "graph.h"
 #include "process_graph.h"
 #include "argument_parser.h"
-#include "bicomponents.h"
-#include "graphIO.h"
-#include "solver.h"
 #include "timer.h"
 #include "bicomponent_solver.h"
-#include "sat_solver.h"
 
 
 std::vector<std::string> split(const std::string &string, const std::string &delimiter) {
@@ -51,14 +47,15 @@ int main(int ac, char **av) {
         for (auto [ei, ei_end] = boost::edges(graph); ei != ei_end; ++ei) {
             boost::put(edge_index_map, *ei, edge_id++);
         }
+        std::cout << boost::num_vertices(graph) << std::endl;
 
-        bicomponent_solver<sat_solver> solver(graph);
+        okp_solver solver(graph, 11);
 
         solver.solve();
 
-        std::cout << solver.crossing_number << std::endl;
+        // std::cout << solver.crossing_number << std::endl;
 
-        save_dot("data/out/tmp.dot", graph, solver.vertex_order, solver.crossing_number, graph_props);
+        // save_dot("data/out/tmp.dot", graph, solver.vertex_order, solver.crossing_number, graph_props);
     }
     return 0;
 }

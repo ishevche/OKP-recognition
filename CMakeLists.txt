@@ -14,7 +14,6 @@ add_executable(okp-recognition
         src/sat.cpp
         src/bicomponents.cpp
         src/argument_parser.cpp
-        src/process_graph.cpp
         src/okp_solver.cpp
 )
 
@@ -29,7 +28,6 @@ find_library(KISSAT_LIBRARY
 
 target_include_directories(okp-recognition PRIVATE
         ${GUROBI_INCLUDE_DIRS}
-        ${OGDF_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIR}
         "${CMAKE_SOURCE_DIR}/../kissat/src"
         include)
@@ -37,8 +35,7 @@ target_link_libraries(okp-recognition
         ${GUROBI_LIBRARY}
         ${GUROBI_CXX_LIBRARY}
         ${KISSAT_LIBRARY}
-        ${Boost_LIBRARIES}
-        OGDF)
+        ${Boost_LIBRARIES})
 
 if (ILP_CROSSING_SUM_OPTIMIZATION)
     target_compile_definitions(okp-recognition PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)

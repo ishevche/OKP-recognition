@@ -10,4 +10,6 @@ void save_dot(const std::string &file_name, Graph &graph,
               int number_of_crossings,
               const boost::dynamic_properties &graph_props);
 
+int count_edge_crossing(Edge edge, const Graph &graph);
+
 #endif //OKP_RECOGNITION_GRAPHIO_H
