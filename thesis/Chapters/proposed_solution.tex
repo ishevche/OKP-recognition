@@ -1,6 +1,8 @@
 \chapter{Proposed Solution}
 
-\section{ILP Formulation}\label{subsec:ILP-def}
+In this chapter we will discuss the methods considered in this work to recognise the outer k-planar graphs. Besides recognition, these methods also provide the outer k-planar drawings of the given graphs if it is possible. We represent drawing as a sequence of vertices in the circular order they apper on the boundary of the outer face. Considering only straight line drawings this order uniquely determines all the edge crossings and so also the number of crossings per edge.
+
+\section{ILP Formulation (unchanged)}\label{sec:ILP-def}
 
 The result of the integral linear program should be an arrangement of vertices on a line.
 Given the arrangement of the vertices, we can definitively identify whether two edges cross each other.
@@ -11,7 +13,7 @@ Under these assumptions, the edges $uv$ and $st$ cross if and only if $s$ is loc
 
 The arrangement is represented using the so-called ``ordering variables''.
 For every pair of vertices $u$ and $v$, we create a binary variable $a_{u, v}$ that defines the order in which they appear in the arrangement.
-$a_{u, v} = 1$ indicates that $u$ is located before $v$ and vice versa, and $a_{u, v} = 0$ indicates that $v$ is located before $u$ or $u$ and $v$ is the same vertex.
+Equality $a_{u, v} = 1$ indicates that $u$ is located before $v$ and vice versa, and $a_{u, v} = 0$ indicates that $v$ is located before $u$ or $u$ and $v$ is the same vertex.
 
 For these variables, it is crucial to ensure transitivity.
 That is, if $a_{u, v} = 1$ and $a_{v, w} = 1$ which means $u$ is located before $v$ and $v$ is located before $w$, then $u$ must be located before $w$, so the following should hold $a_{u, w} = 1$.
@@ -35,7 +37,7 @@ Thus, the edge $uv$ crosses the edge $st$ if and only if one of the following ho
 \end{itemize}
 
 To describe this in the linear program, we create a binary variable $c_{uv, st}$ for every pair of edges $uv$ and $st$.
-$c_{uv, st} = 0$ indicates that the edge $uv$ does not cross $st$.
+Equality $c_{uv, st} = 0$ indicates that the edge $uv$ does not cross $st$.
 To ensure the correctness of these values, we impose eight constraints on each variable, one for each case from above.
 For example, considering the case $a_{u,s} = 1$, $a_{s,v} = 1$, and $a_{v,t} = 1$, we impose the following restriction: $c_{uv, st} \geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2$, which ensures that $c_{uv, st}$ equals $1$ whenever the vertices are ordered as $usvt$.
 Making this for each case restricts $c_{uv, st}$ to the value $1$ if the vertices are arranged in one of the eight ``intersecting'' configurations, ensuring that $c_{uv, st} = 0$ is possible only if $uv$ does not cross $st$.
@@ -63,7 +65,7 @@ So, the integer linear program can be described as follows:
     &&a_{u, v} &\in \{0, 1\},&&\forall u, v \in V(G)\\
 \end{align*}
 
-\section{SAT Formulation}
+\section{SAT Formulation (unchanged)}
 
 Another approach to solving this problem is to check for a specific $k$ whether the given graph is outer-$k$-planar.
 This check can be encoded as a boolean satisfiability problem.
@@ -72,7 +74,7 @@ A disjunctive clause is a single literal or a disjunction of several.
 Literal is either a variable or a negation of a variable, with the former being the positive and the latter the negative literal.
 
 
-Similarly to the ILP algorithm described in~\ref{subsec:ILP-def}, this algorithm uses the same ``ordering variables'' $a_{u, v}$ for each pair of vertices $u$ and $v$ that represent the arrangement of the vertices.
+Similarly to the ILP algorithm described in~\ref{sec:ILP-def}, this algorithm uses the same ``ordering variables'' $a_{u, v}$ for each pair of vertices $u$ and $v$ that represent the arrangement of the vertices.
 If the boolean variable $a_{u, v}$ is $\textsc{True}$, the vertex $u$ is located before the vertex $v$ and vice versa otherwise.
 
 Similarly, these variables must account for transitivity, which means that for every triple of vertices $u$, $v$, and $w$ $a_{u, v} \equiv \textsc{True}$ and $a_{v, w} \equiv \textsc{True}$ implies $a_{u, w} \equiv \textsc{True}$.
@@ -97,3 +99,19 @@ Doing so, we ensure that for each edge $e_0$, no $k + 1$ different edges interse
 % TODO: implementation details (iterate over all permutations, finding minimal k)
 % TODO: possible optimizations (2k + 2, equivalence instead of implication for c_{...}, eliminating c_{...} at all)
 
+
+\section{Bicomponent decomposition}
+
+Considering the complexity of the recognition of such graphs, splitting the problem into smaller independent subproblems yields a huge increase in performance.
+
+For solving this problem particularly, such a method that can propose a way to split a graph into pieces in such a way that implementations can benefit of that is block-cut decomposition. The idea behind this decomposition is to split the graph into biconnected components (blocks). It is worth noting that each edge of the graph belongs to a single block. However, any two bicomponents can share a vertex (cut). Considering blocks and cuts as vertices of a graph we can form a so-called block-cut tree, where block vertex is connected to a cut vertex if and only if the corresponding component contains corresponding vertex.
+
+The advantage of performing this decomposition is that now, any method for recognising outer k-planar graphs can be applied independently to each component, and results can be combined easily afterwards. Indeed, if there is a component that does not admin an outer k-planar drawing then neither does the whole graph. Furthermore, if all of them admit it, then such drawings can be glued together by combining duplicated of each cut vertex into a single one. It is worth noting that this combining does not add any edge crossings, as both components are located in the outer face of each other. Moreover, all vertices stay on the outer face of the graph during this process, as no new faces are created, as the block-cut tree does not contain loops. Thus, the resulting drawing is outer k-planar drawing of a graph, and it exists if and only if such a drawing exists for each biconnected component of this graph.
+
+In this work we implemented this decomposition using \textsc{biconnected\_components}\footnote{\url{https://www.boost.org/doc/libs/1_87_0/libs/graph/doc/biconnected_components.html}} function from Boost~\cite{boost}. This function maps each edge of a graph to its bicomponnet number and provides a list of cut vertices. Afterwards we created a copy of each block as a separate graph and mappings to translate new \emph{local} vertices in original ones. Finally, we constructed a supergraph that represents the structure of block-cut tree and references a copied block and a mapping or a cut vertex in each node of this tree.
+
+To construct a resulting drawing of a graph we walk through the block-cut tree using depth-first search storing the predecessor for each node upon discovery. Also, each time block vertex is discovered we use one of the methods described in other sections to check weather the componnent is outer k-planar and get the drawing if it is. Afterwards we glue this new drawing to already existing one by combining the corresponding cut vertex as described before. If the considered block is the first one, its drawing is simply copied into a sequence that stores the final one. Otherwise, the block necessarily has a predecessor. Due to a structure of a tree it is a cut node, that corresponds to a vertex that is shared with some other block already considered and added to a final drawing. As a result, we can find a corresponding cut vertex in both global and local drawings. As drawing is a sequence of vertices in a cyclic order, we can rotate it in such a way, that this cut vertex is located as a first item in a local drawing. Finally, we insert the local drawing starting from the second element into the global one immediately after cut vertex.
+
+\begin{quote}
+    Alexander, maybe we should not exclude the first element from the local drawing but include it at the end of it, so for two touching loops $ABC$, and $BDE$ we would have the following order $ABDEBC$ rather than $ABDEC$ or $ADEBC$ as vertex $B$ indeed occurs twice on the boundary?
+\end{quote}
