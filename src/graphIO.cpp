@@ -1,4 +1,4 @@
-#include "graphIO.h"include "process_graph.h"
+#include "graphIO.h"
 
 void save_dot(const std::string& file_name, Graph& graph,
               const std::vector<Vertex>& ordering,

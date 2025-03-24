@@ -4,7 +4,6 @@
 #include <okp_solver.h>
 #include <boost/property_map/dynamic_property_map.hpp>
 #include "graph.h"
-#include "process_graph.h"
 #include "argument_parser.h"
 #include "timer.h"
 #include "bicomponent_solver.h"

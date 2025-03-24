@@ -1,5 +1,4 @@
 #include "sat_solver.h"
-#include "process_graph.h"
 
 bool sat_solver::solve() {
     vertex_order.clear();
