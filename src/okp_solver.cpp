@@ -18,16 +18,32 @@ bool okp_solver::solve() {
     initialise_table();
 
     while (crossing_number < 7 && !is_drawable()) {
-        add_table_entries(crossing_number++);
+        add_table_entries(++crossing_number);
     }
 
     if (crossing_number >= 7) {
         return false;
     }
 
-    // TODO: Fill vertex_order based on filled dp_table
+    print_true_table();
+    print_table();
 
-    return true;
+    size_t num_vertices = boost::num_vertices(graph);
+    for (size_t v_index = 0; v_index < num_vertices; ++v_index) {
+        for (size_t u_index = v_index + 1; u_index < num_vertices; ++u_index) {
+            size_t right_side = (1 << num_vertices) - 1;
+            right_side ^= (1 << u_index) | (1 << v_index);
+            if (dp_table[v_index][u_index].contains(right_side) && !dp_table[v_index][u_index][right_side].empty()) {
+                vertex_order = dp_table[v_index][u_index][right_side][0].vertex_order;
+                vertex_order.push_back(u_index);
+                vertex_order.push_back(v_index);
+                return true;
+            }
+        }
+    }
+
+    std::cout << "Something went wrong" << std::endl;
+    return false;
 }
 
 bool okp_solver::is_biconnected() const {
@@ -51,14 +67,10 @@ void okp_solver::insert_triangle_edges(std::vector<size_t>& triangle_vertex_draw
     }
 }
 
-bool okp_solver::get_next_permutation(okp_solver::table_entry_t& combined_arrangement) {
+bool okp_solver::get_next_permutation(table_entry_t& combined_arrangement) {
     return std::next_permutation(
         combined_arrangement.edge_order.begin(),
-        combined_arrangement.edge_order.end(),
-        [](const std::pair<size_t, std::vector<Edge>>& a, const std::pair<size_t, std::vector<Edge>>& b) {
-            return std::less<size_t>()(a.first, b.first);
-        }
-    );
+        combined_arrangement.edge_order.end());
 }
 
 std::vector<Edge> okp_solver::get_ordered_edges(const std::vector<Edge>& edges,
@@ -95,18 +107,71 @@ bool okp_solver::verify_triangle_drawing(const std::vector<size_t>& triangle_ver
     return true;
 }
 
+bool okp_solver::check_triangle_consistency(const std::vector<Edge>& edges,
+                                            const std::vector<size_t>& triangle_drawing,
+                                            std::vector<Edge>& triangle_edges,
+                                            size_t min_index, size_t max_index) {
+    size_t previous_end_index = min_index;
+    for (const Edge& edge : edges) {
+        size_t src_vertex = boost::get(vertex_index_map, boost::source(edge, graph));
+        size_t trg_vertex = boost::get(vertex_index_map, boost::target(edge, graph));
+        size_t src_index = triangle_drawing[src_vertex];
+        size_t trg_index = triangle_drawing[trg_vertex];
+        if (min_index <= trg_index && trg_index <= max_index) {
+            std::swap(src_index, trg_index);
+        }
+        if ((trg_index < min_index && (trg_index > previous_end_index || previous_end_index >= max_index)) ||
+            (trg_index > max_index && trg_index > previous_end_index && previous_end_index >= max_index)) {
+            return false;
+        }
+        previous_end_index = trg_index;
+        triangle_edges.push_back(edge);
+    }
+    return true;
+}
+
 bool okp_solver::count_triangle_intersections(const std::vector<Edge>& part_a_edges,
                                               const std::vector<Edge>& part_b_edges,
                                               const std::vector<Edge>& piercing_edges,
                                               size_t split_vertex,
-                                              std::vector<size_t>& intersections_count) {
-    Graph result(boost::num_vertices(graph));
+                                              std::vector<size_t>& intersections_count,
+                                              const std::vector<size_t>& triangle_drawing) {
+    std::vector<Edge> triangle_edges;
 
+    if (!check_triangle_consistency(part_a_edges, triangle_drawing, triangle_edges, 1, part_a_edges.size()))
+        return false;
+    if (!check_triangle_consistency(part_b_edges, triangle_drawing, triangle_edges, 2 + part_a_edges.size(),
+                                    1 + part_b_edges.size()))
+        return false;
+    if (!check_triangle_consistency(part_b_edges, triangle_drawing, triangle_edges,
+                                    3 + part_a_edges.size() + part_b_edges.size(),
+                                    2 + part_a_edges.size() + part_b_edges.size() + piercing_edges.size()))
+        return false;
 
     auto [link, ok] = boost::edge(active_link.first, active_link.second, graph);
-    if (ok) { combined_piercing_edges.push_back(link); }
+    if (ok) { triangle_edges.push_back(link); }
 
-    // TODO: construct triangle graph and count all intersections
+    for (const Edge& edge : triangle_edges) {
+        size_t intersections = 0;
+        size_t edge_src = triangle_drawing[boost::get(vertex_index_map, boost::source(edge, graph))];
+        size_t edge_trg = triangle_drawing[boost::get(vertex_index_map, boost::target(edge, graph))];
+        if (edge_src > edge_trg) { std::swap(edge_src, edge_trg); }
+        for (const Edge& other : triangle_edges) {
+            size_t other_src = triangle_drawing[boost::get(vertex_index_map, boost::source(other, graph))];
+            size_t other_trg = triangle_drawing[boost::get(vertex_index_map, boost::target(other, graph))];
+            if (other_src > other_trg) { std::swap(other_src, other_trg); }
+            bool src_between = edge_src < other_src && other_src < edge_trg;
+            bool trg_between = edge_src < other_trg && other_trg < edge_trg;
+            intersections += (src_between && other_trg > edge_trg) ||
+                (trg_between && other_src < edge_src);
+        }
+        size_t edge_index = boost::get(edge_index_map, edge);
+        intersections_count[edge_index] += intersections;
+        if (intersections_count[edge_index] > crossing_number) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void okp_solver::process_split(size_t right_side, int right_size, const std::vector<Edge>& piercing_edges,
@@ -156,9 +221,21 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
                             edges_intersection_count[edge_index] += part_b_arrangement.edge_order[i].second;
                         }
 
+                        std::vector<size_t> triangle_drawing(boost::num_vertices(graph), -1);
+
+                        triangle_drawing[boost::get(vertex_index_map, active_link.first)] = 0;
+                        triangle_drawing[split_vertex] = part_a_edges.size() + 1;
+                        triangle_drawing[boost::get(vertex_index_map, active_link.second)] =
+                            part_a_edges.size() + part_b_edges.size() + 2;
+
+                        insert_triangle_edges(triangle_drawing, part_a_edges_order, part_a, 1);
+                        insert_triangle_edges(triangle_drawing, part_b_edges_order, part_b, 2 + part_a_edges.size());
+                        insert_triangle_edges(triangle_drawing, piercing_edges_order, ~right_side,
+                                              3 + part_a_edges.size() + part_b_edges.size());
+
                         bool ok = count_triangle_intersections(part_a_edges_order, part_b_edges_order,
                                                                piercing_edges_order, split_vertex,
-                                                               edges_intersection_count);
+                                                               edges_intersection_count, triangle_drawing);
                         if (!ok) { continue; }
 
                         for (size_t i = 0; i < piercing_edges.size(); i++) {
@@ -171,8 +248,8 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
                         combined_arrangement.vertex_order.insert(combined_arrangement.vertex_order.end(),
                                                                  part_b_arrangement.vertex_order.begin(),
                                                                  part_b_arrangement.vertex_order.end());
-                        dp_table[active_link.first][active_link.second][right_side].push_back(
-                            std::move(combined_arrangement));
+                        dp_table[active_link.first][active_link.second][right_side].push_back(combined_arrangement);
+                        std::ranges::reverse(combined_arrangement.edge_order);
                     } while (get_next_permutation(combined_arrangement));
                 }
             }
@@ -186,6 +263,9 @@ bool okp_solver::is_drawable() {
     dp_table.resize(num_vertices);
     for (int i = 0; i < num_vertices; ++i) {
         dp_table[i].resize(num_vertices);
+        for (int j = i + 1; j < num_vertices; ++j) {
+            dp_table[i][j][0].emplace_back();
+        }
     }
 
     for (int right_size = 1; right_size <= num_vertices - 2; ++right_size) {
@@ -193,20 +273,23 @@ bool okp_solver::is_drawable() {
             active_link.first = v_index;
             for (size_t u_index = v_index + 1; u_index < num_vertices; ++u_index) {
                 active_link.second = u_index;
-                for (auto [right_side, piercing_edges] : dp_table_initialisation[u_index][v_index][right_size]) {
+                for (auto [right_side, piercing_edges] : dp_table_initialisation[v_index][u_index][right_size]) {
                     for (size_t split_vertex = 0; split_vertex < num_vertices; ++split_vertex) {
                         if ((right_side & 1 << split_vertex) == 0) { continue; }
                         process_split(right_side, right_size, piercing_edges, split_vertex);
                     }
-                }
-                if (right_size == num_vertices - 1 && dp_table[v_index][u_index][right_size].size() != 0) {
-                    return true;
+                    if (right_size == num_vertices - 2 && dp_table[v_index][u_index][right_side].size() != 0) {
+                        return true;
+                    }
                 }
                 active_link.second = -1;
             }
             active_link.first = -1;
         }
     }
+#ifndef NDEBUG
+    print_table();
+#endif
     return false;
 }
 
@@ -235,8 +318,6 @@ void okp_solver::initialise_table() {
         }
     }
     for (int k = 0; k <= crossing_number; add_table_entries(k++)) {}
-
-    print_table();
 }
 
 void okp_solver::select_edges(filtered_graph_t::edge_iterator start, filtered_graph_t::edge_iterator end, size_t k) {
@@ -320,6 +401,96 @@ void okp_solver::print_table() {
                     for (auto edge : edges) {
                         std::cout << edge << ", ";
                     }
+                    std::cout << "]" << std::endl;
+                }
+            }
+            std::cout << std::endl;
+        }
+    }
+
+
+    for (int i = 0; i < dp_table.size(); ++i) {
+        for (int j = 0; j < dp_table[i].size(); ++j) {
+            std::cout << "Active link: " << i << "-" << j << std::endl;
+            std::vector<size_t> entries;
+            for (const auto& key : dp_table[i][j] | std::views::keys) {
+                entries.emplace_back(key);
+            }
+            std::ranges::sort(entries);
+            for (auto side : entries) {
+                std::cout << std::bitset<10>(side) << ": {";
+                for (const table_entry_t& entry : dp_table[i][j][side]) {
+                    std::cout << "[(";
+                    for (auto const& [edge, cross] : entry.edge_order) {
+                        std::cout << edge << " " << cross << ",";
+                    }
+                    std::cout << "), ";
+                    for (auto v : entry.vertex_order) {
+                        std::cout << v;
+                    }
+                    std::cout << "],";
+                }
+                std::cout << "}" << std::endl;
+            }
+            std::cout << std::endl;
+        }
+    }
+}
+
+void okp_solver::print_true_table() {
+    std::set<size_t> vertices;
+    std::pair<size_t, size_t> link;
+    filtered_graph_t part(graph,
+                          [this, &vertices, &link](const Edge& edge) {
+                              size_t src = source(edge, graph);
+                              size_t trg = target(edge, graph);
+                              if (src > trg) { std::swap(src, trg); }
+                              return vertices.contains(src) || vertices.contains(trg) ||
+                                     (src == link.first && trg == link.second);
+                          },
+                          [&vertices](const Vertex& vertex) { return true; });
+
+    for (int i = 0; i < dp_table_initialisation.size(); ++i) {
+        active_link.first = i;
+        for (int j = i + 1; j < dp_table_initialisation[i].size(); ++j) {
+            active_link.second = j;
+            std::cout << "Active link: " << i << "-" << j << std::endl;
+            for (int k = 0; k < dp_table_initialisation[i][j].size(); ++k) {
+                std::vector entries(
+                    dp_table_initialisation[i][j][k].begin(), dp_table_initialisation[i][j][k].end());
+                std::ranges::sort(entries);
+                for (auto [side, edges] : entries) {
+                    std::cout << std::bitset<10>(side) << ": [";
+                    vertices.clear();
+                    for (int v = 0; (1 << v) <= side; v++) {
+                        if (1 << v & side) {
+                            vertices.insert(v);
+                        }
+                    }
+                    std::vector<size_t> order;
+                    order.push_back(active_link.first);
+                    order.insert(order.end(), vertices.begin(), vertices.end());
+                    order.push_back(active_link.second);
+                    for (const Edge& edge : edges) {
+                        auto src = source(edge, graph);
+                        auto trg = target(edge, graph);
+                        if (1 << trg & side) { std::swap(src, trg); }
+                        order.push_back(trg);
+                    }
+                    std::sort(&order[1], &order[vertices.size()]);
+                    std::sort(&order[2 + vertices.size()], &order[order.size() - 1]);
+                    std::vector<size_t> index(num_vertices(graph));
+                    do {
+                        do {
+                            for (size_t idx = 0; idx < order.size(); ++idx) {
+                                index[order[idx]] = idx;
+                            }
+                            for (auto [ei, ei_end] = boost::edges(part); ei != ei_end; ++ei) {
+                                // TODO : debug
+                            }
+                        } while (std::next_permutation(&order[2 + vertices.size()], &order[order.size() - 1]));
+                    } while (std::next_permutation(&order[1], &order[vertices.size()]));
+
                     std::cout << "]" << std::endl;
                 }
             }

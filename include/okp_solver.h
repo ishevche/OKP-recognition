@@ -40,7 +40,7 @@ private:
     std::vector<Edge> filtered_edges;
 
     bool is_biconnected() const;
-    void okp_solver::insert_triangle_edges(std::vector<size_t>& triangle_vertex_drawing,
+    void insert_triangle_edges(std::vector<size_t>& triangle_vertex_drawing,
                                            const std::vector<Edge>& ordered_edges,
                                            size_t part_mask, size_t starting_index);
     bool get_next_permutation(table_entry_t& combined_arrangement);
@@ -49,10 +49,16 @@ private:
     bool verify_triangle_drawing(const std::vector<size_t>& triangle_vertex_drawing,
                                  const std::vector<Edge>& ordered_edges, size_t part_mask) const;
     bool count_triangle_intersections(const std::vector<Edge>& part_a_edges,
-                                  const std::vector<Edge>& part_b_edges,
-                                  const std::vector<Edge>& piercing_edges,
-                                  size_t split_vertex,
-                                  std::vector<size_t>& intersections_count);
+                                      const std::vector<Edge>& part_b_edges,
+                                      const std::vector<Edge>& piercing_edges,
+                                      size_t split_vertex,
+                                      std::vector<size_t>& intersections_count,
+                                      const std::vector<size_t>& triangle_drawing);
+    bool check_triangle_consistency(const std::vector<Edge>& edges,
+                                    const std::vector<size_t>& triangle_drawing,
+                                    std::vector<Edge>& triangle_edges,
+                                    size_t min_index, size_t max_index);
+    void print_true_table();
     void process_split(size_t right_side, int right_size, const std::vector<Edge>& piercing_edges, size_t split_vertex);
     bool is_drawable();
     void add_table_entries(size_t k);
