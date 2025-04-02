@@ -3,6 +3,7 @@
 #include <boost/graph/bipartite.hpp>
 #include "okp_solver.h"
 
+#include <numeric>
 #include <ranges>
 
 bool okp_solver::solve() {
@@ -438,60 +439,106 @@ void okp_solver::print_table() {
 }
 
 void okp_solver::print_true_table() {
-    std::set<size_t> vertices;
+    std::vector<size_t> vertices;
     std::pair<size_t, size_t> link;
     filtered_graph_t part(graph,
                           [this, &vertices, &link](const Edge& edge) {
                               size_t src = source(edge, graph);
                               size_t trg = target(edge, graph);
                               if (src > trg) { std::swap(src, trg); }
-                              return vertices.contains(src) || vertices.contains(trg) ||
+                              bool has_src = std::ranges::find(vertices, src) != vertices.end();
+                              bool has_trg = std::ranges::find(vertices, trg) != vertices.end();
+                              return  has_src || has_trg ||
                                      (src == link.first && trg == link.second);
                           },
-                          [&vertices](const Vertex& vertex) { return true; });
+                          [](const Vertex&) { return true; });
 
     for (int i = 0; i < dp_table_initialisation.size(); ++i) {
-        active_link.first = i;
+        link.first = i;
         for (int j = i + 1; j < dp_table_initialisation[i].size(); ++j) {
-            active_link.second = j;
+            link.second = j;
             std::cout << "Active link: " << i << "-" << j << std::endl;
             for (int k = 0; k < dp_table_initialisation[i][j].size(); ++k) {
                 std::vector entries(
                     dp_table_initialisation[i][j][k].begin(), dp_table_initialisation[i][j][k].end());
                 std::ranges::sort(entries);
                 for (auto [side, edges] : entries) {
-                    std::cout << std::bitset<10>(side) << ": [";
+                    std::cout << std::bitset<10>(side) << ": {";
                     vertices.clear();
                     for (int v = 0; (1 << v) <= side; v++) {
                         if (1 << v & side) {
-                            vertices.insert(v);
+                            vertices.push_back(v);
                         }
                     }
-                    std::vector<size_t> order;
-                    order.push_back(active_link.first);
-                    order.insert(order.end(), vertices.begin(), vertices.end());
-                    order.push_back(active_link.second);
-                    for (const Edge& edge : edges) {
-                        auto src = source(edge, graph);
-                        auto trg = target(edge, graph);
-                        if (1 << trg & side) { std::swap(src, trg); }
-                        order.push_back(trg);
-                    }
-                    std::sort(&order[1], &order[vertices.size()]);
-                    std::sort(&order[2 + vertices.size()], &order[order.size() - 1]);
+                    std::ranges::sort(vertices);
+                    std::vector<size_t> edges_idx(edges.size());
+                    std::iota(edges_idx.begin(), edges_idx.end(), 0);
                     std::vector<size_t> index(num_vertices(graph));
+                    std::vector<size_t> order;
+                    order.push_back(link.first);
+                    order.insert(order.end(), vertices.begin(), vertices.end());
+                    order.push_back(link.second);
+
                     do {
                         do {
+                            order.resize(vertices.size() + 2);
+                            for (const size_t edge_idx : edges_idx) {
+                                auto src = source(edges[edge_idx], graph);
+                                auto trg = target(edges[edge_idx], graph);
+                                if (1 << trg & side) { std::swap(src, trg); }
+                                order.push_back(trg);
+                            }
                             for (size_t idx = 0; idx < order.size(); ++idx) {
                                 index[order[idx]] = idx;
                             }
+                            bool ok = true;
                             for (auto [ei, ei_end] = boost::edges(part); ei != ei_end; ++ei) {
-                                // TODO : debug
+                                int intersections = 0;
+                                int edge_src = order[boost::source(*ei, graph)];
+                                int edge_trg = order[boost::target(*ei, graph)];
+                                if (edge_src > edge_trg) { std::swap(edge_src, edge_trg); }
+                                for (auto [ci, ci_end] = boost::edges(part); ci != ci_end; ++ci) {
+                                    int other_src = order[boost::source(*ci, graph)];
+                                    int other_trg = order[boost::target(*ci, graph)];
+                                    if (other_src > other_trg) { std::swap(other_src, other_trg); }
+                                    bool src_between = edge_src < other_src && other_src < edge_trg;
+                                    bool trg_between = edge_src < other_trg && other_trg < edge_trg;
+                                    intersections += (src_between && other_trg > edge_trg) ||
+                                        (trg_between && other_src < edge_src);
+                                    if (intersections > crossing_number) {
+                                        ok = false;
+                                        break;
+                                    }
+                                }
+                                if (!ok) { break; }
                             }
-                        } while (std::next_permutation(&order[2 + vertices.size()], &order[order.size() - 1]));
-                    } while (std::next_permutation(&order[1], &order[vertices.size()]));
+                            if (!ok) { continue; }
+                            std::cout << "[(";
+                            for (const size_t edge_idx : edges_idx) {
+                                int intersections = 0;
+                                int edge_src = std::distance(order.begin(), std::ranges::find(order, source(edges[edge_idx], graph)));
+                                int edge_trg = std::distance(order.begin(), std::ranges::find(order, target(edges[edge_idx], graph)));
+                                if (edge_src > edge_trg) { std::swap(edge_src, edge_trg); }
+                                for (auto [ci, ci_end] = boost::edges(part); ci != ci_end; ++ci) {
+                                    int other_src = std::distance(order.begin(), std::ranges::find(order, source(*ci, graph)));
+                                    int other_trg = std::distance(order.begin(), std::ranges::find(order, target(*ci, graph)));
+                                    if (other_src > other_trg) { std::swap(other_src, other_trg); }
+                                    bool src_between = edge_src < other_src && other_src < edge_trg;
+                                    bool trg_between = edge_src < other_trg && other_trg < edge_trg;
+                                    intersections += (src_between && other_trg > edge_trg) ||
+                                        (trg_between && other_src < edge_src);
+                                }
+                                std::cout << boost::source(edges[edge_idx], graph) << boost::target(edges[edge_idx], graph) << " " << intersections << ", ";
+                            }
+                            std::cout << ") ";
+                            for (int kl = 1; kl <= vertices.size(); ++kl) {
+                                std::cout << order[kl];
+                            }
+                            std::cout << "],\t";
+                        } while (std::ranges::next_permutation(edges_idx).found);
+                    } while (std::next_permutation(&order[1], &order[vertices.size() + 1]));
 
-                    std::cout << "]" << std::endl;
+                    std::cout << "}" << std::endl;
                 }
             }
             std::cout << std::endl;
