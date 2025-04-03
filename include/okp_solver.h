@@ -41,8 +41,8 @@ private:
 
     bool is_biconnected() const;
     void insert_triangle_edges(std::vector<size_t>& triangle_vertex_drawing,
-                                           const std::vector<Edge>& ordered_edges,
-                                           size_t part_mask, size_t starting_index);
+                               const std::vector<Edge>& ordered_edges,
+                               size_t part_mask, size_t starting_index);
     bool get_next_permutation(table_entry_t& combined_arrangement);
     std::vector<Edge> get_ordered_edges(const std::vector<Edge>& edges,
                                         const std::vector<std::pair<int, int>>& edge_order);
@@ -52,8 +52,7 @@ private:
                                       const std::vector<Edge>& part_b_edges,
                                       const std::vector<Edge>& piercing_edges,
                                       size_t split_vertex,
-                                      std::vector<size_t>& intersections_count,
-                                      const std::vector<size_t>& triangle_drawing);
+                                      std::vector<size_t>& intersections_count);
     bool check_triangle_consistency(const std::vector<Edge>& edges,
                                     const std::vector<size_t>& triangle_drawing,
                                     std::vector<Edge>& triangle_edges,
@@ -71,6 +70,20 @@ private:
     void print_table();
 
     bool is_same(const Edge& e1, const Edge& e2) const;
+
+    enum group_t {
+        LINK_SRC = 0,
+        PART_A   = 1,
+        SPLIT    = 2,
+        PART_B   = 3,
+        LINK_TRG = 4,
+        PIERCE   = 5,
+        NONE     = 6
+    };
+
+    bool check_triangle_consistency(const std::vector<Edge>& edges,
+                                    const std::vector<std::pair<std::pair<group_t, int>, std::pair<group_t, int>>>& triangle_edges_map,
+                                    group_t common_group, group_t prev_group);
 };
 
 
