@@ -28,7 +28,6 @@ bool okp_solver::solve() {
     }
 
 #ifndef NDEBUG
-    print_true_table();
     print_table();
 #endif
 
@@ -51,31 +50,10 @@ bool okp_solver::solve() {
 }
 
 bool okp_solver::is_biconnected() const {
-    const size_t num_components = boost::biconnected_components(graph, boost::dummy_property_map());
+    const size_t num_components = biconnected_components(graph, boost::dummy_property_map());
     return num_components == 1;
 }
 
-void okp_solver::insert_triangle_edges(std::vector<size_t>& triangle_vertex_drawing,
-                                       const std::vector<Edge>& ordered_edges,
-                                       size_t part_mask, size_t starting_index) {
-    for (const Edge& edge : ordered_edges) {
-        size_t src_index = boost::get(vertex_index_map, boost::source(edge, graph));
-        size_t trg_index = boost::get(vertex_index_map, boost::target(edge, graph));
-        if ((1 << src_index & part_mask) != 0) {
-            triangle_vertex_drawing[src_index] = starting_index++;
-        } else if ((1 << trg_index & part_mask) != 0) {
-            triangle_vertex_drawing[trg_index] = starting_index++;
-        } else {
-            std::cout << "ERROR" << std::endl;
-        }
-    }
-}
-
-bool okp_solver::get_next_permutation(table_entry_t& combined_arrangement) {
-    return std::next_permutation(
-        combined_arrangement.edge_order.begin(),
-        combined_arrangement.edge_order.end());
-}
 
 std::vector<Edge> okp_solver::get_ordered_edges(const std::vector<Edge>& edges,
                                                 const std::vector<std::pair<int, int>>& edge_order) {
@@ -86,35 +64,8 @@ std::vector<Edge> okp_solver::get_ordered_edges(const std::vector<Edge>& edges,
     return result;
 }
 
-bool okp_solver::verify_triangle_drawing(const std::vector<size_t>& triangle_vertex_drawing,
-                                         const std::vector<Edge>& ordered_edges, size_t part_mask) const {
-    size_t before_index = triangle_vertex_drawing.size();
-    size_t after_index = 0;
-    for (const Edge& edge : ordered_edges) {
-        size_t src_index = boost::get(vertex_index_map, boost::source(edge, graph));
-        size_t trg_index = boost::get(vertex_index_map, boost::target(edge, graph));
-        if ((1 << src_index & part_mask) == 0) { std::swap(src_index, trg_index); }
-        size_t triangle_source_idx = triangle_vertex_drawing[src_index];
-        size_t triangle_target_idx = triangle_vertex_drawing[trg_index];
-        if (triangle_source_idx < triangle_target_idx) {
-            if (before_index < triangle_target_idx) {
-                return false;
-            }
-            before_index = triangle_target_idx;
-        } else {
-            if (after_index > triangle_target_idx) {
-                return false;
-            }
-            after_index = triangle_target_idx;
-        }
-    }
-    return true;
-}
-
 bool okp_solver::check_triangle_consistency(const std::vector<Edge>& edges,
-                                            const std::vector<std::pair<
-                                                std::pair<group_t, int>, std::pair<group_t, int>>>&
-                                            triangle_edges_map, group_t common_group, group_t prev_group) {
+                                            group_t common_group, group_t prev_group) {
     std::pair<group_t, size_t> prev_trg{prev_group, 0};
     for (const Edge& edge : edges) {
         const auto& triangle_edge = triangle_edges_map[get(edge_index_map, edge)];
@@ -132,59 +83,40 @@ bool okp_solver::check_triangle_consistency(const std::vector<Edge>& edges,
     return true;
 }
 
+void okp_solver::add_triangle_edges(const std::vector<Edge>& edges,
+                                    Vertex opposite_vertex,
+                                    group_t opposite_group,
+                                    group_t common_group) {
+    for (size_t i = 0; i < edges.size(); ++i) {
+        size_t edge_index = get(edge_index_map, edges[i]);
+        if (source(edges[i], graph) == opposite_vertex ||
+            target(edges[i], graph) == opposite_vertex) {
+            triangle_edges_map[edge_index].second = {opposite_group, 0};
+        }
+        if (triangle_edges_map[edge_index].first.first == NONE) {
+            triangle_edges_map[edge_index].first = {common_group, i};
+            triangle_edges.push_back(edge_index);
+        } else {
+            triangle_edges_map[edge_index].second = {common_group, i};
+        }
+    }
+}
+
 bool okp_solver::count_triangle_intersections(const std::vector<Edge>& part_a_edges,
                                               const std::vector<Edge>& part_b_edges,
                                               const std::vector<Edge>& piercing_edges,
                                               size_t split_vertex,
                                               std::vector<size_t>& intersections_count) {
-    std::vector<std::pair<std::pair<group_t, int>, std::pair<group_t, int>>> triangle_edges_map(
-        num_edges(graph), {{NONE, 0}, {NONE, 0}}
-    );
-    std::vector<size_t> triangle_edges;
+    auto default_entry = std::make_pair(std::make_pair(NONE, 0), std::make_pair(NONE, 0));
+    std::ranges::fill(triangle_edges_map, default_entry);
+    triangle_edges.clear();
 
-    for (size_t i = 0; i < part_a_edges.size(); ++i) {
-        size_t edge_index = get(edge_index_map, part_a_edges[i]);
-        if (source(part_a_edges[i], graph) == active_link.second ||
-            target(part_a_edges[i], graph) == active_link.second) {
-            triangle_edges_map[edge_index].second = {LINK_TRG, 0};
-        }
-        if (triangle_edges_map[edge_index].first.first == NONE) {
-            triangle_edges_map[edge_index].first = {PART_A, i};
-            triangle_edges.push_back(edge_index);
-        } else {
-            triangle_edges_map[edge_index].second = {PART_A, i};
-        }
-    }
-    for (size_t i = 0; i < part_b_edges.size(); ++i) {
-        size_t edge_index = get(edge_index_map, part_b_edges[i]);
-        if (source(part_b_edges[i], graph) == active_link.first ||
-            target(part_b_edges[i], graph) == active_link.first) {
-            triangle_edges_map[edge_index].second = {LINK_SRC, 0};
-        }
-        if (triangle_edges_map[edge_index].first.first == NONE) {
-            triangle_edges_map[edge_index].first = {PART_B, i};
-            triangle_edges.push_back(edge_index);
-        } else {
-            triangle_edges_map[edge_index].second = {PART_B, i};
-        }
-    }
-    for (size_t i = 0; i < piercing_edges.size(); ++i) {
-        size_t edge_index = get(edge_index_map, piercing_edges[i]);
-        if (source(piercing_edges[i], graph) == split_vertex ||
-            target(piercing_edges[i], graph) == split_vertex) {
-            triangle_edges_map[edge_index].second = {SPLIT, 0};
-        }
-        if (triangle_edges_map[edge_index].first.first == NONE) {
-            triangle_edges_map[edge_index].first = {PIERCE, i};
-            triangle_edges.push_back(edge_index);
-        } else {
-            triangle_edges_map[edge_index].second = {PIERCE, i};
-        }
-    }
+    add_triangle_edges(part_a_edges, active_link.second, LINK_TRG, PART_A);
+    add_triangle_edges(part_b_edges, active_link.first, LINK_SRC, PART_B);
+    add_triangle_edges(piercing_edges, split_vertex, SPLIT, PIERCE);
 
-
-    if (!check_triangle_consistency(part_a_edges, triangle_edges_map, PART_A, LINK_SRC)) return false;
-    if (!check_triangle_consistency(part_b_edges, triangle_edges_map, PART_B, SPLIT)) return false;
+    if (!check_triangle_consistency(part_a_edges, PART_A, LINK_SRC)) return false;
+    if (!check_triangle_consistency(part_b_edges, PART_B, SPLIT)) return false;
 
     auto [link, ok] = boost::edge(active_link.first, active_link.second, graph);
     if (ok) {
@@ -231,13 +163,9 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
                 !dp_table[vw_link.first][vw_link.second].contains(part_b)) {
                 continue;
             }
-            auto vw_index = dp_table_initialisation[vw_link.first][vw_link.second][part_b_size];
-            auto b_pair = std::ranges::find_if(vw_index,
-                                               [part_b](const std::pair<size_t, std::vector<Edge>>& pair) {
-                                                   return pair.first == part_b;
-                                               });
-            if (b_pair == vw_index.end()) { continue; }
-            auto part_b_edges = b_pair->second;
+            const auto& vw_index = dp_table_initialisation[vw_link.first][vw_link.second][part_b_size];
+            if (!vw_index.contains(part_b)) { continue; }
+            const auto& part_b_edges = vw_index.at(part_b);
 
             for (auto part_a_arrangement : dp_table[uw_link.first][uw_link.second][part_a]) {
                 if (split_vertex < active_link.first) {
@@ -261,9 +189,9 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
                     do {
                         std::vector<Edge> piercing_edges_order = get_ordered_edges(
                             piercing_edges, combined_arrangement.edge_order);
-                        std::vector<size_t> edges_intersection_count(num_edges(graph), 0);
+                        std::ranges::fill(edges_intersection_count, 0);
                         for (size_t i = 0; i < part_a_edges_order.size(); i++) {
-                            size_t edge_index = boost::get(edge_index_map, part_a_edges_order[i]);
+                            size_t edge_index = get(edge_index_map, part_a_edges_order[i]);
                             edges_intersection_count[edge_index] += part_a_arrangement.edge_order[i].second;
                         }
                         for (size_t i = 0; i < part_b_edges_order.size(); i++) {
@@ -332,7 +260,7 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
 #endif
                         dp_table[active_link.first][active_link.second][right_side].push_back(combined_arrangement);
                         std::ranges::reverse(combined_arrangement.edge_order);
-                    } while (get_next_permutation(combined_arrangement));
+                    } while (std::ranges::next_permutation(combined_arrangement.edge_order).found);
                 }
             }
         }
@@ -413,14 +341,15 @@ void okp_solver::select_edges(filtered_graph_t::edge_iterator start, filtered_gr
 }
 
 void okp_solver::fill_right_sides() {
-    std::vector<size_t> component_map(boost::num_vertices(graph));
-    size_t num_components = boost::connected_components(filtered_graph,
-                                                        boost::make_iterator_property_map(
-                                                            component_map.begin(), vertex_index_map));
+    std::vector<size_t> component_map(num_vertices(graph));
+    size_t num_components = connected_components(
+        filtered_graph,
+        make_iterator_property_map(component_map.begin(), vertex_index_map)
+    );
     Graph component_graph(num_components);
     for (Edge e : filtered_edges) {
-        size_t source_index = boost::get(vertex_index_map, boost::source(e, graph));
-        size_t target_index = boost::get(vertex_index_map, boost::target(e, graph));
+        size_t source_index = get(vertex_index_map, source(e, graph));
+        size_t target_index = get(vertex_index_map, target(e, graph));
         if (component_map[source_index] == component_map[target_index]) {
             return;
         }
@@ -428,17 +357,18 @@ void okp_solver::fill_right_sides() {
     }
     std::vector<size_t> cluster_map(num_components);
     std::vector<boost::default_color_type> component_colors(num_components);
-    auto component_index_map = boost::get(boost::vertex_index, component_graph);
-    size_t num_clusters = boost::connected_components(component_graph,
-                                                      boost::make_iterator_property_map(
-                                                          cluster_map.begin(), component_index_map));
-    if (!boost::is_bipartite(component_graph, component_index_map,
-                             boost::make_iterator_property_map(component_colors.begin(), component_index_map))) {
+    auto component_index_map = get(boost::vertex_index, component_graph);
+    size_t num_clusters = connected_components(
+        component_graph,
+        make_iterator_property_map(cluster_map.begin(), component_index_map)
+    );
+    if (!is_bipartite(component_graph, component_index_map,
+                      make_iterator_property_map(component_colors.begin(), component_index_map))) {
         return;
     }
     std::vector<std::pair<std::pair<size_t, int>, std::pair<size_t, int>>> sides(num_clusters);
-    for (auto [vi, vi_end] = boost::vertices(filtered_graph); vi != vi_end; ++vi) {
-        size_t v_index = boost::get(vertex_index_map, *vi);
+    for (auto [vi, vi_end] = vertices(filtered_graph); vi != vi_end; ++vi) {
+        size_t v_index = get(vertex_index_map, *vi);
         size_t component_index = component_map[v_index];
         size_t cluster_index = cluster_map[component_index];
         boost::default_color_type component_color = component_colors[component_index];
@@ -459,7 +389,7 @@ void okp_solver::populate_right_sides(
     std::vector<std::pair<std::pair<size_t, int>, std::pair<size_t, int>>>::iterator end,
     size_t cur_side, int count) {
     if (start == end) {
-        dp_table_initialisation[active_link.first][active_link.second][count].emplace_back(cur_side, filtered_edges);
+        dp_table_initialisation[active_link.first][active_link.second][count][cur_side] = filtered_edges;
         return;
     }
     auto [r, l] = *start;
@@ -469,26 +399,6 @@ void okp_solver::populate_right_sides(
 }
 
 void okp_solver::print_table() {
-    // for (int i = 0; i < dp_table_initialisation.size(); ++i) {
-    //     for (int j = 0; j < dp_table_initialisation[i].size(); ++j) {
-    //         std::cout << "Active link: " << i << "-" << j << std::endl;
-    //         for (int k = 0; k < dp_table_initialisation[i][j].size(); ++k) {
-    //             std::vector entries(
-    //                 dp_table_initialisation[i][j][k].begin(), dp_table_initialisation[i][j][k].end());
-    //             std::ranges::sort(entries);
-    //             for (auto [side, edges] : entries) {
-    //                 std::cout << std::bitset<10>(side) << ": [";
-    //                 for (auto edge : edges) {
-    //                     std::cout << edge << ", ";
-    //                 }
-    //                 std::cout << "]" << std::endl;
-    //             }
-    //         }
-    //         std::cout << std::endl;
-    //     }
-    // }
-
-
     for (int i = 0; i < dp_table.size(); ++i) {
         for (int j = 0; j < dp_table[i].size(); ++j) {
             std::cout << "Active link: " << i << "-" << j << std::endl;
@@ -522,131 +432,4 @@ void okp_solver::print_table() {
             std::cout << std::endl;
         }
     }
-}
-
-void okp_solver::print_true_table() {
-    std::vector<size_t> vertices;
-    std::pair<size_t, size_t> link;
-    filtered_graph_t part(graph,
-                          [this, &vertices, &link](const Edge& edge) {
-                              size_t src = source(edge, graph);
-                              size_t trg = target(edge, graph);
-                              if (src > trg) { std::swap(src, trg); }
-                              bool has_src = std::ranges::find(vertices, src) != vertices.end();
-                              bool has_trg = std::ranges::find(vertices, trg) != vertices.end();
-                              return has_src || has_trg ||
-                                     (src == link.first && trg == link.second);
-                          },
-                          [](const Vertex&) { return true; });
-
-    for (int i = 0; i < dp_table_initialisation.size(); ++i) {
-        link.first = i;
-        for (int j = i + 1; j < dp_table_initialisation[i].size(); ++j) {
-            link.second = j;
-            std::cout << "Active link: " << i << "-" << j << std::endl;
-            for (int k = 0; k < dp_table_initialisation[i][j].size(); ++k) {
-                std::vector entries(
-                    dp_table_initialisation[i][j][k].begin(), dp_table_initialisation[i][j][k].end());
-                std::ranges::sort(entries);
-                for (auto [side, edges] : entries) {
-                    std::cout << std::bitset<10>(side) << ": {";
-                    vertices.clear();
-                    for (int v = 0; (1 << v) <= side; v++) {
-                        if (1 << v & side) {
-                            vertices.push_back(v);
-                        }
-                    }
-                    std::ranges::sort(vertices);
-                    std::vector<size_t> edges_idx(edges.size());
-                    std::iota(edges_idx.begin(), edges_idx.end(), 0);
-                    std::vector<size_t> index(num_vertices(graph));
-                    std::vector<size_t> order;
-                    order.push_back(link.first);
-                    order.insert(order.end(), vertices.begin(), vertices.end());
-                    order.push_back(link.second);
-
-                    do {
-                        do {
-                            order.resize(vertices.size() + 2);
-                            for (const size_t edge_idx : edges_idx) {
-                                auto src = source(edges[edge_idx], graph);
-                                auto trg = target(edges[edge_idx], graph);
-                                if (1 << trg & side) { std::swap(src, trg); }
-                                order.push_back(trg);
-                            }
-                            for (size_t idx = 0; idx < order.size(); ++idx) {
-                                index[order[idx]] = idx;
-                            }
-                            bool ok = true;
-                            for (auto [ei, ei_end] = boost::edges(part); ei != ei_end; ++ei) {
-                                int intersections = 0;
-                                int edge_src = std::distance(order.begin(),
-                                                             std::ranges::find(order, source(*ei, graph)));
-                                int edge_trg = std::distance(order.begin(),
-                                                             std::ranges::find(order, target(*ei, graph)));
-                                if (edge_src > edge_trg) { std::swap(edge_src, edge_trg); }
-                                for (auto [ci, ci_end] = boost::edges(part); ci != ci_end; ++ci) {
-                                    int other_src = std::distance(order.begin(),
-                                                                  std::ranges::find(order, source(*ci, graph)));
-                                    int other_trg = std::distance(order.begin(),
-                                                                  std::ranges::find(order, target(*ci, graph)));
-                                    if (other_src > other_trg) { std::swap(other_src, other_trg); }
-                                    bool src_between = edge_src < other_src && other_src < edge_trg;
-                                    bool trg_between = edge_src < other_trg && other_trg < edge_trg;
-                                    intersections += (src_between && other_trg > edge_trg) ||
-                                        (trg_between && other_src < edge_src);
-                                    if (intersections > crossing_number) {
-                                        ok = false;
-                                        break;
-                                    }
-                                }
-                                if (!ok) { break; }
-                            }
-                            if (!ok) { continue; }
-                            std::cout << "[(";
-                            for (const size_t edge_idx : edges_idx) {
-                                int intersections = 0;
-                                int edge_src = std::distance(order.begin(),
-                                                             std::ranges::find(order, source(edges[edge_idx], graph)));
-                                int edge_trg = std::distance(order.begin(),
-                                                             std::ranges::find(order, target(edges[edge_idx], graph)));
-                                if (edge_src > edge_trg) { std::swap(edge_src, edge_trg); }
-                                for (auto [ci, ci_end] = boost::edges(part); ci != ci_end; ++ci) {
-                                    int other_src = std::distance(order.begin(),
-                                                                  std::ranges::find(order, source(*ci, graph)));
-                                    int other_trg = std::distance(order.begin(),
-                                                                  std::ranges::find(order, target(*ci, graph)));
-                                    if (other_src > other_trg) { std::swap(other_src, other_trg); }
-                                    bool src_between = edge_src < other_src && other_src < edge_trg;
-                                    bool trg_between = edge_src < other_trg && other_trg < edge_trg;
-                                    intersections += (src_between && other_trg > edge_trg) ||
-                                        (trg_between && other_src < edge_src);
-                                }
-                                std::cout << boost::source(edges[edge_idx], graph) << boost::target(
-                                    edges[edge_idx], graph) << " " << intersections << ",";
-                            }
-                            std::cout << ") ";
-                            for (int kl = 1; kl <= vertices.size(); ++kl) {
-                                std::cout << order[kl];
-                            }
-                            std::cout << "],";
-                        } while (std::ranges::next_permutation(edges_idx).found);
-                    } while (std::next_permutation(&order[1], &order[vertices.size() + 1]));
-
-                    std::cout << "}" << std::endl;
-                }
-            }
-            std::cout << std::endl;
-        }
-    }
-}
-
-bool okp_solver::is_same(const Edge& e1, const Edge& e2) const {
-    size_t src1_index = boost::get(vertex_index_map, boost::source(e1, graph));
-    size_t trg1_index = boost::get(vertex_index_map, boost::target(e1, graph));
-    size_t src2_index = boost::get(vertex_index_map, boost::source(e2, graph));
-    size_t trg2_index = boost::get(vertex_index_map, boost::target(e2, graph));
-    if (src1_index > trg1_index) { std::swap(src1_index, trg1_index); }
-    if (src2_index > trg2_index) { std::swap(src2_index, trg2_index); }
-    return src1_index == trg1_index && src2_index == trg2_index;
 }
