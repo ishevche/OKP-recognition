@@ -35,6 +35,9 @@ public:
         std::vector<Vertex> vertex_order;
     };
 
+    size_t hits;
+    size_t misses;
+
 private:
     enum group_t {
         LINK_SRC = 0,
@@ -46,7 +49,7 @@ private:
         NONE     = 6
     };
 
-    std::vector<std::vector<std::unordered_map<size_t, std::vector<table_entry_t>>>> dp_table;
+    std::vector<std::vector<std::unordered_map<size_t, std::unordered_map<std::string, table_entry_t>>>> dp_table;
     std::vector<std::vector<std::vector<std::unordered_map<size_t, std::vector<Edge>>>>> dp_table_initialisation;
     typedef boost::filtered_graph<Graph, boost::function<bool(Edge)>, boost::function<bool(Vertex)>> filtered_graph_t;
     filtered_graph_t filtered_graph;
@@ -55,15 +58,19 @@ private:
     std::vector<size_t> triangle_edges;
     std::vector<std::pair<std::pair<group_t, int>, std::pair<group_t, int>>> triangle_edges_map;
     std::vector<size_t> edges_intersection_count;
+    std::vector<Edge> part_a_edges_order;
+    std::vector<Edge> part_b_edges_order;
+    std::vector<Edge> piercing_edges_order;
+    table_entry_t combined_arrangement;
 
     bool is_biconnected() const;
-    std::vector<Edge> get_ordered_edges(const std::vector<Edge>& edges,
-                                        const std::vector<std::pair<int, int>>& edge_order);
-    bool count_triangle_intersections(const std::vector<Edge>& part_a_edges,
-                                      const std::vector<Edge>& part_b_edges,
-                                      const std::vector<Edge>& piercing_edges,
-                                      size_t split_vertex,
-                                      std::vector<size_t>& intersections_count);
+    void fill_edge_order(std::vector<Edge>& order_vector,
+                         const std::vector<Edge>& edges,
+                         const std::vector<std::pair<int, int>>& edge_order);
+    bool count_triangle_intersections(const std::ranges::range auto& part_a_edges,
+                                      const std::ranges::range auto& part_b_edges,
+                                      const std::ranges::range auto& piercing_edges,
+                                      size_t split_vertex);
     void process_split(size_t right_side, int right_size, const std::vector<Edge>& piercing_edges, size_t split_vertex);
     bool is_drawable();
     void add_table_entries(size_t k);
@@ -74,9 +81,9 @@ private:
                               size_t cur_side, int count);
     void fill_right_sides();
     void print_table();
-    bool check_triangle_consistency(const std::vector<Edge>& edges,
+    bool check_triangle_consistency(const std::ranges::range auto& edges,
                                     group_t common_group, group_t prev_group);
-    void add_triangle_edges(const std::vector<Edge>& edges,
+    void add_triangle_edges(const std::ranges::range auto& edges,
                             Vertex opposite_vertex,
                             group_t opposite_group,
                             group_t common_group);

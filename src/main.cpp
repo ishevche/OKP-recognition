@@ -50,6 +50,8 @@ int main(int ac, char** av) {
         }
 
         okp_solver solver(graph, 0);
+        solver.hits = 0;
+        solver.misses = 0;
         auto start = get_current_time_fenced();
         solver.solve();
         auto end = get_current_time_fenced();
@@ -57,6 +59,7 @@ int main(int ac, char** av) {
         std::string name = graph_to_g6(graph);
         std::cout << name << "\nOKP: ";
         std::cout << solver.crossing_number << " " << to_ns(end - start) << std::endl;
+        std::cout << "H/M: " << solver.hits << "/" << solver.misses << std::endl;
 
         save_dot("data/out/" + name + ".dot", graph, solver.vertex_order, solver.crossing_number, graph_props);
     }
