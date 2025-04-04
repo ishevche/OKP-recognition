@@ -227,11 +227,9 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
                                 );
                             }
                         }
-
                         if (!ok) { continue; }
 
                         std::string key = "";
-
                         for (size_t i = 0; i < piercing_edges_order.size(); i++) {
                             size_t edge_index = boost::get(edge_index_map, piercing_edges_order[i]);
                             combined_arrangement.edge_order[i].second = edges_intersection_count[edge_index];
@@ -250,7 +248,7 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
                                                                      part_a_arrangement.vertex_order.begin(),
                                                                      part_a_arrangement.vertex_order.end());
                         }
-                        combined_arrangement.vertex_order.push_back(split_vertex); // TODO: fix, it is index, not vertex
+                        combined_arrangement.vertex_order.push_back(split_vertex);
                         if (split_vertex > active_link.second) {
                             combined_arrangement.vertex_order.insert(combined_arrangement.vertex_order.end(),
                                                                      part_b_arrangement.vertex_order.rbegin(),
@@ -260,56 +258,15 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
                                                                      part_b_arrangement.vertex_order.begin(),
                                                                      part_b_arrangement.vertex_order.end());
                         }
-#ifndef NDEBUG
-                        if (active_link.first == 0 && active_link.second == 1 &&
-                            combined_arrangement.vertex_order.size() == 5 &&
-                            combined_arrangement.vertex_order[0] == 2 &&
-                            combined_arrangement.vertex_order[1] == 3 &&
-                            combined_arrangement.vertex_order[2] == 5 &&
-                            combined_arrangement.vertex_order[3] == 4 &&
-                            combined_arrangement.vertex_order[4] == 6) {
-                            std::cout << "Active link:" << active_link.first << "-" << active_link.second << "\n";
-                            std::cout << std::bitset<10>(right_side) << ": [(";
-                            for (auto [edge_id, cross] : combined_arrangement.edge_order) {
-                                std::cout << std::to_string(piercing_edges[edge_id].m_source) + std::to_string(
-                                    piercing_edges[edge_id].m_target) + " " + std::to_string(cross) << ",";
-                            }
-                            std::cout << "), ";
-                            for (auto v : combined_arrangement.vertex_order) {
-                                std::cout << v;
-                            }
-                            std::cout << "]\nCombined from: " << active_link.first << "-" << split_vertex
-                                << "-" << active_link.second << "\n";
-                            std::cout << std::bitset<10>(part_a) << ": ";
-                            std::cout << "[(";
-                            for (auto [edge_id, cross] : part_a_arrangement.edge_order) {
-                                std::cout << std::to_string(part_a_edges[edge_id].m_source) + std::to_string(
-                                    part_a_edges[edge_id].m_target) + " " + std::to_string(cross) << ",";
-                            }
-                            std::cout << "), ";
-                            for (auto v : part_a_arrangement.vertex_order) {
-                                std::cout << v;
-                            }
-                            std::cout << "]\n";
-                            std::cout << std::bitset<10>(part_b) << ": ";
-                            std::cout << "[(";
-                            for (auto [edge_id, cross] : part_b_arrangement.edge_order) {
-                                std::cout << std::to_string(part_b_edges[edge_id].m_source) + std::to_string(
-                                    part_b_edges[edge_id].m_target) + " " + std::to_string(cross) << ",";
-                            }
-                            std::cout << "), ";
-                            for (auto v : part_b_arrangement.vertex_order) {
-                                std::cout << v;
-                            }
-                            std::cout << "]\n";
-                        }
-#endif
+
                         auto& cell = dp_table[active_link.first][active_link.second][right_side];
-                        if (cell.contains(key)) {
-                            hits ++;
-                        } else {
-                            misses ++;
+                        if (!cell.contains(key)) {
                             cell[key] = combined_arrangement;
+#ifndef NDEBUG
+                            misses ++;
+                        } else {
+                            hits ++;
+#endif
                         }
                     } while (std::ranges::next_permutation(combined_arrangement.edge_order).found);
                 }

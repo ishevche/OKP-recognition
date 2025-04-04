@@ -35,8 +35,10 @@ public:
         std::vector<Vertex> vertex_order;
     };
 
-    size_t hits;
-    size_t misses;
+#ifndef NDEBUG
+    size_t hits(0);
+    size_t misses(0);
+#endif
 
 private:
     enum group_t {
