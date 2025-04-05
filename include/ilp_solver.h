@@ -20,9 +20,9 @@ public:
               edge_index_map(boost::get(boost::edge_index, graph)) {
         if (!gurobi_env) {
             gurobi_env = std::make_unique<GRBEnv>(true);
-            (*gurobi_env).set("LogFile", "test.log");
-            (*gurobi_env).set("OutputFlag", "0");
-            (*gurobi_env).start();
+            gurobi_env->set(GRB_IntParam_OutputFlag, 0);
+            gurobi_env->set(GRB_IntParam_Threads, 1);
+            gurobi_env->start();
         }
     }
 
