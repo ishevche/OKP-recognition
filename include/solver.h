@@ -2,20 +2,22 @@
 #define OKP_RECOGNITION_SOLVER_H
 
 #include <vector>
-#include <functional>
 #include "graph.h"
 
 class solver {
 public:
-    explicit solver(const Graph &graph, size_t crossing_number = 0)
-            : graph(graph), crossing_number(crossing_number) {}
+    explicit solver(const Graph& graph, size_t crossing_number = 0)
+        : crossing_number(crossing_number), graph(graph) {}
 
     virtual bool solve() = 0;
 
+    virtual ~solver() = default;
+
     std::vector<Vertex> vertex_order;
     size_t crossing_number;
+
 protected:
-    const Graph &graph;
+    const Graph& graph;
 };
 
 #endif //OKP_RECOGNITION_SOLVER_H

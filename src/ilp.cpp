@@ -6,7 +6,7 @@
 
 bool ilp_solver::solve() {
     vertex_order.clear();
-    vertex_order.insert(vertex_order.end(), boost::vertices(graph).first, boost::vertices(graph).second);
+    vertex_order.insert(vertex_order.end(), vertices(graph).first, vertices(graph).second);
     if (vertex_order.size() <= 3) {
         crossing_number = 0;
         return true;
@@ -14,7 +14,7 @@ bool ilp_solver::solve() {
 
     GRBModel model = GRBModel(*gurobi_env);
 
-    unsigned long num_vertices = boost::num_vertices(graph);
+    size_t num_vertices = boost::num_vertices(graph);
     // Order variables initialization
     order_variables = std::vector<std::vector<GRBLinExpr>>(num_vertices);
     for (int i = 0; i < num_vertices; ++i) {
@@ -22,13 +22,12 @@ bool ilp_solver::solve() {
     }
     for (int i = 0; i < num_vertices; ++i) {
         for (int j = 0; j < num_vertices; ++j) {
-            if (i == j) {
-                continue;
-            } else if (order_variables[j][i].size() == 0) {
+            if (i == j) { continue; }
+            if (order_variables[j][i].size() == 0) {
                 order_variables[i][j] = model.addVar(
-                        0, 1, 0, GRB_BINARY,
-                        "is_" + std::to_string(i) +
-                        "_before_" + std::to_string(j)
+                    0, 1, 0, GRB_BINARY,
+                    "is_" + std::to_string(i) +
+                    "_before_" + std::to_string(j)
                 );
             } else {
                 order_variables[i][j] = 1 - order_variables[j][i];
@@ -41,9 +40,9 @@ bool ilp_solver::solve() {
         for (int middle = 0; middle < num_vertices; ++middle) {
             for (int end = 0; end < num_vertices; ++end) {
                 model.addConstr(
-                        order_variables[start][end] >=
-                        order_variables[start][middle] +
-                        order_variables[middle][end] - 1
+                    order_variables[start][end] >=
+                    order_variables[start][middle] +
+                    order_variables[middle][end] - 1
                 );
             }
         }
@@ -54,20 +53,20 @@ bool ilp_solver::solve() {
     std::vector<GRBLinExpr> edge_crossing_numbers(num_edges);
 
     // Edge crossings variables definition
-    for (Edge edge1: boost::make_iterator_range(boost::edges(graph))) {
-        size_t u = boost::get(vertex_index_map, boost::source(edge1, graph));
-        size_t v = boost::get(vertex_index_map, boost::target(edge1, graph));
-        for (Edge edge2: boost::make_iterator_range(boost::edges(graph))) {
-            if (boost::get(edge_index_map, edge1) >= boost::get(edge_index_map, edge2)) {
+    for (Edge edge1 : make_iterator_range(edges(graph))) {
+        size_t u = get(vertex_index_map, source(edge1, graph));
+        size_t v = get(vertex_index_map, target(edge1, graph));
+        for (Edge edge2 : make_iterator_range(edges(graph))) {
+            if (get(edge_index_map, edge1) >= get(edge_index_map, edge2)) {
                 continue;
             }
-            size_t s = boost::get(vertex_index_map, boost::source(edge2, graph));
-            size_t t = boost::get(vertex_index_map, boost::target(edge2, graph));
+            size_t s = get(vertex_index_map, source(edge2, graph));
+            size_t t = get(vertex_index_map, target(edge2, graph));
 
             GRBVar do_cross = model.addVar(0, 1, 0, GRB_BINARY, "");
 
-            edge_crossing_numbers[boost::get(edge_index_map, edge1)] += do_cross;
-            edge_crossing_numbers[boost::get(edge_index_map, edge2)] += do_cross;
+            edge_crossing_numbers[get(edge_index_map, edge1)] += do_cross;
+            edge_crossing_numbers[get(edge_index_map, edge2)] += do_cross;
 
             {
                 model.addConstr(do_cross >= order_variables[u][s] + order_variables[s][v] + order_variables[v][t] - 2);
@@ -81,32 +80,29 @@ bool ilp_solver::solve() {
             }
         }
         model.addConstr(crossing_upper_bound >=
-                        edge_crossing_numbers[boost::get(edge_index_map, edge1)]);
+                        edge_crossing_numbers[get(edge_index_map, edge1)]);
     }
 
 #ifndef ILP_CROSSING_SUM_OPTIMIZATION
     model.setObjective(crossing_upper_bound, GRB_MINIMIZE);
 #else
     GRBLinExpr crossing_sum = 0;
-    for (const GRBLinExpr &edge_sum: edge_crossing_numbers) {
+    for (const GRBLinExpr& edge_sum : edge_crossing_numbers) {
         crossing_sum += edge_sum;
     }
     size_t factor = num_edges * num_edges;
-    model.setObjective(crossing_upper_bound + crossing_sum / factor, GRB_MINIMIZE);
+    model.setObjective(crossing_upper_bound + crossing_sum / static_cast<double>(factor), GRB_MINIMIZE);
 #endif
 
     model.optimize();
 
-    std::sort(vertex_order.begin(), vertex_order.end(),
-              [this](Vertex u, Vertex v) {
-                  size_t u_index = boost::get(vertex_index_map, u);
-                  size_t v_index = boost::get(vertex_index_map, v);
-                  return order_variables[u_index][v_index].getValue();
-              });
+    std::ranges::sort(vertex_order,
+                      [this](Vertex u, Vertex v) {
+                          size_t u_index = get(vertex_index_map, u);
+                          size_t v_index = get(vertex_index_map, v);
+                          return order_variables[u_index][v_index].getValue();
+                      });
 
-    crossing_number = crossing_upper_bound.getValue();
+    crossing_number = static_cast<size_t>(crossing_upper_bound.getValue());
     return true;
 }
-
-
-

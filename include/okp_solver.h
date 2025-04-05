@@ -16,8 +16,8 @@ public:
         : solver(graph, crossing_number),
           vertex_index_map(get(boost::vertex_index, graph)),
           edge_index_map(get(boost::edge_index, graph)),
-          filtered_graph(graph, [&](Edge v) {
-                             return std::find(filtered_edges.begin(), filtered_edges.end(), v) == filtered_edges.end();
+          filtered_graph(graph, [&](const Edge& v) {
+                             return std::ranges::find(filtered_edges, v) == filtered_edges.end();
                          }, [&](Vertex v) {
                              return active_link.first != get(vertex_index_map, v)
                                     && active_link.second != get(vertex_index_map, v);
@@ -66,9 +66,9 @@ private:
     table_entry_t combined_arrangement;
 
     bool is_biconnected() const;
-    void fill_edge_order(std::vector<Edge>& order_vector,
-                         const std::vector<Edge>& edges,
-                         const std::vector<std::pair<int, int>>& edge_order);
+    void static fill_edge_order(std::vector<Edge>& order_vector,
+                                const std::vector<Edge>& edges,
+                                const std::vector<std::pair<int, int>>& edge_order);
     bool count_triangle_intersections(const std::ranges::range auto& part_a_edges,
                                       const std::ranges::range auto& part_b_edges,
                                       const std::ranges::range auto& piercing_edges,
@@ -77,7 +77,7 @@ private:
     bool is_drawable();
     void add_table_entries(size_t k);
     void initialise_table();
-    void select_edges(filtered_graph_t::edge_iterator start, filtered_graph_t::edge_iterator end, size_t k);
+    void select_edges(filtered_graph_t::edge_iterator start, const filtered_graph_t::edge_iterator& end, size_t k);
     void populate_right_sides(std::vector<std::pair<std::pair<size_t, int>, std::pair<size_t, int>>>::iterator start,
                               std::vector<std::pair<std::pair<size_t, int>, std::pair<size_t, int>>>::iterator end,
                               size_t cur_side, int count);

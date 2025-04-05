@@ -11,8 +11,8 @@ inline std::chrono::high_resolution_clock::time_point get_current_time_fenced() 
     return res_time;
 }
 
-template<class D>
-inline size_t to_ns(const D &d) {
+template <class D>
+size_t to_ns(const D& d) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(d).count();
 }
 

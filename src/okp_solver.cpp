@@ -1,7 +1,6 @@
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/biconnected_components.hpp>
 #include <boost/graph/bipartite.hpp>
-#include <boost/algorithm/string/join.hpp>
 #include "okp_solver.h"
 
 #include <numeric>
@@ -12,7 +11,7 @@ bool okp_solver::solve() {
         std::cout << "WARNING: The input graph is not biconnected. Use bicomponent_solver<okp_solver>" << std::endl;
     }
     vertex_order.clear();
-    vertex_order.insert(vertex_order.end(), boost::vertices(graph).first, boost::vertices(graph).second);
+    vertex_order.insert(vertex_order.end(), vertices(graph).first, vertices(graph).second);
     if (vertex_order.size() <= 3) {
         return true;
     }
@@ -116,7 +115,7 @@ bool okp_solver::count_triangle_intersections(const std::ranges::range auto& par
     if (!check_triangle_consistency(part_a_edges, PART_A, LINK_SRC)) return false;
     if (!check_triangle_consistency(part_b_edges, PART_B, SPLIT)) return false;
 
-    auto [link, ok] = boost::edge(active_link.first, active_link.second, graph);
+    auto [link, ok] = edge(active_link.first, active_link.second, graph);
     if (ok) {
         size_t link_index = get(edge_index_map, link);
         triangle_edges.push_back(link_index);
@@ -167,9 +166,11 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
             if (!vw_index.contains(part_b)) { continue; }
             const auto& part_b_edges = vw_index.at(part_b);
 
-            for (const auto& part_a_arrangement : dp_table[uw_link.first][uw_link.second][part_a] | std::views::values) {
+            for (const auto& part_a_arrangement :
+                 dp_table[uw_link.first][uw_link.second][part_a] | std::views::values) {
                 fill_edge_order(part_a_edges_order, part_a_edges, part_a_arrangement.edge_order);
-                for (const auto& part_b_arrangement : dp_table[vw_link.first][vw_link.second][part_b] | std::views::values) {
+                for (const auto& part_b_arrangement :
+                     dp_table[vw_link.first][vw_link.second][part_b] | std::views::values) {
                     fill_edge_order(part_b_edges_order, part_b_edges, part_b_arrangement.edge_order);
                     combined_arrangement.edge_order.resize(piercing_edges.size());
                     for (size_t i = 0; i < piercing_edges.size(); i++) {
@@ -185,7 +186,7 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
                             edges_intersection_count[edge_index] += part_a_arrangement.edge_order[i].second;
                         }
                         for (size_t i = 0; i < part_b_edges_order.size(); i++) {
-                            size_t edge_index = boost::get(edge_index_map, part_b_edges_order[i]);
+                            size_t edge_index = get(edge_index_map, part_b_edges_order[i]);
                             edges_intersection_count[edge_index] += part_b_arrangement.edge_order[i].second;
                             if (edges_intersection_count[edge_index] > crossing_number) {
                                 ok = false;
@@ -231,7 +232,7 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
 
                         std::string key = "";
                         for (size_t i = 0; i < piercing_edges_order.size(); i++) {
-                            size_t edge_index = boost::get(edge_index_map, piercing_edges_order[i]);
+                            size_t edge_index = get(edge_index_map, piercing_edges_order[i]);
                             combined_arrangement.edge_order[i].second = edges_intersection_count[edge_index];
                             key += combined_arrangement.edge_order[i].first;
                             key += "_";
@@ -285,7 +286,6 @@ bool okp_solver::is_drawable() {
             dp_table[i][j][0][""] = {};
         }
     }
-    bool ok = false;
 
     for (int right_size = 1; right_size <= num_vertices - 2; ++right_size) {
         for (size_t v_index = 0; v_index < num_vertices; ++v_index) {
@@ -306,7 +306,7 @@ bool okp_solver::is_drawable() {
             active_link.first = -1;
         }
     }
-    return ok;
+    return false;
 }
 
 void okp_solver::add_table_entries(size_t k) {
@@ -315,7 +315,7 @@ void okp_solver::add_table_entries(size_t k) {
         active_link.first = v_index;
         for (size_t u_index = v_index + 1; u_index < num_vertices; ++u_index) {
             active_link.second = u_index;
-            select_edges(boost::edges(filtered_graph).first, boost::edges(filtered_graph).second, k);
+            select_edges(edges(filtered_graph).first, edges(filtered_graph).second, k);
             active_link.second = -1;
         }
         active_link.first = -1;
@@ -336,7 +336,8 @@ void okp_solver::initialise_table() {
     for (int k = 0; k <= crossing_number; add_table_entries(k++)) {}
 }
 
-void okp_solver::select_edges(filtered_graph_t::edge_iterator start, filtered_graph_t::edge_iterator end, size_t k) {
+void okp_solver::select_edges(filtered_graph_t::edge_iterator start, const filtered_graph_t::edge_iterator& end,
+                              size_t k) {
     if (k == 0) {
         fill_right_sides();
         return;
@@ -361,7 +362,7 @@ void okp_solver::fill_right_sides() {
         if (component_map[source_index] == component_map[target_index]) {
             return;
         }
-        boost::add_edge(component_map[source_index], component_map[target_index], component_graph);
+        add_edge(component_map[source_index], component_map[target_index], component_graph);
     }
     std::vector<size_t> cluster_map(num_components);
     std::vector<boost::default_color_type> component_colors(num_components);

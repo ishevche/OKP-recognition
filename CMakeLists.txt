@@ -12,7 +12,7 @@ add_executable(okp-recognition
         src/graphIO.cpp
         src/ilp.cpp
         src/sat.cpp
-        src/bicomponents.cpp
+        src/bctree.cpp
         src/argument_parser.cpp
         src/okp_solver.cpp
 )

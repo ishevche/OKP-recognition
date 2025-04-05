@@ -18,8 +18,6 @@ struct bctree_vertex_t {
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, bctree_vertex_t> bctree_t;
 typedef bctree_t::vertex_descriptor bctree_vertex;
 
-
-
-bctree_t decompose(const Graph &graph);
+bctree_t decompose(const Graph& graph);
 
 #endif //OKP_RECOGNITION_PREPROCESS_H
