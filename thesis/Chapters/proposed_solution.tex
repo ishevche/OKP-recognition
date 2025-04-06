@@ -20,7 +20,8 @@ Given the arrangement of the vertices, we can definitively identify whether two 
 Indeed, consider two edges, $uv$ and $st$.
 Without loss of generality, we can assume that $u$ is located before $v$ in the arrangement, $s$ before $t$, and $u$ before $s$.
 Under these assumptions, the edges $uv$ and $st$ cross if and only if $s$ is located before $v$ and $t$ after $v$.
-% Image?
+
+\todo[inline]{Image depicting 8 intersecting pairs out of 24 possibble}
 
 The arrangement is represented using the so-called ``ordering variables''.
 For every pair of vertices $u$ and $v$, we create a binary variable $a_{u, v}$ that defines the order in which they appear in the arrangement.
@@ -109,3 +110,11 @@ Doing so, we ensure that for each edge $e_0$, no $k + 1$ different edges interse
 
 \todo[inline]{implementation details (iterate over all permutations, finding minimal k)}
 \todo[inline]{possible optimizations (2k + 2, equivalence instead of implication for c\_\{...\}, eliminating c\_\{...\} at all)}
+
+\section{Dynamic algorithm}
+
+The last algorithm we considered was introduced by Kobayashi et al. in~\cite{okp}. The main idea of the algorithm is to incrementally build the drawing of the graph. Each step of this process can be mainly parametrized by two parameters: active link and right side. The former is a pair of vertices \(u\) and \(v\) that split a potential drawing in two parts. And latter is a set of vertices, located in the right part of the split. On each step algorithm checks whether such drawing is possible and which arrangements of the edges crossing the link which there are at most \(k\) does it produce.
+
+To do so, the authors used the result of Firman et al. who showed~\cite{triangulations} that in such configuration in a valid outer \(k\)-planar drawing it is possible to split the right side into two smaller parts by selecting a vertex \(w\) from the right side in such a way that both links \(uw\) and \(vw\) are crossed by at most \(k\) edges. By reversing this argument we get that outer \(k\)-planar drawing for \(uv\) configuration is possible if and only if we can combine it from two valid configurations \(uw\) and \(vw\) for some vertex \(w\) from the right side.
+
+At the end, to get whether the graph is outer \(k\)-planar algorithm checks weather there is a valid drawing for any link with the right side being the whole graph except two vertices of the link.
