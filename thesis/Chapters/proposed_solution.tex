@@ -77,7 +77,7 @@ So, the integer linear program can be described as follows:
     &&a_{u, v} &\in \{0, 1\},&&\forall u, v \in V(G)\\
 \end{align*}
 
-\section{SAT Formulation (unchanged)}
+\section{SAT Formulation (unchanged)}\label{sec:SAT-def}
 
 Another approach to solving this problem is to check for a specific $k$ whether the given graph is outer-$k$-planar.
 This check can be encoded as a boolean satisfiability problem.
@@ -117,4 +117,8 @@ The last algorithm we considered was introduced by \citeauthor{okp}~\cite{okp}. 
 
 To do so, the authors used the result of \citeauthor{triangulations}, who showed~\cite{triangulations} that in such configuration in a valid outer \(k\)-planar drawing it is possible to split the right side into two smaller parts by selecting a vertex \(w\) from the right side in such a way that both links \(uw\) and \(vw\) are crossed by at most \(k\) edges. By reversing this argument we get that outer \(k\)-planar drawing for \(uv\) configuration is possible if and only if we can combine it from two valid configurations \(uw\) and \(vw\) for some vertex \(w\) from the right side.
 
-At the end, to get whether the graph is outer \(k\)-planar algorithm checks weather there is a valid drawing for any link with the right side being the whole graph except two vertices of the link.
+At the end, to get whether the graph is outer \(k\)-planar algorithm checks weather there is a valid drawing for any link with the right side being the whole graph except two vertices of the link. Similar to the SAT formulation~\ref{sec:SAT-def} this method only tests whether the graph admits outer \(k\)-planar drawing or not for a given \(k\), so to find the minimal possible \(k\) we have to incrementally check the values.
+
+In the implementation of the algorithm we firstly construct an index for a dynamic programing table that contained all possible right sides for each link alongside the list of crossing edges grouped by the size of the right part. Since amount of crossing edges is bounded from above by \(k\), the number of entries in this index can be bounded by the following amount:~\(2^{O(k)}m^{k+O(1)}\)~\cite[Lemma 15]{okp}.
+
+To fill the index we start by choosing the number \(l\) of edges that will cross the link\footnote{Iterating over this first, we ensure that it is easy to extend the index for \(k+1\) edges if the check for outer \(k\)-planarity is unsecsessfull}. Then for each pair of vertices as a link we select exactly \(l\) edges from an augmented graph \(H\) that is obtained from an original graph \(G\) by removing the link vertices. Some connected components of \(H\) are father split by chosen edges on connected subcomponents. Each such subcomponent must be located on one side of the link, as it does not contain edges that cross the link. Thus finding all valid right side for a given link means finding all valid black-white colorings of subcomponents, where white indicates that subcomponent is located on the right side and black~--~on the left side. As a consequence, each selected edge has to connect subcomponents of different color, thus, the metagraph of each connected component of \(H\) with subcomponents as vertices and selected edges connecting them has to be bipartite.
