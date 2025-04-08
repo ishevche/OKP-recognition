@@ -2,17 +2,23 @@
 #include <filesystem>
 #include "argument_parser.h"
 
+#include <okp_recognition.h>
+
 namespace po = boost::program_options;
+namespace fs = std::filesystem;
 
 command_line_options_t::command_line_options_t() {
     opt_conf.add_options()
         ("help,h", "Show help message")
-        ("input,i", po::value<std::string>(&input_file)->required(),
-         "Path to input file with graphs in G6 format separated by newline character")
-        ("output,o", po::value<std::string>(&output_file),
-         "Path to output directory with drawing produced by all methods for each graph");
-    popt_conf.add("input", 1);
-    popt_conf.add("output", 1);
+        ("input_graph,i", po::value<std::string>(&input_graph)->required(),
+         "Input graph in Graphviz format")
+        ("output_file,o", po::value<std::string>(&output_file)->default_value(""),
+         "Path to output file used to save graph drawing in Graphviz format")
+        ("method,m", po::value<solver_type>(&method)->default_value(ILP_SOLVER),
+         "Method to use for calculating the drawing of the input graph. One of the ILP, SAT, OKP")
+        ("use_bct,b", po::bool_switch(&use_bct_decomposition)->default_value(true),
+         "Whether to decompose the graph in biconnected components before passing it to the solver");
+    popt_conf.add("input_graph", 1);
 }
 
 command_line_options_t::command_line_options_t(int ac, char** av) :
@@ -29,9 +35,8 @@ void command_line_options_t::parse(int ac, char** av) {
         exit(EXIT_SUCCESS);
     }
     notify(var_map);
-    assert_exists(input_file);
     if (!output_file.empty()) {
-        std::filesystem::create_directories(output_file);
+        fs::create_directories(fs::path(output_file).parent_path());
     }
 }
 

@@ -40,3 +40,10 @@ target_link_libraries(okp-recognition
 if (ILP_CROSSING_SUM_OPTIMIZATION)
     target_compile_definitions(okp-recognition PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
 endif ()
+
+set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib"
+        LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib"
+        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+)

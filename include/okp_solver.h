@@ -35,11 +35,6 @@ public:
         std::vector<Vertex> vertex_order;
     };
 
-#ifndef NDEBUG
-    size_t hits(0);
-    size_t misses(0);
-#endif
-
 private:
     enum group_t {
         LINK_SRC = 0,
@@ -82,13 +77,19 @@ private:
                               std::vector<std::pair<std::pair<size_t, int>, std::pair<size_t, int>>>::iterator end,
                               size_t cur_side, int count);
     void fill_right_sides();
-    void print_table();
     bool check_triangle_consistency(const std::ranges::range auto& edges,
                                     group_t common_group, group_t prev_group);
     void add_triangle_edges(const std::ranges::range auto& edges,
                             Vertex opposite_vertex,
                             group_t opposite_group,
                             group_t common_group);
+
+#ifndef NDEBUG
+    size_t hits = 0;
+    size_t misses = 0;
+
+    void print_table();
+#endif
 };
 
 

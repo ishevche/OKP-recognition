@@ -11,6 +11,4 @@ void save_dot(const std::string& file_name, Graph& graph,
 
 int count_edge_crossing(const Edge& edge, const Graph& graph);
 
-std::string graph_to_g6(const Graph& g);
-
 #endif //OKP_RECOGNITION_GRAPHIO_H

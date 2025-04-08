@@ -42,37 +42,3 @@ int count_edge_crossing(const Edge& edge, const Graph& graph) {
     }
     return result;
 }
-
-std::string graph_to_g6(const Graph& g) {
-    size_t n = num_vertices(g);
-    std::ostringstream g6;
-
-    if (n <= 62) {
-        g6 << n + 63;
-    } else {
-        throw std::runtime_error("Graph6 extended format (n > 62) not implemented");
-    }
-
-    std::vector<bool> adjacency_bits;
-    for (size_t i = 0; i < n; ++i) {
-        for (size_t j = 0; j < i; ++j) {
-            if (edge(i, j, g).second) {
-                adjacency_bits.push_back(true);
-            } else {
-                adjacency_bits.push_back(false);
-            }
-        }
-    }
-
-    for (size_t i = 0; i < adjacency_bits.size(); i += 6) {
-        int chunk_value = 0;
-        for (size_t j = 0; j < 6; ++j) {
-            if (i + j < adjacency_bits.size() && adjacency_bits[i + j]) {
-                chunk_value |= 1 << 5 - j;
-            }
-        }
-        g6 << chunk_value + 63;
-    }
-
-    return g6.str();
-}

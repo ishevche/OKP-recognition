@@ -3,6 +3,7 @@
 
 #include <boost/program_options.hpp>
 #include <string>
+#include "okp_recognition.h"
 
 class command_line_options_t {
 public:
@@ -18,8 +19,10 @@ public:
 
     void parse(int ac, char** av);
 
-    std::string input_file;
+    std::string input_graph;
     std::string output_file;
+    solver_type method;
+    bool use_bct_decomposition;
 
 private:
     boost::program_options::variables_map var_map{};

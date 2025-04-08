@@ -27,6 +27,8 @@ bool okp_solver::solve() {
     }
 
 #ifndef NDEBUG
+    std::cout << "Entries in all dp_tables: " << misses << "\n"
+        "Duplicates not inserted in tables: " << hits << std::endl;
     print_table();
 #endif
 
@@ -264,9 +266,9 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
                         if (!cell.contains(key)) {
                             cell[key] = combined_arrangement;
 #ifndef NDEBUG
-                            misses ++;
+                            misses++;
                         } else {
-                            hits ++;
+                            hits++;
 #endif
                         }
                     } while (std::ranges::next_permutation(combined_arrangement.edge_order).found);
@@ -407,6 +409,7 @@ void okp_solver::populate_right_sides(
     populate_right_sides(start, end, cur_side | l.first, count + l.second);
 }
 
+#ifndef NDEBUG
 void okp_solver::print_table() {
     for (int i = 0; i < dp_table.size(); ++i) {
         for (int j = 0; j < dp_table[i].size(); ++j) {
@@ -442,3 +445,4 @@ void okp_solver::print_table() {
         }
     }
 }
+#endif
