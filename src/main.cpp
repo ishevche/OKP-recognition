@@ -46,11 +46,11 @@ int main(int ac, char** av) {
 
     std::unique_ptr<solver> solver = get_solver(cmd_arguments.method, cmd_arguments.use_bct_decomposition, graph);
     auto start = get_current_time_fenced();
-    solver->solve();
+    bool solved = solver->solve();
     auto end = get_current_time_fenced();
-    std::cout << solver->crossing_number << " " << to_ns(end - start) << std::endl;
+    std::cout << solved << " " << solver->crossing_number << " " << to_ns(end - start) << std::endl;
 
-    if (!cmd_arguments.output_file.empty()) {
+    if (solved && !cmd_arguments.output_file.empty()) {
         save_dot(cmd_arguments.output_file, graph, solver->vertex_order, solver->crossing_number, graph_props);
     }
     return 0;
