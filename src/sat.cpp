@@ -53,21 +53,21 @@ void sat_solver::initialise_solver() {
     int variable_count = 1;
 
     // Order variables initialization
-    if (order_variables.empty()) {
-        order_variables = std::vector<std::vector<int>>(num_vertices);
-        for (int i = 0; i < num_vertices; ++i) {
-            order_variables[i].resize(num_vertices, 0);
-        }
+    order_variables.clear();
+    order_variables.resize(num_vertices);
+    for (int i = 0; i < num_vertices; ++i) {
+        order_variables[i].resize(num_vertices);
+        std::ranges::fill(order_variables[i], 0);
+    }
 
-        for (int i = 0; i < num_vertices; ++i) {
-            for (int j = 0; j < num_vertices; ++j) {
-                if (i == j) {
-                    order_variables[i][j] = 1;
-                } else if (order_variables[j][i] != 0) {
-                    order_variables[i][j] = -order_variables[j][i];
-                } else {
-                    order_variables[i][j] = ++variable_count;
-                }
+    for (int i = 0; i < num_vertices; ++i) {
+        for (int j = 0; j < num_vertices; ++j) {
+            if (i == j) {
+                order_variables[i][j] = 1;
+            } else if (order_variables[j][i] != 0) {
+                order_variables[i][j] = -order_variables[j][i];
+            } else {
+                order_variables[i][j] = ++variable_count;
             }
         }
     }
@@ -87,9 +87,10 @@ void sat_solver::initialise_solver() {
 
     // Edge crossings variables definition
     size_t num_edges = boost::num_edges(graph);
-    crossing_variables = std::vector<std::vector<int>>(num_edges);
+    crossing_variables.resize(num_edges);
     for (int i = 0; i < num_edges; ++i) {
-        crossing_variables[i].resize(num_edges, 0);
+        crossing_variables[i].resize(num_edges);
+        std::ranges::fill(crossing_variables[i], 0);
     }
 
     for (Edge edge1 : make_iterator_range(edges(graph))) {

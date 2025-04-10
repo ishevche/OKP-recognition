@@ -54,7 +54,7 @@ async def gather_results(df: pd.DataFrame, df_lock, executable: str, out_file: s
             df.at[graph_index, "done"] = True
             methods = []
             if not df.at[graph_index, "done_ilp"]: methods.append("ilp")
-            # if not df.at[graph_index, "done_sat"]: methods.append("sat")
+            if not df.at[graph_index, "done_sat"]: methods.append("sat")
             if not df.at[graph_index, "done_okp"]: methods.append("okp")
             graph_str = df.at[graph_index, "graph_dot"]
             graph_g6 = df.at[graph_index, "graph_g6"]
