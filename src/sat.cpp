@@ -17,8 +17,8 @@ bool sat_solver::solve() {
 
     std::ranges::sort(vertex_order,
                       [this](Vertex u, Vertex v) {
-                          size_t u_idx = get(vertex_index_map, u);
-                          size_t v_idx = get(vertex_index_map, v);
+                          int u_idx = static_cast<int>(get(vertex_index_map, u));
+                          int v_idx = static_cast<int>(get(vertex_index_map, v));
                           return kissat_value(kissat_solver, order_variables[u_idx][v_idx]) > 0;
                       });
 
@@ -41,7 +41,7 @@ bool sat_solver::is_drawable() {
 
 void sat_solver::initialise_solver() {
     if (kissat_solver != nullptr) { kissat_release(kissat_solver); }
-    size_t num_vertices = boost::num_vertices(graph);
+    int num_vertices = static_cast<int>(boost::num_vertices(graph));
 
     kissat_solver = kissat_init();
     kissat_set_option(kissat_solver, "quiet", 1);
@@ -55,13 +55,13 @@ void sat_solver::initialise_solver() {
     // Order variables initialization
     order_variables.clear();
     order_variables.resize(num_vertices);
-    for (size_t i = 0; i < num_vertices; ++i) {
+    for (int i = 0; i < num_vertices; ++i) {
         order_variables[i].resize(num_vertices);
         std::ranges::fill(order_variables[i], 0);
     }
 
-    for (size_t i = 0; i < num_vertices; ++i) {
-        for (size_t j = 0; j < num_vertices; ++j) {
+    for (int i = 0; i < num_vertices; ++i) {
+        for (int j = 0; j < num_vertices; ++j) {
             if (i == j) {
                 order_variables[i][j] = 1;
             } else if (order_variables[j][i] != 0) {
@@ -74,9 +74,9 @@ void sat_solver::initialise_solver() {
 
     // Transitivity constraints
     // (sm && me) -> se   <=>   -sm || -me || se
-    for (size_t start = 0; start < num_vertices; ++start) {
-        for (size_t middle = 0; middle < num_vertices; ++middle) {
-            for (size_t end = 0; end < num_vertices; ++end) {
+    for (int start = 0; start < num_vertices; ++start) {
+        for (int middle = 0; middle < num_vertices; ++middle) {
+            for (int end = 0; end < num_vertices; ++end) {
                 kissat_add(kissat_solver, -order_variables[start][middle]);
                 kissat_add(kissat_solver, -order_variables[middle][end]);
                 kissat_add(kissat_solver, order_variables[start][end]);
@@ -86,17 +86,17 @@ void sat_solver::initialise_solver() {
     }
 
     // Edge crossings variables definition
-    size_t num_edges = boost::num_edges(graph);
+    int num_edges = static_cast<int>(boost::num_edges(graph));
     crossing_variables.resize(num_edges);
-    for (size_t i = 0; i < num_edges; ++i) {
+    for (int i = 0; i < num_edges; ++i) {
         crossing_variables[i].resize(num_edges);
         std::ranges::fill(crossing_variables[i], 0);
     }
 
     for (Edge edge1 : make_iterator_range(edges(graph))) {
-        size_t edge1_idx = get(edge_index_map, edge1);
+        int edge1_idx = get(edge_index_map, edge1);
         for (Edge edge2 : make_iterator_range(edges(graph))) {
-            size_t edge2_idx = get(edge_index_map, edge2);
+            int edge2_idx = get(edge_index_map, edge2);
             if (edge1_idx == edge2_idx) {
                 crossing_variables[edge1_idx][edge2_idx] = 1;
             } else if (crossing_variables[edge2_idx][edge1_idx] != 0) {
@@ -109,9 +109,9 @@ void sat_solver::initialise_solver() {
     }
 
     for (auto [e1i, ei_end] = edges(graph); e1i != ei_end; ++e1i) {
-        size_t edge1_idx = get(edge_index_map, *e1i);
+        int edge1_idx = get(edge_index_map, *e1i);
         for (auto e2i = std::next(e1i); e2i != ei_end; ++e2i) {
-            size_t edge2_idx = get(edge_index_map, *e2i);
+            int edge2_idx = get(edge_index_map, *e2i);
             add_crossing_clauses(*e1i, *e2i, crossing_variables[edge1_idx][edge2_idx]);
         }
     }
@@ -119,13 +119,13 @@ void sat_solver::initialise_solver() {
     // Restricting number of crossings for every edge
     for (Edge edge : make_iterator_range(edges(graph))) {
         std::string crossings(crossing_number + 1, 1);
-        size_t edge_idx = get(edge_index_map, edge);
+        int edge_idx = get(edge_index_map, edge);
         crossings.resize(num_edges, 0);
         do {
-            size_t i = 0;
+            int i = 0;
             for (Edge other : make_iterator_range(edges(graph))) {
                 if (crossings[i++]) {
-                    size_t other_idx = get(edge_index_map, other);
+                    int other_idx = get(edge_index_map, other);
                     kissat_add(kissat_solver, -crossing_variables[edge_idx][other_idx]);
                 }
             }
@@ -137,10 +137,10 @@ void sat_solver::initialise_solver() {
 #define ADD_CLAUSE4(solver, a, b, c, d) {kissat_add(solver, a);kissat_add(solver, b);kissat_add(solver, c);kissat_add(solver, d);kissat_add(solver, 0);}
 
 void sat_solver::add_crossing_clauses(const Edge& edge1, const Edge& edge2, int crossing_var) const {
-    size_t u = get(vertex_index_map, source(edge1, graph));
-    size_t v = get(vertex_index_map, target(edge1, graph));
-    size_t s = get(vertex_index_map, source(edge2, graph));
-    size_t t = get(vertex_index_map, target(edge2, graph));
+    int u = static_cast<int>(get(vertex_index_map, source(edge1, graph)));
+    int v = static_cast<int>(get(vertex_index_map, target(edge1, graph)));
+    int s = static_cast<int>(get(vertex_index_map, source(edge2, graph)));
+    int t = static_cast<int>(get(vertex_index_map, target(edge2, graph)));
     ADD_CLAUSE4(kissat_solver, -order_variables[u][s], -order_variables[s][v], -order_variables[v][t], crossing_var)
     ADD_CLAUSE4(kissat_solver, -order_variables[u][t], -order_variables[t][v], -order_variables[v][s], crossing_var)
     ADD_CLAUSE4(kissat_solver, -order_variables[v][s], -order_variables[s][u], -order_variables[u][t], crossing_var)

@@ -12,7 +12,7 @@ class okp_solver : public solver {
     const edge_index_map_t edge_index_map;
 
 public:
-    explicit okp_solver(const Graph& graph, size_t crossing_number = 0)
+    explicit okp_solver(const Graph& graph, int crossing_number = 0)
         : solver(graph, crossing_number),
           vertex_index_map(get(boost::vertex_index, graph)),
           edge_index_map(get(boost::edge_index, graph)),
@@ -50,11 +50,11 @@ private:
     std::vector<std::vector<std::vector<std::unordered_map<size_t, std::vector<Edge>>>>> dp_table_initialisation;
     typedef boost::filtered_graph<Graph, boost::function<bool(Edge)>, boost::function<bool(Vertex)>> filtered_graph_t;
     filtered_graph_t filtered_graph;
-    std::pair<size_t, size_t> active_link;
+    std::pair<Vertex, Vertex> active_link;
     std::vector<Edge> filtered_edges;
-    std::vector<size_t> triangle_edges;
+    std::vector<int> triangle_edges;
     std::vector<std::pair<std::pair<group_t, int>, std::pair<group_t, int>>> triangle_edges_map;
-    std::vector<size_t> edges_intersection_count;
+    std::vector<int> edges_intersection_count;
     std::vector<Edge> part_a_edges_order;
     std::vector<Edge> part_b_edges_order;
     std::vector<Edge> piercing_edges_order;
@@ -67,12 +67,12 @@ private:
     bool count_triangle_intersections(const std::ranges::range auto& part_a_edges,
                                       const std::ranges::range auto& part_b_edges,
                                       const std::ranges::range auto& piercing_edges,
-                                      size_t split_vertex);
-    void process_split(size_t right_side, int right_size, const std::vector<Edge>& piercing_edges, size_t split_vertex);
+                                      Vertex split_vertex);
+    void process_split(size_t right_side, int right_size, const std::vector<Edge>& piercing_edges, Vertex split_vertex);
     bool is_drawable();
-    void add_table_entries(size_t k);
+    void add_table_entries(int k);
     void initialise_table();
-    void select_edges(filtered_graph_t::edge_iterator start, const filtered_graph_t::edge_iterator& end, size_t k);
+    void select_edges(filtered_graph_t::edge_iterator start, const filtered_graph_t::edge_iterator& end, int k);
     void populate_right_sides(std::vector<std::pair<std::pair<size_t, int>, std::pair<size_t, int>>>::iterator start,
                               std::vector<std::pair<std::pair<size_t, int>, std::pair<size_t, int>>>::iterator end,
                               size_t cur_side, int count);

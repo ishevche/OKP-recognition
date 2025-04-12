@@ -8,7 +8,7 @@
 template <class sub_solver>
 class bicomponent_solver : public solver {
 public:
-    explicit bicomponent_solver(const Graph& graph, size_t crossing_number = 0)
+    explicit bicomponent_solver(const Graph& graph, int crossing_number = 0)
         : solver(graph, crossing_number) {}
 
     bool solve() override {
@@ -27,13 +27,13 @@ public:
 
 private:
     class dfs_visitor : public boost::default_dfs_visitor {
-        size_t& crossing_number;
+        int& crossing_number;
         std::vector<Vertex>& vertex_order;
         std::map<bctree_vertex, bctree_vertex> predecessors;
         bool& ok;
 
     public:
-        dfs_visitor(std::vector<Vertex>& vertex_order, size_t& crossing_number, bool& ok)
+        dfs_visitor(std::vector<Vertex>& vertex_order, int& crossing_number, bool& ok)
             : crossing_number(crossing_number), vertex_order(vertex_order), ok(ok) {}
 
         void discover_vertex(bctree_vertex node, const bctree_t& tree) {

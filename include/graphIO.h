@@ -6,7 +6,7 @@
 
 void save_dot(const std::string& file_name, Graph& graph,
               const std::vector<Vertex>& ordering,
-              size_t number_of_crossings,
+              int number_of_crossings,
               const boost::dynamic_properties& graph_props);
 
 int count_edge_crossing(const Edge& edge, const Graph& graph);

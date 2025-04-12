@@ -17,7 +17,7 @@ class sat_solver : public solver {
     kissat* kissat_solver;
 
 public:
-    explicit sat_solver(const Graph& graph, size_t crossing_number = 0)
+    explicit sat_solver(const Graph& graph, int crossing_number = 0)
         : solver(graph, crossing_number),
           vertex_index_map(get(boost::vertex_index, graph)),
           edge_index_map(get(boost::edge_index, graph)),

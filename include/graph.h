@@ -4,12 +4,11 @@
 #include <string>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/function.hpp>
 
 struct VertexStruct {
     std::string name;
     std::string location;
-    size_t order;
+    int order;
 };
 
 struct EdgeStruct {
@@ -17,7 +16,7 @@ struct EdgeStruct {
 };
 
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
-                              VertexStruct, boost::property<boost::edge_index_t, size_t, EdgeStruct>> Graph;
+                              VertexStruct, boost::property<boost::edge_index_t, int, EdgeStruct>> Graph;
 typedef Graph::vertex_descriptor Vertex;
 typedef Graph::edge_descriptor Edge;
 

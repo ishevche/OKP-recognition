@@ -3,7 +3,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
-#include <iostream>
 #include <string>
 #include "bicomponent_solver.h"
 #include "ilp_solver.h"

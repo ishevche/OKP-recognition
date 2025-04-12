@@ -14,7 +14,7 @@ class ilp_solver : public solver {
     const edge_index_map_t edge_index_map;
 
 public:
-    explicit ilp_solver(const Graph& graph, size_t crossing_number = 0)
+    explicit ilp_solver(const Graph& graph, int crossing_number = 0)
         : solver(graph, crossing_number),
           vertex_index_map(get(boost::vertex_index, graph)),
           edge_index_map(get(boost::edge_index, graph)) {

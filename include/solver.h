@@ -6,7 +6,7 @@
 
 class solver {
 public:
-    explicit solver(const Graph& graph, size_t crossing_number = 0)
+    explicit solver(const Graph& graph, int crossing_number = 0)
         : crossing_number(crossing_number), graph(graph) {}
 
     virtual bool solve() = 0;
@@ -14,7 +14,7 @@ public:
     virtual ~solver() = default;
 
     std::vector<Vertex> vertex_order;
-    size_t crossing_number;
+    int crossing_number;
 
 protected:
     const Graph& graph;
