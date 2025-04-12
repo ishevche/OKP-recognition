@@ -55,13 +55,13 @@ void sat_solver::initialise_solver() {
     // Order variables initialization
     order_variables.clear();
     order_variables.resize(num_vertices);
-    for (int i = 0; i < num_vertices; ++i) {
+    for (size_t i = 0; i < num_vertices; ++i) {
         order_variables[i].resize(num_vertices);
         std::ranges::fill(order_variables[i], 0);
     }
 
-    for (int i = 0; i < num_vertices; ++i) {
-        for (int j = 0; j < num_vertices; ++j) {
+    for (size_t i = 0; i < num_vertices; ++i) {
+        for (size_t j = 0; j < num_vertices; ++j) {
             if (i == j) {
                 order_variables[i][j] = 1;
             } else if (order_variables[j][i] != 0) {
@@ -74,9 +74,9 @@ void sat_solver::initialise_solver() {
 
     // Transitivity constraints
     // (sm && me) -> se   <=>   -sm || -me || se
-    for (int start = 0; start < num_vertices; ++start) {
-        for (int middle = 0; middle < num_vertices; ++middle) {
-            for (int end = 0; end < num_vertices; ++end) {
+    for (size_t start = 0; start < num_vertices; ++start) {
+        for (size_t middle = 0; middle < num_vertices; ++middle) {
+            for (size_t end = 0; end < num_vertices; ++end) {
                 kissat_add(kissat_solver, -order_variables[start][middle]);
                 kissat_add(kissat_solver, -order_variables[middle][end]);
                 kissat_add(kissat_solver, order_variables[start][end]);
@@ -88,7 +88,7 @@ void sat_solver::initialise_solver() {
     // Edge crossings variables definition
     size_t num_edges = boost::num_edges(graph);
     crossing_variables.resize(num_edges);
-    for (int i = 0; i < num_edges; ++i) {
+    for (size_t i = 0; i < num_edges; ++i) {
         crossing_variables[i].resize(num_edges);
         std::ranges::fill(crossing_variables[i], 0);
     }

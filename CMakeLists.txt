@@ -3,9 +3,7 @@ project(okp-recognition CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CXX ON)
 
-
 set(ILP_CROSSING_SUM_OPTIMIZATION ON)
-
 
 add_executable(okp-recognition
         src/main.cpp
@@ -20,16 +18,13 @@ add_executable(okp-recognition
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(Boost COMPONENTS graph program_options system REQUIRED)
 find_package(GUROBI REQUIRED)
-find_library(KISSAT_LIBRARY
-        NAMES kissat
-        HINTS "${CMAKE_SOURCE_DIR}/../kissat/build"
-        REQUIRED
-)
+find_library(KISSAT_LIBRARY NAMES kissat REQUIRED PATH_SUFFIXES build)
+find_path(KISSAT_INCLUDE_DIR NAMES kissat.h REQUIRED PATH_SUFFIXES src)
 
 target_include_directories(okp-recognition PRIVATE
         ${GUROBI_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIR}
-        "${CMAKE_SOURCE_DIR}/../kissat/src"
+        ${KISSAT_INCLUDE_DIR}
         include)
 target_link_libraries(okp-recognition
         ${GUROBI_LIBRARY}

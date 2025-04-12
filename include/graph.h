@@ -4,6 +4,7 @@
 #include <string>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/function.hpp>
 
 struct VertexStruct {
     std::string name;

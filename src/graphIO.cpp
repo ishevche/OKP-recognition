@@ -5,7 +5,7 @@ void save_dot(const std::string& file_name, Graph& graph,
               size_t number_of_crossings,
               const boost::dynamic_properties& graph_props) {
     std::ofstream out{file_name};
-    for (int j = 0; j < ordering.size(); ++j) {
+    for (size_t j = 0; j < ordering.size(); ++j) {
         graph[ordering[j]].order = j;
         double x = 5. * std::cos(2. * j * M_PI / static_cast<int>(num_vertices(graph)));
         double y = 5. * std::sin(2. * j * M_PI / static_cast<int>(num_vertices(graph)));
@@ -14,7 +14,7 @@ void save_dot(const std::string& file_name, Graph& graph,
     }
     for (Edge e : make_iterator_range(edges(graph))) {
         graph[e].color = "";
-        int crossing = count_edge_crossing(e, graph);
+        size_t crossing = count_edge_crossing(e, graph);
         if (crossing == number_of_crossings) {
             graph[e].color = "blue";
         } else if (crossing > number_of_crossings) {

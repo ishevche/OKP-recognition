@@ -18,7 +18,7 @@ bctree_t decompose(const Graph& graph) {
 
     std::vector<bctree_vertex> b_nodes;
     std::unordered_map<Vertex, bctree_vertex> c_nodes;
-    for (int i = 0; i < num_components; ++i) {
+    for (size_t i = 0; i < num_components; ++i) {
         bctree_vertex node = add_vertex(tree);
         tree[node].node_type = B_NODE;
         b_nodes.push_back(node);

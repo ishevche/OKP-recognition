@@ -66,7 +66,7 @@ void okp_solver::fill_edge_order(std::vector<Edge>& order_vector,
 
 bool okp_solver::check_triangle_consistency(const std::ranges::range auto& edges,
                                             group_t common_group, group_t prev_group) {
-    std::pair<group_t, size_t> prev_trg{prev_group, 0};
+    std::pair prev_trg{prev_group, 0};
     for (const Edge& edge : edges) {
         const auto& triangle_edge = triangle_edges_map[get(edge_index_map, edge)];
         auto src = triangle_edge.first;
@@ -282,14 +282,14 @@ bool okp_solver::is_drawable() {
     dp_table.clear();
     size_t num_vertices = boost::num_vertices(graph);
     dp_table.resize(num_vertices);
-    for (int i = 0; i < num_vertices; ++i) {
+    for (size_t i = 0; i < num_vertices; ++i) {
         dp_table[i].resize(num_vertices);
-        for (int j = i + 1; j < num_vertices; ++j) {
+        for (size_t j = i + 1; j < num_vertices; ++j) {
             dp_table[i][j][0][""] = {};
         }
     }
 
-    for (int right_size = 1; right_size <= num_vertices - 2; ++right_size) {
+    for (size_t right_size = 1; right_size <= num_vertices - 2; ++right_size) {
         for (size_t v_index = 0; v_index < num_vertices; ++v_index) {
             active_link.first = v_index;
             for (size_t u_index = v_index + 1; u_index < num_vertices; ++u_index) {
@@ -335,7 +335,7 @@ void okp_solver::initialise_table() {
             dp_table_initialisation[v_index][u_index].resize(num_vertices - 1);
         }
     }
-    for (int k = 0; k <= crossing_number; add_table_entries(k++)) {}
+    for (size_t k = 0; k <= crossing_number; add_table_entries(k++)) {}
 }
 
 void okp_solver::select_edges(filtered_graph_t::edge_iterator start, const filtered_graph_t::edge_iterator& end,
@@ -411,8 +411,8 @@ void okp_solver::populate_right_sides(
 
 #ifndef NDEBUG
 void okp_solver::print_table() {
-    for (int i = 0; i < dp_table.size(); ++i) {
-        for (int j = 0; j < dp_table[i].size(); ++j) {
+    for (size_t i = 0; i < dp_table.size(); ++i) {
+        for (size_t j = 0; j < dp_table[i].size(); ++j) {
             std::cout << "Active link: " << i << "-" << j << std::endl;
             std::vector<size_t> entries;
             for (const auto& key : dp_table[i][j] | std::views::keys) {
@@ -421,7 +421,7 @@ void okp_solver::print_table() {
             std::ranges::sort(entries);
             for (auto side : entries) {
                 int size = 0;
-                for (int k = 0; 1 << k <= side; size += (1 << k++ & side) != 0) {}
+                for (size_t k = 0; 1UL << k <= side; size += (1 << k++ & side) != 0) {}
                 auto edges = std::ranges::find_if(dp_table_initialisation[i][j][size],
                                                   [side](const std::pair<size_t, std::vector<Edge>>& pair) {
                                                       return pair.first == side;

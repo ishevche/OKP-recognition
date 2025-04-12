@@ -17,11 +17,11 @@ bool ilp_solver::solve() {
     size_t num_vertices = boost::num_vertices(graph);
     // Order variables initialization
     order_variables = std::vector<std::vector<GRBLinExpr>>(num_vertices);
-    for (int i = 0; i < num_vertices; ++i) {
+    for (size_t i = 0; i < num_vertices; ++i) {
         order_variables[i].resize(num_vertices, 0);
     }
-    for (int i = 0; i < num_vertices; ++i) {
-        for (int j = 0; j < num_vertices; ++j) {
+    for (size_t i = 0; i < num_vertices; ++i) {
+        for (size_t j = 0; j < num_vertices; ++j) {
             if (i == j) { continue; }
             if (order_variables[j][i].size() == 0) {
                 order_variables[i][j] = model.addVar(
@@ -36,9 +36,9 @@ bool ilp_solver::solve() {
     }
 
     // Transitivity constraints
-    for (int start = 0; start < num_vertices; ++start) {
-        for (int middle = 0; middle < num_vertices; ++middle) {
-            for (int end = 0; end < num_vertices; ++end) {
+    for (size_t start = 0; start < num_vertices; ++start) {
+        for (size_t middle = 0; middle < num_vertices; ++middle) {
+            for (size_t end = 0; end < num_vertices; ++end) {
                 model.addConstr(
                     order_variables[start][end] >=
                     order_variables[start][middle] +
