@@ -46,7 +46,6 @@ def initialise_df(graphs_file: str, out_file: str):
 async def gather_results(df: pd.DataFrame, df_lock, executable: str, out_file: str):
     save_columns = list(filter(lambda x: not x.startswith("done"), df.columns))
     while True:
-        ilp_result = -1
         async with df_lock:
             todo_graphs_index = df[~df["done"]].index
             if todo_graphs_index.empty:
@@ -55,27 +54,27 @@ async def gather_results(df: pd.DataFrame, df_lock, executable: str, out_file: s
             df.at[graph_index, "done"] = True
             methods = []
             if not df.at[graph_index, "done_ilp"]: methods.append("ilp")
-            else: ilp_result = df.at[graph_index, "ilp_cr"]
             if not df.at[graph_index, "done_sat"]: methods.append("sat")
             if not df.at[graph_index, "done_okp"]: methods.append("okp")
             graph_str = df.at[graph_index, "graph_dot"]
             graph_g6 = df.at[graph_index, "graph_g6"]
         for method in methods:
-            if method != "ilp" and ilp_result >= 7:
-                solved, cr, time = False, 0, 0
-            else:
-                subprocess = await asyncio.create_subprocess_shell(f"{executable} \"{graph_str}\" -m {method}",
-                                                                   stdout=asyncio.subprocess.PIPE,
-                                                                   stderr=asyncio.subprocess.PIPE)
-                print(f"Running {method} for graph {graph_index} ({graph_g6})...")
-                stdout, stderr = await subprocess.communicate()
+            subprocess = await asyncio.create_subprocess_shell(f"{executable} \"{graph_str}\" -m {method}",
+                                                               stdout=asyncio.subprocess.PIPE,
+                                                               stderr=asyncio.subprocess.PIPE)
+            print(f"Running {method} for graph {graph_index} ({graph_g6})...")
+            try:
+                stdout, stderr = await asyncio.wait_for(subprocess.communicate(), timeout=60)
                 print(f"{method} for graph {graph_index} ({graph_g6}) completed.")
                 if subprocess.returncode != 0:
                     print(f"{method} for {graph_g6} failed with return code {subprocess.returncode}:\n{stderr.decode()}")
                     continue
                 else:
                     solved, cr, time = map(int, stdout.decode().split(" "))
-            if ilp_result == -1 and method == "ilp": ilp_result = cr
+            except asyncio.exceptions.TimeoutError:
+                subprocess.kill()
+                print(f"{method} for graph {graph_index} ({graph_g6}) timed out.")
+                solved, cr, time = False, 0, 0
             async with df_lock:
                 df.at[graph_index, method + "_cr"] = cr
                 df.at[graph_index, method + "_time"] = time
