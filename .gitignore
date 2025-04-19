@@ -2,5 +2,10 @@ cmake-build*
 bin
 .idea
 data/out
+.venv
 
 *.log
+*eps-converted-to.pdf
+
+*[Tt][Mm][Pp]*
+*[Tt][Ee][Mm][Pp]*
