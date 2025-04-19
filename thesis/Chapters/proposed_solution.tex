@@ -1,40 +1,31 @@
 \chapter{Proposed Solution}
 
-This chapter will discuss the methods this work considers to recognise the outer \(k\)-planar graphs. Besides recognition, these methods provide the outer \(k\)-planar drawings of the given graphs if possible. We represent the drawing as a sequence of vertices in the circular order in which they appear on the boundary of the outer face. Considering only straight-line drawings, this order uniquely determines all the edge crossings and, thus, also the number of crossings per edge.
+This chapter will discuss the methods this work considers to recognise the outer \(k\)-planar graphs. Besides recognition, these methods provide the outer \(k\)-planar drawings of the given graphs if possible.
+
+We represent the drawing as a sequence of vertices in the circular order in which they appear on the boundary of the outer face. Considering only straight-line drawings, this order uniquely determines all the edge crossings and, thus, also the number of crossings per edge. Indeed, consider two edges, \(uv\) and \(st\). Without loss of generality, we can assume that \(u\) is located before \(v\) in the arrangement, \(s\) before \(t\), and \(u\) before \(s\). Under these assumptions, the edges \(uv\) and \(st\) cross if and only if \(s\) is located before \(v\) and \(t\) after \(v\).
 
 
 \section{Bicomponent decomposition}
 
 \begin{figure}
     \centering
-    \begin{subfigure}{0.4\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{TODO}
-        \caption{An original graph with highlighted biconnected componnents and cut vertices}
-        \label{fig:bidec:original_graph}
-    \end{subfigure}
+    \subcaptionbox{An original graph with highlighted biconnected components and cut vertices \label{fig:bidec:original_graph}} {
+        \includegraphics[width=0.4\textwidth]{TODO}
+    }
     \hfill
-    \begin{subfigure}{0.4\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{TODO}
-        \caption{Block-cut tree of a graph}
-        \label{fig:bidec:bctree}
-    \end{subfigure}
+    \subcaptionbox{Block-cut tree of a graph \label{fig:bidec:bctree}} {
+        \includegraphics[width=0.4\textwidth]{TODO}
+    }
     \hfill
-    \begin{subfigure}{0.4\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{TODO}
-        \caption{Outer \(k\)-planar drawing of each componnent}
-        \label{fig:bidec:componnents_drawings}
-    \end{subfigure}
+    \subcaptionbox{Outer \(k\)-planar drawing of each component \label{fig:bidec:componnents_drawings}}{
+        \includegraphics[width=0.4\textwidth]{TODO}
+    }
     \hfill
-    \begin{subfigure}{0.4\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{TODO}
-        \caption{Outer \(k\)-planar drawing of the original graph}
-        \label{fig:bidec:graph_drawing}
-    \end{subfigure}
-    \caption{An example of bicomponnent decomposition}
+    \subcaptionbox{
+        Outer \(k\)-planar drawing of the original graph \label{fig:bidec:graph_drawing}} {
+        \includegraphics[width=0.4\textwidth]{TODO}
+    }
+    \caption{An example of bicomponent decomposition}
 \end{figure}
 
 For complex problems, decomposing into smaller subproblems often leads to a significant increase in performance. In our context of recognising outer \(k\)-planar graphs, an effective strategy to do so is to partition the graph into subgraphs in such a manner that allows us to process them independently by the recognition algorithm. One of the plausible ways to accomplish this is to split the graph into biconnected components as shown in the figure~\ref{fig:bidec:original_graph}. This process is implemented using block-cut decomposition. It is worth noting that each graph edge belongs to a single biconnected component, referred to as a block. However, any two bicomponents may share a vertex, referred to as a cut vertex. Considering blocks and cut vertices as graph nodes, we can construct a so-called block-cut tree, wherein a block node is connected to a cut node if and only if the corresponding biconnected component contains a corresponding vertex, see figure~\ref{fig:bidec:bctree}.
@@ -47,69 +38,90 @@ In this work, we implemented this decomposition using the method \textsf{bi\-con
 
 To construct a drawing of the whole graph, after performing the decomposition, we perform a depth-first search on the block-cut tree, recording the predecessor for each node upon discovery. Additionally, each time a block vertex is discovered, we use one of the methods described in other sections of this chapter to check whether the component admits an outer \(k\)-planar drawing and obtain it if so. Afterwards, we merge the new drawing with the already existing one by combining the common cut vertex as described before. If the considered block is the first encountered one, its drawing is directly copied into a sequence that will form the final drawing. Otherwise, the block necessarily has a predecessor. Due to the structure of a tree, it is a cut node corresponding to a vertex that is shared with some other block that has already been considered and thus added to a final drawing. As a result, we can find a corresponding cut vertex in both global and local drawings. Since each drawing is represented as a cyclic sequence of vertices, we can rotate the local drawing so that the corresponding cut vertex appears as the first item in a sequence. Finally, we insert the local drawing starting from the second element into the global one immediately after the corresponding cut vertex.
 
-\section{ILP Formulation (unchanged)}\label{sec:ILP-def}
 
-The result of the integral linear program should be an arrangement of vertices on a line.
-Given the arrangement of the vertices, we can definitively identify whether two edges cross each other.
-Indeed, consider two edges, $uv$ and $st$.
-Without loss of generality, we can assume that $u$ is located before $v$ in the arrangement, $s$ before $t$, and $u$ before $s$.
-Under these assumptions, the edges $uv$ and $st$ cross if and only if $s$ is located before $v$ and $t$ after $v$.
+\section{ILP-based algorithm}\label{sec:ILP-def}
 
-\todo[inline]{Image depicting 8 intersecting pairs out of 24 possibble}
+As the problem of recognising the outer \(k\)-planar graphs is NP-hard, it can be reduced to another NP-hard problem. Some of them have already been studied for decades. Thus, extremely optimised algorithms for their solving have emerged during this period. One of them is an Integer Linear Programming problem (ILP). This problem asks to find a realisation of a variable vector \(\mathbf{x}\) that optimises the objective represented as a linear combination of variables \(\mathbf{c}^T\mathbf{x}\) subject to specific constraints \(\mathbf{Ax}\leqslant\mathbf{b}\). Additionally, some variables in the ILP problem are restricted to integer values. Since researchers have extensively studied the problem and developed efficient solvers, we decided to use their results to build an algorithm for recognising outer \(k\)-planar graphs. In this section, we discuss the reduction of our problem to the ILP\@. To implement the described reduction, we used Gurobi Optimizer~\cite{gurobi} under the free academic licence.
 
-The arrangement is represented using the so-called ``ordering variables''.
-For every pair of vertices $u$ and $v$, we create a binary variable $a_{u, v}$ that defines the order in which they appear in the arrangement.
-Equality $a_{u, v} = 1$ indicates that $u$ is located before $v$ and vice versa, and $a_{u, v} = 0$ indicates that $v$ is located before $u$ or $u$ and $v$ is the same vertex.
+To reduce a recognition problem to an ILP, we have to represent its structure using variables and constraints. We start with a graph drawing, which is represented, as described above, as a sequence of vertices. For the ILP, we can encode a sequence using the so-called ``ordering variables'', which defines a relative order of two vertices in a sequence. Specifically, for every pair of vertices \(u\) and \(v\), we create a binary variable \(a_{u, v}\) introducing a constraint~\eqref{eq:ilp:con:order-var}. The value \(1\) indicates that vertex \(u\) is located before vertex \(v\) and value \(0\) indicates that either \(v\) is located before \(u\) or \(u\) and \(v\) is the same vertex.
 
-For these variables, it is crucial to ensure transitivity.
-That is, if $a_{u, v} = 1$ and $a_{v, w} = 1$ which means $u$ is located before $v$ and $v$ is located before $w$, then $u$ must be located before $w$, so the following should hold $a_{u, w} = 1$.
-This can be ensured by the following constraint: $a_{u, w} \geqslant a_{u, v} + a_{v, w} - 1$.
-This constraint will restrict the value of $a_{u, w}$ if and only if both $a_{u, v}$ and $a_{v, w}$ equal $1$.
-Otherwise, the constraint will have no impact on the system at all.
+To ensure that these variables encode a valid sequence, we also have to enforce the transitivity. That is, for every ordered pair of distinct vertices \(u\) and \(v\), and every other vertex \(w\), if \(a_{u, w} \equiv 1\) and \(a_{w, v} \equiv 1\), meaning \(u\) is located before \(w\) and \(w\) is located before \(v\), then \(u\) must be located before \(v\), so the following should hold \(a_{u, v} \equiv 1\). Including also the implication for the value \(0\), we get:
+\begin{align}
+    a_{u, w} \equiv 1 \land a_{w, v} \equiv 1 \longrightarrow a_{u, v} \equiv 1 \label{eq:ilp:transitivity:uv:1}\\
+    a_{u, w} \equiv 0 \land a_{w, v} \equiv 0 \longrightarrow a_{u, v} \equiv 0 \label{eq:ilp:transitivity:uv:0}
+\end{align}
+If we consider a pair \(v, u\) and the same vertex \(w\),  the constraints would look like follows:
+\begin{align}
+    a_{v, w} \equiv 1 \land a_{w, u} \equiv 1 \longrightarrow a_{v, u} \equiv 1 \label{eq:ilp:transitivity:vu:1} \\
+    a_{v, w} \equiv 0 \land a_{w, u} \equiv 0 \longrightarrow a_{v, u} \equiv 0 \label{eq:ilp:transitivity:vu:0}
+\end{align}
+Note that for any distinct vertices \(x\) and \(y\) the following \(a_{x, y} \equiv 1 - a_{y, x}\) always holds, thus equations~\eqref{eq:ilp:transitivity:uv:1} and~\eqref{eq:ilp:transitivity:vu:0} alike equations~\eqref{eq:ilp:transitivity:uv:0} and~\eqref{eq:ilp:transitivity:vu:1} are equivalent. Consequently, it is enough to ensure only the first constraint as long as we do it for every ordered pair of vertices. Considering that the variables are binary, to limit \(a_{u, v}\) to a value \(1\) it is enough to impose a constraint \(a_{u, v} \geqslant \epsilon\) for any \(\epsilon \in (0;1]\). In a constraint for ILP, this \(\epsilon\)must be represented as a linear function of \(a_{u, w}\) and \(a_{w, v}\), whose value lies in the half-interval \((0;1]\) if and only if both binary variables are \(1\). An example of such an equation is \(a_{u, v} + a_{v, w} - 1\), leading to a constraint~\eqref{eq:ilp:con:transitivity} in the ILP formulation.
 
-Having the arrangement of the vertices, we can now deduce for each pair of edges $uv$ and $st$ whether they intersect or not.
-Naturally, there are 24 different arrangements of the vertices, as demonstrated in figure~\ref{fig:edge_crossings}.
-Among them, there are only eight in which the edges intersect.
-Thus, the edge $uv$ crosses the edge $st$ if and only if one of the following holds:
-\begin{itemize}[noitemsep]
-    \item $a_{u,s} = 1$, $a_{s,v} = 1$, and $a_{v,t} = 1$
-    \item $a_{u,t} = 1$, $a_{t,v} = 1$, and $a_{v,s} = 1$
-    \item $a_{v,s} = 1$, $a_{s,u} = 1$, and $a_{u,t} = 1$
-    \item $a_{v,t} = 1$, $a_{t,u} = 1$, and $a_{u,s} = 1$
-    \item $a_{s,u} = 1$, $a_{u,t} = 1$, and $a_{t,v} = 1$
-    \item $a_{t,u} = 1$, $a_{u,s} = 1$, and $a_{s,v} = 1$
-    \item $a_{s,v} = 1$, $a_{v,t} = 1$, and $a_{t,u} = 1$
-    \item $a_{t,v} = 1$, $a_{v,s} = 1$, and $a_{s,u} = 1$
-\end{itemize}
+\begin{figure*}
+    \centering
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/uvst}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/usvt}\label{fig:edge_crossings:example-cross}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/ustv}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/suvt}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/sutv}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/stuv}} \hfill
 
-To describe this in the linear program, we create a binary variable $c_{uv, st}$ for every pair of edges $uv$ and $st$.
-Equality $c_{uv, st} = 0$ indicates that the edge $uv$ does not cross $st$.
-To ensure the correctness of these values, we impose eight constraints on each variable, one for each case from above.
-For example, considering the case $a_{u,s} = 1$, $a_{s,v} = 1$, and $a_{v,t} = 1$, we impose the following restriction: $c_{uv, st} \geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2$, which ensures that $c_{uv, st}$ equals $1$ whenever the vertices are ordered as $usvt$.
-Making this for each case restricts $c_{uv, st}$ to the value $1$ if the vertices are arranged in one of the eight ``intersecting'' configurations, ensuring that $c_{uv, st} = 0$ is possible only if $uv$ does not cross $st$.
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/uvts}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/utvs}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/utsv}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/tuvs}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/tusv}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/tsuv}} \hfill
 
-The algorithm's objective is to minimize the maximal number of crossings per edge.
-This value can be written as follows: $\max_{uv \in E(G)} \sum_{st \in E(G)} c_{uv, st}$.
-Unfortunately, it cannot represent an objective function for a linear program as the $\max$ operation is not linear.
-To solve this, we introduce a new integer variable $k$.
-To ensure that it is equal to the objective value, we impose the following constraint on $k$: $k \geqslant \sum_{st \in E(G)} c_{uv, st}$ for each edge $uv \in E(G)$.
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/vust}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/vsut}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/vstu}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/svut}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/svtu}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/stvu}} \hfill
 
-So, the integer linear program can be described as follows:
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/vuts}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/vtus}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/vtsu}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/tvus}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/tvsu}} \hfill
+    \subfloat[][]{\includegraphics[width=.3\textwidth]{edge_cross/tsvu}}
+    \caption{All \(24\) possible arrangements of two edges' endpoints, only \(8\) of which result in intersection. \emph{I do not think it is really necessary. It is TOO big}}
+    \label{fig:edge_crossings}
+\end{figure*}
+
+The next step of the algorithm is to encode the intersections. To represent them, for every unordered pair of edges, \(uv\) and \(st\), we introduce a binary variable \(c_{uv, st}\), hence the constraint~\eqref{eq:ilp:con:cross-var}. The endpoints of the edges can be arranged in \(24\) different ways, as demonstrated in the figure~\ref{fig:edge_crossings}. Among them, there are only eight in which the edges intersect, so the variable \(c_{uv, st}\) must be equal to \(1\) if the corresponding ``ordering variables'' indicate one of these eight arrangements\footnote{As the objective of the program is to minimise the number of crossings, we do not constraint \(c_{uv, st}\) to \(0\) when \(uv\) and \(st\) do not cross leaving it to the optimiser. Doing so, we simplify the problem by reducing the number of constraints for every pair of edges from \(24\) to \(8\).}. For example, considering the arrangement in figure~\ref{fig:edge_crossings:example-cross}, we have to limit the value of \(c_{uv, st}\) to \(1\) if the endpoints are arranged in the order \(usvt\). If the vertices are arranged so, each equation out of \(a_{u,s} \equiv 1\), \(a_{s,v} \equiv 1\) and \(a_{v,t} \equiv 1\) must hold. Moreover, if these equations hold, the vertices must be arranged as \(usvt\). Thus, we have to encode the following equation:
 \begin{align*}
-    \textbf{minimize}\quad&k\\
-    \textbf{subject to}\quad&&k &\geqslant \sum_{st \in E(G)} c_{uv, st},&&\forall uv \in E(G)\\
-    &&c_{uv, st} &\geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2,&&\forall uv, st \in E(G)\\
-    &&c_{uv, st} &\geqslant a_{u,t} + a_{t,v} + a_{v,s} - 2,&&\forall uv, st \in E(G)\\
+    a_{u,s} \equiv 1 \land a_{s,v} \equiv 1 \land a_{v,t} \equiv 1 \longrightarrow c_{uv, st} \equiv 1
+\end{align*}
+We can do so in the same way as we encoded the equation~\eqref{eq:ilp:transitivity:uv:1}, getting the constraint~\eqref{eq:ilp:con:cross-example}. The constraints~\eqref{eq:ilp:con:cross-begin} to~\eqref{eq:ilp:con:cross-end} are constructed analogously for the other seven intersecting arrangements.
+
+Lastly, the algorithm has to encode each edge's crossing number and minimise the maximal value. The crossing number of each edge can be easily represented using ``crossing variables'' by summing the corresponding ones:
+\begin{align}
+    \label{eq:ilp:crossing-number}
+    cr_{e_1} \leqslant \sum_{e_2 \in E(G)} c_{e1, e2}
+\end{align}
+However, as taking the maximal value is not a linear function, to represent the objective, we have to introduce a new variable \(k\), which represents the crossing number of the whole graph \(G\). To ensure that we have to bound \(k\) from below by crossing number if each edge: \(k \geqslant cr_{e_1} \forall e_1 \in E(G)\). Combining this with equation~\eqref{eq:ilp:crossing-number}, we get the constraint~\eqref{eq:ilp:con:crossing-number}. As a result, minimising for \(k\) would give the desired result.
+
+Combining everything together, we get the following formulation of the ILP problem:
+\begin{align}
+    \textbf{minimize}\quad&k  \label{eq:ilp:objective}\\
+    \textbf{subject to}\quad
+    &&a_{u, v} &\geqslant a_{u, w} + a_{w, v} - 1,&&\forall u, v, w \in V(G)  \label{eq:ilp:con:transitivity}\\
+    &&c_{uv, st} &\geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2,&&\forall uv, st \in E(G)  \label{eq:ilp:con:cross-example}\\
+    &&c_{uv, st} &\geqslant a_{u,t} + a_{t,v} + a_{v,s} - 2,&&\forall uv, st \in E(G) \label{eq:ilp:con:cross-begin}\\
     &&c_{uv, st} &\geqslant a_{v,s} + a_{s,u} + a_{u,t} - 2,&&\forall uv, st \in E(G)\\
     &&c_{uv, st} &\geqslant a_{v,t} + a_{t,u} + a_{u,s} - 2,&&\forall uv, st \in E(G)\\
     &&c_{uv, st} &\geqslant a_{s,u} + a_{u,t} + a_{t,v} - 2,&&\forall uv, st \in E(G)\\
     &&c_{uv, st} &\geqslant a_{t,u} + a_{u,s} + a_{s,v} - 2,&&\forall uv, st \in E(G)\\
     &&c_{uv, st} &\geqslant a_{s,v} + a_{v,t} + a_{t,u} - 2,&&\forall uv, st \in E(G)\\
-    &&c_{uv, st} &\geqslant a_{t,v} + a_{v,s} + a_{s,u} - 2,&&\forall uv, st \in E(G)\\
-    &&a_{u, w} &\geqslant a_{u, v} + a_{v, w} - 1,&&\forall u, v, w \in V(G)\\
-    &&c_{uv, st} &\in \{0, 1\},&&\forall uv, st \in E(G)\\
-    &&a_{u, v} &\in \{0, 1\},&&\forall u, v \in V(G)\\
-\end{align*}
+    &&c_{uv, st} &\geqslant a_{t,v} + a_{v,s} + a_{s,u} - 2,&&\forall uv, st \in E(G)  \label{eq:ilp:con:cross-end}\\
+    &&k &\geqslant \sum_{st \in E(G)} c_{uv, st},&&\forall uv \in E(G)  \label{eq:ilp:con:crossing-number}\\
+    &&c_{uv, st} &\in \{0, 1\},&&\forall uv, st \in E(G)  \label{eq:ilp:con:cross-var}\\
+    &&a_{u, v} &\in \{0, 1\},&&\forall u, v \in V(G)  \label{eq:ilp:con:order-var}
+\end{align}
+
+In addition to the described reduction, we also considered a small optimisation of an objective function for the ILP formulation. In the implementation we discussed, we only ensure that each ``crossing variable'' equals \(1\) if two edges actually cross, so for any non-crossing edges, the variable might take on both \(0\) and \(1\). As the variables' influence on the objective is not direct, but through a constraint on variable \(k\), it might be hard for an optimiser to estimate the influence of each variable accurately. To help it, we included an extra term in the objective function~\eqref{eq:ilp:objective}: \(\frac{\sum c_{e_1, e_2}}{|E|^2}\). By using \(|E|^2\) as a dominator of the fraction, we ensure that the value of the inserted term never exceeds \(1\) so that the optimiser would always prioritise decreasing \(k\) over this term.
 
 
 \section{SAT Formulation (unchanged)}\label{sec:SAT-def}
