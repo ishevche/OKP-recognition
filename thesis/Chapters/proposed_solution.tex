@@ -5,13 +5,47 @@ This chapter will discuss the methods this work considers to recognise the outer
 
 \section{Bicomponent decomposition}
 
-For complex problems, decomposing into smaller, independent subproblems often leads to a significant performance boost. In our context of recognising outer \(k\)-planar graphs, an effective strategy to do so is to partition the graph into subgraphs in such a manner that allows us to process them independently by the recognition algorithm. As the smallest part of the graph that can be processed by any algorithm independently of the remainder is a biconnected component, we use block-cut decomposition for this purpose, which splits the graph into biconnected components, referred to as blocks. It is worth noting that each graph edge belongs to a single block. However, any two bicomponents may share a vertex, referred to as a cut vertex. Considering blocks and cut vertices as graph nodes, we can construct a so-called block-cut tree, wherein a block node is connected to a cut node if and only if the corresponding biconnected component contains a corresponding vertex.
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{TODO}
+        \caption{An original graph with highlighted biconnected componnents and cut vertices}
+        \label{fig:bidec:original_graph}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{TODO}
+        \caption{Block-cut tree of a graph}
+        \label{fig:bidec:bctree}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{TODO}
+        \caption{Outer \(k\)-planar drawing of each componnent}
+        \label{fig:bidec:componnents_drawings}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{TODO}
+        \caption{Outer \(k\)-planar drawing of the original graph}
+        \label{fig:bidec:graph_drawing}
+    \end{subfigure}
+    \caption{An example of bicomponnent decomposition}
+\end{figure}
 
-The advantage of this decomposition is that any method for recognising outer \(k\)-planar graphs can be applied separately to each component, and results can be combined easily afterwards. Specifically, if some component does not admit an outer \(k\)-planar drawing, neither does the whole graph. Otherwise, if all components admit such a drawing, they can be merged by combining duplicates of each cut vertex. This merging process does not introduce any additional edge crossings since both components are located on the outer face of each other. Moreover, as no new faces are created during this process -- due to the acyclic structure of the block-cut tree -- every vertex remains on the outer face of the graph during this process. Consequently, the resulting drawing of an original graph is outer \(k\)-planar, and it exists if and only if each biconnected component of the graph admits such a drawing.
+For complex problems, decomposing into smaller subproblems often leads to a significant increase in performance. In our context of recognising outer \(k\)-planar graphs, an effective strategy to do so is to partition the graph into subgraphs in such a manner that allows us to process them independently by the recognition algorithm. One of the plausible ways to accomplish this is to split the graph into biconnected components as shown in the figure~\ref{fig:bidec:original_graph}. This process is implemented using block-cut decomposition. It is worth noting that each graph edge belongs to a single biconnected component, referred to as a block. However, any two bicomponents may share a vertex, referred to as a cut vertex. Considering blocks and cut vertices as graph nodes, we can construct a so-called block-cut tree, wherein a block node is connected to a cut node if and only if the corresponding biconnected component contains a corresponding vertex, see figure~\ref{fig:bidec:bctree}.
 
-In this work, we implemented this decomposition using the method \textsf{biconnected\_compo\-nents}\footnote{\url{https://www.boost.org/doc/libs/1_87_0/libs/graph/doc/biconnected_components.html}} from the Boost Graph Library~\cite{boost}. This function assigns an index of the bicomponent to each edge to which it belongs. Additionally, it provides a list of cut vertices. Afterwards, we copy each block as an independent graph and create mappings to translate new \emph{local} vertices back to their original identifiers. Finally, we construct a supergraph representing the structure of a block-cut tree wherein each node references a copied block along with corresponding mapping or a cut vertex.
+\todo[inline]{How to show that this boosts performance more formally in the next sentence?}
 
-To construct a final graph drawing, we perform a depth-first search on the block-cut tree, recording the predecessor for each node upon discovery. Also, each time a block vertex is discovered, we use one of the methods described in other sections of this chapter to check whether the component admits an outer \(k\)-planar drawing and obtain it if so. Afterwards, we merge the new drawing with the already existing one by combining the corresponding cut vertex as described before. If the considered block is the first encountered one, its drawing is directly copied into a sequence that will form the final drawing. Otherwise, the block necessarily has a predecessor. Due to the structure of a tree, it is a cut node corresponding to a vertex that is shared with some other block that has already been considered and thus added to a final drawing. As a result, we can find a corresponding cut vertex in both global and local drawings. Since each drawing is represented as a cyclic sequence of vertices, we can rotate the local drawing so that the corresponding cut vertex appears as the first item in a sequence. Finally, we insert the local drawing starting from the second element into the global one immediately after the cut vertex.
+Due to the nature of bi-connectedness, after getting outer \(k\)-planar drawings of biconnected components separately, we can combine them easily into an outer \(k\)-planar drawing of the whole graph, hence, the increase in performance. To be more specific, if some component does not admit an outer \(k\)-planar drawing, neither does the whole graph. Otherwise, if all components admit such a drawing, they can be merged by combining duplicates of each cut vertex see figures~\ref{fig:bidec:componnents_drawings} and~\ref{fig:bidec:graph_drawing}. This merging process does not introduce any additional edge crossings since both components are located on the outer face of each other. Moreover, as no new faces are created during this process (due to the acyclic structure of the block-cut tree), every vertex remains on the outer face of the graph during this process. Consequently, the resulting drawing of an original graph is outer \(k\)-planar, and it exists if and only if each biconnected component of the graph admits such a drawing.
+
+In this work, we implemented this decomposition using the method \textsf{bi\-connec\-ted\_compo\-nents}\footnote{\url{https://www.boost.org/doc/libs/1_87_0/libs/graph/doc/biconnected_components.html}} from the Boost Graph Library~\cite{boost}. This function assigns an index of the bicomponent to each edge to which it belongs. Additionally, it provides a list of cut vertices. Afterwards, we copy each block as an independent graph and create mappings to translate new \emph{local} vertices back to their original identifiers. Finally, we construct a supergraph representing the structure of a block-cut tree wherein each node references a copied block alongside corresponding mapping or a cut vertex.
+
+To construct a drawing of the whole graph, after performing the decomposition, we perform a depth-first search on the block-cut tree, recording the predecessor for each node upon discovery. Additionally, each time a block vertex is discovered, we use one of the methods described in other sections of this chapter to check whether the component admits an outer \(k\)-planar drawing and obtain it if so. Afterwards, we merge the new drawing with the already existing one by combining the common cut vertex as described before. If the considered block is the first encountered one, its drawing is directly copied into a sequence that will form the final drawing. Otherwise, the block necessarily has a predecessor. Due to the structure of a tree, it is a cut node corresponding to a vertex that is shared with some other block that has already been considered and thus added to a final drawing. As a result, we can find a corresponding cut vertex in both global and local drawings. Since each drawing is represented as a cyclic sequence of vertices, we can rotate the local drawing so that the corresponding cut vertex appears as the first item in a sequence. Finally, we insert the local drawing starting from the second element into the global one immediately after the corresponding cut vertex.
 
 \section{ILP Formulation (unchanged)}\label{sec:ILP-def}
 
@@ -77,6 +111,7 @@ So, the integer linear program can be described as follows:
     &&a_{u, v} &\in \{0, 1\},&&\forall u, v \in V(G)\\
 \end{align*}
 
+
 \section{SAT Formulation (unchanged)}\label{sec:SAT-def}
 
 Another approach to solving this problem is to check for a specific $k$ whether the given graph is outer-$k$-planar.
@@ -111,9 +146,10 @@ Doing so, we ensure that for each edge $e_0$, no $k + 1$ different edges interse
 \todo[inline]{implementation details (iterate over all permutations, finding minimal k)}
 \todo[inline]{possible optimizations (2k + 2, equivalence instead of implication for c\_\{...\}, eliminating c\_\{...\} at all)}
 
+
 \section{Dynamic algorithm}
 
-The last algorithm we considered was introduced by \citeauthor{okp}~\cite{okp}. Its core idea is to build the drawing incrementally. Each step of this process can be parameterised by three parameters. The first is a pair of vertices \(u\) and \(v\) that split a potential drawing into two parts, denoted as a link. The next is a set \(R_{uv}\) of vertices lying to the right of the split. And lastly the set \(E_{uv} = \{e_1, e_2, \dots, e_l\}\) of \(l\) edges crossing the \(uv\) link from the right to the left side. Let \(G_{uv, R_{uv}}\) be a graph consisting of vertices \(\{u, v\} \cup R_{uv}\) alongside all connecting edges  from an original graph \(G\) with inserted vertices \(t_1, t_2, \dots, t_l\) connected to corresponding vertices by edges \(e_1, e_2, \dots, e_l\). We call a configuration on each step \emph{drawable} if exists an outer \(k\)-planar drawing of a corresponding graph \(G_{uv, R_{uv}}\) which cyclic order contains \((u, t_{\tau(1)}, t_{\tau(2)}, \dots, t_{\tau(l)}, v)\) as a consecutive subsequence for some permutation \(\tau\). On each step, the algorithm finds all possible permutations for which the configuration is \emph{drawable} and stores them in the lookup table.
+The last algorithm we considered was introduced by \citeauthor{okp}~\cite{okp}. Its core idea is to build the drawing incrementally. Each step of this process can be parameterised by three parameters. The first is a pair of vertices \(u\) and \(v\) that split a potential drawing into two parts, denoted as a link. The next is a set \(R_{uv}\) of vertices lying to the right of the split. And lastly the set \(E_{uv} = \{e_1, e_2, \dots, e_l\}\) of \(l\) edges crossing the \(uv\) link from the right to the left side. Let \(G_{uv, R_{uv}}\) be a graph consisting of vertices \(\{u, v\} \cup R_{uv}\) alongside all connecting edges from an original graph \(G\) with inserted vertices \(t_1, t_2, \dots, t_l\) connected to corresponding vertices by edges \(e_1, e_2, \dots, e_l\). We call a configuration on each step \emph{drawable} if exists an outer \(k\)-planar drawing of a corresponding graph \(G_{uv, R_{uv}}\) which cyclic order contains \((u, t_{\tau(1)}, t_{\tau(2)}, \dots, t_{\tau(l)}, v)\) as a consecutive subsequence for some permutation \(\tau\). On each step, the algorithm finds all possible permutations for which the configuration is \emph{drawable} and stores them in the lookup table.
 
 To significantly reduce the search space, the authors used the result of \citeauthor{triangulations}. In their work~\cite{triangulations}, authors showed that the right side of any \emph{drawable} configuration can be split into two smaller parts by selecting a vertex \(w\) from the right side in such a way that both links \(uw\) and \(vw\) are crossed by at most \(k\) edges. This allows us to limit the search only to \emph{narrow} configurations with \(l \leqslant k\) as by reversing the argument, we get that outer \(k\)-planar drawing for \(G_{uv, R_{uv}}\) is possible if and only if we can combine it from two \emph{narrow drawable} configurations for active links \(uw\) and \(vw\) for some vertex \(w\) from the right side.
 
