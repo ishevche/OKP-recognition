@@ -18,12 +18,8 @@ bool okp_solver::solve() {
 
     initialise_table();
 
-    while (crossing_number < 7 && !is_drawable()) {
+    while (!is_drawable()) {
         add_table_entries(++crossing_number);
-    }
-
-    if (crossing_number >= 7) {
-        return false;
     }
 
 #ifndef NDEBUG

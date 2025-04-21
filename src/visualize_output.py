@@ -14,38 +14,17 @@ def get_arguments():
                         help="File in which the plot is saved", type=str)
     return parser.parse_args()
 
-def sync_cr(data):
-    data['ilp_cr'] = data['ilp_cr'].where(data['ilp_success'], np.nan)
-    data['okp_cr'] = data['okp_cr'].where(data['okp_success'], np.nan)
-    data['sat_cr'] = data['sat_cr'].where(data['sat_success'], np.nan)
-    rows = data[['ilp_cr', 'okp_cr', 'sat_cr']].dropna(how='all')
-    diff_cr = rows.min(axis=1) != rows.max(axis=1)
-    if diff_cr.any():
-        raise ValueError(f"Non consistent crossing numbers:\n{rows[diff_cr]}")
-    cr = data[['ilp_cr', 'okp_cr', 'sat_cr']].min(axis=1)
-    data['ilp_cr'] = cr
-    data['okp_cr'] = cr
-    data['sat_cr'] = cr
-    return data
 
 def read_input(input_files):
     data = pd.read_csv(input_files)
-    data = sync_cr(data)
-    data = pd.wide_to_long(data, stubnames=['ilp', 'sat', 'okp'],
-                           i=['graph_dot', 'graph_g6'],
-                           j='attribute', sep='_', suffix='.+').reset_index()
-    data = data.melt(id_vars=['graph_dot', 'graph_g6', 'attribute'],
-                     value_vars=['ilp', 'sat', 'okp'],
-                     var_name="method")
-    data = data.pivot(index=['graph_dot', 'graph_g6', 'method'],
-                      columns='attribute', values='value').reset_index()
     # data = data[data['success'].notna()]
     data = data[data['success'] == True]
     # data = data[data['cr'] <= 7]
     data['time'] /= 10 ** 9
-    data['time'] = data['time'].replace(0., 60.*10.)
+    data['time'] = data['time'].replace(0., 60. * 10.)
     data = data.astype({"cr": "int64"})
     return data
+
 
 def main(input_files, output_file):
     data = read_input(input_files)
@@ -57,6 +36,7 @@ def main(input_files, output_file):
     plt.yscale('log')
     plt.savefig(output_file)
     plt.clf()
+
 
 if __name__ == "__main__":
     args = get_arguments()

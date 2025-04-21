@@ -7,12 +7,8 @@ bool sat_solver::solve() {
         return true;
     }
 
-    while (crossing_number < 7 && !is_drawable()) {
+    while (!is_drawable()) {
         crossing_number++;
-    }
-
-    if (crossing_number >= 7) {
-        return false;
     }
 
     std::ranges::sort(vertex_order,

@@ -3,9 +3,7 @@ project(okp-recognition CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CXX ON)
 
-set(ILP_CROSSING_SUM_OPTIMIZATION ON)
-
-add_executable(okp-recognition
+set(SOURCES
         src/main.cpp
         src/graphIO.cpp
         src/ilp.cpp
@@ -15,30 +13,41 @@ add_executable(okp-recognition
         src/okp_solver.cpp
 )
 
+add_executable(okp-recognition-cro ${SOURCES})
+add_executable(okp-recognition ${SOURCES})
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(Boost COMPONENTS graph program_options system REQUIRED)
 find_package(GUROBI REQUIRED)
 find_library(KISSAT_LIBRARY NAMES kissat REQUIRED PATH_SUFFIXES build)
 find_path(KISSAT_INCLUDE_DIR NAMES kissat.h REQUIRED PATH_SUFFIXES src)
 
-target_include_directories(okp-recognition PRIVATE
+set(INCLUDES
         ${GUROBI_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIR}
         ${KISSAT_INCLUDE_DIR}
-        include)
-target_link_libraries(okp-recognition
+        include
+)
+set(LIBS
         ${GUROBI_LIBRARY}
         ${GUROBI_CXX_LIBRARY}
         ${KISSAT_LIBRARY}
-        ${Boost_LIBRARIES})
+        ${Boost_LIBRARIES}
+)
 
-if (ILP_CROSSING_SUM_OPTIMIZATION)
-    target_compile_definitions(okp-recognition PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
-endif ()
+target_include_directories(okp-recognition PRIVATE ${INCLUDES})
+target_include_directories(okp-recognition-cro PRIVATE ${INCLUDES})
+target_link_libraries(okp-recognition ${LIBS})
+target_link_libraries(okp-recognition-cro ${LIBS})
 
-set_target_properties(${PROJECT_NAME}
+target_compile_definitions(okp-recognition-cro PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
+
+set(PROPERTIES
         PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib"
         LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib"
         RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
 )
+
+set_target_properties(okp-recognition ${PROPERTIES})
+set_target_properties(okp-recognition-cro ${PROPERTIES})
