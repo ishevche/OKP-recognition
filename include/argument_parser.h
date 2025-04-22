@@ -22,7 +22,7 @@ public:
     std::string input_graph;
     std::string output_file;
     solver_type method;
-    bool use_bct_decomposition;
+    bool no_bct_decomposition;
 
 private:
     boost::program_options::variables_map var_map{};

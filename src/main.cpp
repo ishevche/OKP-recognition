@@ -44,7 +44,7 @@ int main(int ac, char** av) {
         put(edge_index_map, *ei, edge_id++);
     }
 
-    std::unique_ptr<solver> solver = get_solver(cmd_arguments.method, cmd_arguments.use_bct_decomposition, graph);
+    std::unique_ptr<solver> solver = get_solver(cmd_arguments.method, !cmd_arguments.no_bct_decomposition, graph);
     auto start = get_current_time_fenced();
     bool solved = solver->solve();
     auto end = get_current_time_fenced();

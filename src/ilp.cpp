@@ -78,6 +78,26 @@ bool ilp_solver::solve() {
                 model.addConstr(do_cross >= order_variables[s][v] + order_variables[v][t] + order_variables[t][u] - 2);
                 model.addConstr(do_cross >= order_variables[t][v] + order_variables[v][s] + order_variables[s][u] - 2);
             }
+#ifdef ILP_EXACT_CROSS
+            {
+                model.addConstr(do_cross <= 3 - order_variables[u][v] - order_variables[v][s] - order_variables[s][t]);
+                model.addConstr(do_cross <= 3 - order_variables[u][s] - order_variables[s][t] - order_variables[t][v]);
+                model.addConstr(do_cross <= 3 - order_variables[s][t] - order_variables[t][u] - order_variables[u][v]);
+                model.addConstr(do_cross <= 3 - order_variables[s][u] - order_variables[u][v] - order_variables[v][t]);
+                model.addConstr(do_cross <= 3 - order_variables[v][u] - order_variables[u][s] - order_variables[s][t]);
+                model.addConstr(do_cross <= 3 - order_variables[v][s] - order_variables[s][t] - order_variables[t][u]);
+                model.addConstr(do_cross <= 3 - order_variables[s][t] - order_variables[t][v] - order_variables[v][u]);
+                model.addConstr(do_cross <= 3 - order_variables[s][v] - order_variables[v][u] - order_variables[u][t]);
+                model.addConstr(do_cross <= 3 - order_variables[u][v] - order_variables[v][t] - order_variables[t][s]);
+                model.addConstr(do_cross <= 3 - order_variables[u][t] - order_variables[t][s] - order_variables[s][v]);
+                model.addConstr(do_cross <= 3 - order_variables[t][s] - order_variables[s][u] - order_variables[u][v]);
+                model.addConstr(do_cross <= 3 - order_variables[t][u] - order_variables[u][v] - order_variables[v][s]);
+                model.addConstr(do_cross <= 3 - order_variables[v][u] - order_variables[u][t] - order_variables[t][s]);
+                model.addConstr(do_cross <= 3 - order_variables[v][t] - order_variables[t][s] - order_variables[s][u]);
+                model.addConstr(do_cross <= 3 - order_variables[t][s] - order_variables[s][v] - order_variables[v][u]);
+                model.addConstr(do_cross <= 3 - order_variables[t][v] - order_variables[v][u] - order_variables[u][s]);
+            }
+#endif
         }
         model.addConstr(crossing_upper_bound >=
                         edge_crossing_numbers[get(edge_index_map, edge1)]);

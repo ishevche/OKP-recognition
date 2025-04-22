@@ -13,6 +13,8 @@ set(SOURCES
         src/okp_solver.cpp
 )
 
+add_executable(okp-recognition-full-cro ${SOURCES})
+add_executable(okp-recognition-full ${SOURCES})
 add_executable(okp-recognition-cro ${SOURCES})
 add_executable(okp-recognition ${SOURCES})
 
@@ -37,10 +39,17 @@ set(LIBS
 
 target_include_directories(okp-recognition PRIVATE ${INCLUDES})
 target_include_directories(okp-recognition-cro PRIVATE ${INCLUDES})
+target_include_directories(okp-recognition-full PRIVATE ${INCLUDES})
+target_include_directories(okp-recognition-full-cro PRIVATE ${INCLUDES})
 target_link_libraries(okp-recognition ${LIBS})
 target_link_libraries(okp-recognition-cro ${LIBS})
+target_link_libraries(okp-recognition-full ${LIBS})
+target_link_libraries(okp-recognition-full-cro ${LIBS})
 
 target_compile_definitions(okp-recognition-cro PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
+target_compile_definitions(okp-recognition-full-cro PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
+target_compile_definitions(okp-recognition-full PRIVATE ILP_EXACT_CROSS)
+target_compile_definitions(okp-recognition-full-cro PRIVATE ILP_EXACT_CROSS)
 
 set(PROPERTIES
         PROPERTIES
@@ -51,3 +60,5 @@ set(PROPERTIES
 
 set_target_properties(okp-recognition ${PROPERTIES})
 set_target_properties(okp-recognition-cro ${PROPERTIES})
+set_target_properties(okp-recognition-full ${PROPERTIES})
+set_target_properties(okp-recognition-full-cro ${PROPERTIES})
