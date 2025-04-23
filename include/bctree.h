@@ -10,14 +10,14 @@ enum bctree_node_type_t {
 
 struct bctree_vertex_t {
     bctree_node_type_t node_type;
-    Graph bi_component;
-    std::vector<Vertex> original_vertices;
-    Vertex articulation_point;
+    graph_t bi_component;
+    std::vector<vertex_t> original_vertices;
+    vertex_t articulation_point;
 };
 
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, bctree_vertex_t> bctree_t;
 typedef bctree_t::vertex_descriptor bctree_vertex;
 
-bctree_t decompose(const Graph& graph);
+bctree_t decompose(const graph_t& graph);
 
 #endif //OKP_RECOGNITION_PREPROCESS_H

@@ -51,8 +51,8 @@ bool okp_solver::is_biconnected() const {
     return num_components == 1;
 }
 
-void okp_solver::fill_edge_order(std::vector<Edge>& order_vector,
-                                 const std::vector<Edge>& edges,
+void okp_solver::fill_edge_order(std::vector<edge_t>& order_vector,
+                                 const std::vector<edge_t>& edges,
                                  const std::vector<std::pair<int, int>>& edge_order) {
     order_vector.resize(edges.size());
     for (int i = 0; i < static_cast<int>(edges.size()); i++) {
@@ -63,7 +63,7 @@ void okp_solver::fill_edge_order(std::vector<Edge>& order_vector,
 bool okp_solver::check_triangle_consistency(const std::ranges::range auto& edges,
                                             group_t common_group, group_t prev_group) {
     std::pair prev_trg{prev_group, 0};
-    for (const Edge& edge : edges) {
+    for (const edge_t& edge : edges) {
         const auto& triangle_edge = triangle_edges_map[get(edge_index_map, edge)];
         auto src = triangle_edge.first;
         auto trg = triangle_edge.second;
@@ -80,7 +80,7 @@ bool okp_solver::check_triangle_consistency(const std::ranges::range auto& edges
 }
 
 void okp_solver::add_triangle_edges(const std::ranges::range auto& edges,
-                                    Vertex opposite_vertex,
+                                    vertex_t opposite_vertex,
                                     group_t opposite_group,
                                     group_t common_group) {
     for (int i = 0; i < static_cast<int>(edges.size()); ++i) {
@@ -101,7 +101,7 @@ void okp_solver::add_triangle_edges(const std::ranges::range auto& edges,
 bool okp_solver::count_triangle_intersections(const std::ranges::range auto& part_a_edges,
                                               const std::ranges::range auto& part_b_edges,
                                               const std::ranges::range auto& piercing_edges,
-                                              Vertex split_vertex) {
+                                              vertex_t split_vertex) {
     auto default_entry = std::make_pair(std::make_pair(NONE, 0), std::make_pair(NONE, 0));
     std::ranges::fill(triangle_edges_map, default_entry);
     triangle_edges.clear();
@@ -143,8 +143,8 @@ bool okp_solver::count_triangle_intersections(const std::ranges::range auto& par
     return true;
 }
 
-void okp_solver::process_split(size_t right_side, int right_size, const std::vector<Edge>& piercing_edges,
-                               Vertex split_vertex) {
+void okp_solver::process_split(size_t right_side, int right_size, const std::vector<edge_t>& piercing_edges,
+                               vertex_t split_vertex) {
     std::pair uw_link(active_link.first, split_vertex);
     std::pair vw_link(split_vertex, active_link.second);
     if (split_vertex < active_link.first) { std::swap(uw_link.first, uw_link.second); }
@@ -352,8 +352,8 @@ void okp_solver::fill_right_sides() {
         filtered_graph,
         make_iterator_property_map(component_map.begin(), vertex_index_map)
     );
-    Graph component_graph(num_components);
-    for (Edge e : filtered_edges) {
+    graph_t component_graph(num_components);
+    for (edge_t e : filtered_edges) {
         int source_index = static_cast<int>(get(vertex_index_map, source(e, graph)));
         int target_index = static_cast<int>(get(vertex_index_map, target(e, graph)));
         if (component_map[source_index] == component_map[target_index]) {
@@ -418,7 +418,7 @@ void okp_solver::print_table() {
                 int size = 0;
                 for (int k = 0; 1UL << k <= side; size += (1 << k++ & side) != 0) {}
                 auto edges = std::ranges::find_if(dp_table_initialisation[i][j][size],
-                                                  [side](const std::pair<size_t, std::vector<Edge>>& pair) {
+                                                  [side](const std::pair<size_t, std::vector<edge_t>>& pair) {
                                                       return pair.first == side;
                                                   })->second;
                 std::cout << std::bitset<10>(side) << ": {";

@@ -1,7 +1,7 @@
 #include "graphIO.h"
 
-void save_dot(const std::string& file_name, Graph& graph,
-              const std::vector<Vertex>& ordering,
+void save_dot(const std::string& file_name, graph_t& graph,
+              const std::vector<vertex_t>& ordering,
               int number_of_crossings,
               const boost::dynamic_properties& graph_props) {
     std::ofstream out{file_name};
@@ -13,7 +13,7 @@ void save_dot(const std::string& file_name, Graph& graph,
         graph[ordering[j]].location = std::to_string(x) + ','
                                       + std::to_string(y) + '!';
     }
-    for (Edge e : make_iterator_range(edges(graph))) {
+    for (edge_t e : make_iterator_range(edges(graph))) {
         graph[e].color = "";
         int crossing = count_edge_crossing(e, graph);
         if (crossing == number_of_crossings) {
@@ -27,12 +27,12 @@ void save_dot(const std::string& file_name, Graph& graph,
     dot_file.close();
 }
 
-int count_edge_crossing(const Edge& edge, const Graph& graph) {
+int count_edge_crossing(const edge_t& edge, const graph_t& graph) {
     int result = 0;
     int edge_src = graph[source(edge, graph)].order;
     int edge_trg = graph[target(edge, graph)].order;
     if (edge_src > edge_trg) { std::swap(edge_src, edge_trg); }
-    for (Edge other : make_iterator_range(edges(graph))) {
+    for (edge_t other : make_iterator_range(edges(graph))) {
         int other_src = graph[source(other, graph)].order;
         int other_trg = graph[target(other, graph)].order;
         if (other_src > other_trg) { std::swap(other_src, other_trg); }

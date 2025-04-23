@@ -5,7 +5,7 @@
 #include "argument_parser.h"
 #include "timer.h"
 
-std::unique_ptr<solver> get_solver(solver_type type, bool use_bct, const Graph& graph) {
+std::unique_ptr<solver> get_solver(solver_type type, bool use_bct, const graph_t& graph) {
     switch (type) {
     case ILP_SOLVER:
         if (!use_bct) {
@@ -29,12 +29,12 @@ std::unique_ptr<solver> get_solver(solver_type type, bool use_bct, const Graph& 
 
 int main(int ac, char** av) {
     command_line_options_t cmd_arguments(ac, av);
-    Graph graph;
+    graph_t graph;
 
     boost::dynamic_properties graph_props;
-    graph_props.property("node_id", get(&VertexStruct::name, graph));
-    graph_props.property("pos", get(&VertexStruct::location, graph));
-    graph_props.property("color", get(&EdgeStruct::color, graph));
+    graph_props.property("node_id", get(&vertex_struct::name, graph));
+    graph_props.property("pos", get(&vertex_struct::location, graph));
+    graph_props.property("color", get(&edge_struct::color, graph));
     read_graphviz(cmd_arguments.input_graph, graph, graph_props);
 
     auto edge_index_map = get(boost::edge_index, graph);

@@ -12,7 +12,7 @@ bool sat_solver::solve() {
     }
 
     std::ranges::sort(vertex_order,
-                      [this](Vertex u, Vertex v) {
+                      [this](vertex_t u, vertex_t v) {
                           int u_idx = static_cast<int>(get(vertex_index_map, u));
                           int v_idx = static_cast<int>(get(vertex_index_map, v));
                           return kissat_value(kissat_solver, order_variables[u_idx][v_idx]) > 0;
@@ -89,9 +89,9 @@ void sat_solver::initialise_solver() {
         std::ranges::fill(crossing_variables[i], 0);
     }
 
-    for (Edge edge1 : make_iterator_range(edges(graph))) {
+    for (edge_t edge1 : make_iterator_range(edges(graph))) {
         int edge1_idx = get(edge_index_map, edge1);
-        for (Edge edge2 : make_iterator_range(edges(graph))) {
+        for (edge_t edge2 : make_iterator_range(edges(graph))) {
             int edge2_idx = get(edge_index_map, edge2);
             if (edge1_idx == edge2_idx) {
                 crossing_variables[edge1_idx][edge2_idx] = 1;
@@ -113,13 +113,13 @@ void sat_solver::initialise_solver() {
     }
 
     // Restricting number of crossings for every edge
-    for (Edge edge : make_iterator_range(edges(graph))) {
+    for (edge_t edge : make_iterator_range(edges(graph))) {
         std::string crossings(crossing_number + 1, 1);
         int edge_idx = get(edge_index_map, edge);
         crossings.resize(num_edges, 0);
         do {
             int i = 0;
-            for (Edge other : make_iterator_range(edges(graph))) {
+            for (edge_t other : make_iterator_range(edges(graph))) {
                 if (crossings[i++]) {
                     int other_idx = get(edge_index_map, other);
                     kissat_add(kissat_solver, -crossing_variables[edge_idx][other_idx]);
@@ -132,7 +132,7 @@ void sat_solver::initialise_solver() {
 
 #define ADD_CLAUSE4(solver, a, b, c, d) {kissat_add(solver, a);kissat_add(solver, b);kissat_add(solver, c);kissat_add(solver, d);kissat_add(solver, 0);}
 
-void sat_solver::add_crossing_clauses(const Edge& edge1, const Edge& edge2, int crossing_var) const {
+void sat_solver::add_crossing_clauses(const edge_t& edge1, const edge_t& edge2, int crossing_var) const {
     int u = static_cast<int>(get(vertex_index_map, source(edge1, graph)));
     int v = static_cast<int>(get(vertex_index_map, target(edge1, graph)));
     int s = static_cast<int>(get(vertex_index_map, source(edge2, graph)));

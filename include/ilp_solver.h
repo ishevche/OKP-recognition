@@ -7,14 +7,14 @@
 
 
 class ilp_solver : public solver {
-    typedef boost::property_map<Graph, boost::edge_index_t>::const_type edge_index_map_t;
-    typedef boost::property_map<Graph, boost::vertex_index_t>::const_type vertex_index_map_t;
+    typedef boost::property_map<graph_t, boost::edge_index_t>::const_type edge_index_map_t;
+    typedef boost::property_map<graph_t, boost::vertex_index_t>::const_type vertex_index_map_t;
 
     const vertex_index_map_t vertex_index_map;
     const edge_index_map_t edge_index_map;
 
 public:
-    explicit ilp_solver(const Graph& graph, int crossing_number = 0)
+    explicit ilp_solver(const graph_t& graph, int crossing_number = 0)
         : solver(graph, crossing_number),
           vertex_index_map(get(boost::vertex_index, graph)),
           edge_index_map(get(boost::edge_index, graph)) {

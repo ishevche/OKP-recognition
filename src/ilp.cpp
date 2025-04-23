@@ -53,10 +53,10 @@ bool ilp_solver::solve() {
     std::vector<GRBLinExpr> edge_crossing_numbers(num_edges);
 
     // Edge crossings variables definition
-    for (Edge edge1 : make_iterator_range(edges(graph))) {
+    for (edge_t edge1 : make_iterator_range(edges(graph))) {
         int u = static_cast<int>(get(vertex_index_map, source(edge1, graph)));
         int v = static_cast<int>(get(vertex_index_map, target(edge1, graph)));
-        for (Edge edge2 : make_iterator_range(edges(graph))) {
+        for (edge_t edge2 : make_iterator_range(edges(graph))) {
             if (get(edge_index_map, edge1) >= get(edge_index_map, edge2)) {
                 continue;
             }
@@ -117,7 +117,7 @@ bool ilp_solver::solve() {
     model.optimize();
 
     std::ranges::sort(vertex_order,
-                      [this](Vertex u, Vertex v) {
+                      [this](vertex_t u, vertex_t v) {
                           int u_index = static_cast<int>(get(vertex_index_map, u));
                           int v_index = static_cast<int>(get(vertex_index_map, v));
                           return order_variables[u_index][v_index].getValue();
