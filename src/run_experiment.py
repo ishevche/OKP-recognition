@@ -13,24 +13,27 @@ import networkx as nx
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("graphs_file", help="file containing graphs in Graphviz format", default="data/graphs.txt")
-    parser.add_argument("-p", "--subprocesses", help="Number of subprocesses to use at the same time. Default: 1",
+    parser.add_argument("-p", "--subprocesses", help="number of subprocesses to use at the same time (default: 1)",
                         dest="subprocesses", type=int, default=1)
     parser.add_argument("-b", "--bin-executables",
-                        help="Path to an executables separated by ','. Default: bin/okp-recognition-cro",
+                        help="path to an executables separated by ',' (default: bin/okp-recognition-cro)",
                         dest="execs", default="bin/okp-recognition-cro")
-    parser.add_argument("-o", "--output", help="Output file for all evaluations. Default: data/results.csv",
+    parser.add_argument("-o", "--output", help="output file for all evaluations (default: data/results.csv)",
                         dest="out", default="data/results.csv")
     parser.add_argument("-m", "--methods",
-                        help="Methods to use, separated by ','. Possible values: ilp, sat, okp. Default: ilp,sat,okp",
+                        help="methods to use, separated by ','; possible values: ilp, sat, okp (default: ilp,sat,okp)",
                         dest="methods", default="ilp,sat,okp")
-    parser.add_argument("-t", "--timeout", help="Timeout for each subprocess in seconds. Default: 600",
+    parser.add_argument("-t", "--timeout", help="timeout for each subprocess in seconds (default: 600)",
                         dest="timeout", type=int, default=600)
-    parser.add_argument("--resume", help="Resume the experiments from the output file. Default: False",
-                        dest="resume", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--resume", help="resume the experiments from the output file (default: no-resume)",
+                        dest="resume", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--biconnected",
+                        help="switch whether to use only biconnected or only non-biconnected graphs (default: biconnected)",
+                        dest="bicon", action=argparse.BooleanOptionalAction, default=True)
     return parser.parse_args()
 
 
-def initialise_df(graphs_file: str, out_file: str, executables: list, methods: list):
+def initialise_df(graphs_file: str, out_file: str, executables: list, methods: list, biconnected: bool):
     with open(graphs_file, "r") as in_file:
         graphs_string = in_file.read()
     graphs_strings = re.findall(r'graph\s+\w\s+\{.*?\}', graphs_string)
@@ -39,7 +42,7 @@ def initialise_df(graphs_file: str, out_file: str, executables: list, methods: l
         pydot_graph = pydot.graph_from_dot_data(graph)
         nx_graph = nx.Graph(nx.nx_pydot.from_pydot(pydot_graph[0]))
         graph_g6 = nx.to_graph6_bytes(nx_graph, header=False).decode().strip()
-        if (nx.is_biconnected(nx_graph)):
+        if not (biconnected ^ nx.is_biconnected(nx_graph)):
             graphs.append((graph, graph_g6, executables, methods))
     df = pd.DataFrame(data=graphs, columns=["graph_dot", "graph_g6", "executable", "method"])
     df = df.reindex(columns=["graph_dot", "graph_g6", "executable", "method", "cr", "time", "success"])
@@ -86,14 +89,15 @@ async def gather_results(df: pd.DataFrame, df_lock, out_file: str, timeout: int)
 
 
 async def run_experiments(graphs_file: str, subprocesses: int, executables: list,
-                          out_file: str, methods: list, timeout: int, resume: bool):
+                          out_file: str, methods: list, timeout: int, resume: bool,
+                          biconnected: bool):
     if os.path.exists(out_file):
         if resume:
             df = pd.read_csv(out_file)
         else:
             sys.exit("Output file already exists. Use --resume to resume the experiments.")
     else:
-        df = initialise_df(graphs_file, out_file, executables, methods)
+        df = initialise_df(graphs_file, out_file, executables, methods, biconnected)
     df["done"] = df.notna().all(axis=1)
     df_lock = asyncio.Lock()
     tasks = [gather_results(df, df_lock, out_file, timeout) for _ in range(subprocesses)]
@@ -104,5 +108,6 @@ if __name__ == "__main__":
     args = get_arguments()
     asyncio.run(run_experiments(
         args.graphs_file, args.subprocesses, args.execs.split(','),
-        args.out, args.methods.split(','), args.timeout, args.resume
+        args.out, args.methods.split(','), args.timeout, args.resume,
+        args.bicon
     ))
