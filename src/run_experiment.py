@@ -30,19 +30,17 @@ def get_arguments():
     return parser.parse_args()
 
 
-def dot_to_g6(graph: str):
-    pydot_graph = pydot.graph_from_dot_data(graph)
-    nx_graph = nx.Graph(nx.nx_pydot.from_pydot(pydot_graph[0]))
-    return nx.to_graph6_bytes(nx_graph, header=False).decode().strip()
-
-
 def initialise_df(graphs_file: str, out_file: str, executables: list, methods: list):
     with open(graphs_file, "r") as in_file:
         graphs_string = in_file.read()
     graphs_strings = re.findall(r'graph\s+\w\s+\{.*?\}', graphs_string)
     graphs = []
     for graph in graphs_strings:
-        graphs.append((graph, dot_to_g6(graph), executables, methods))
+        pydot_graph = pydot.graph_from_dot_data(graph)
+        nx_graph = nx.Graph(nx.nx_pydot.from_pydot(pydot_graph[0]))
+        graph_g6 = nx.to_graph6_bytes(nx_graph, header=False).decode().strip()
+        if (nx.is_biconnected(nx_graph)):
+            graphs.append((graph, graph_g6, executables, methods))
     df = pd.DataFrame(data=graphs, columns=["graph_dot", "graph_g6", "executable", "method"])
     df = df.reindex(columns=["graph_dot", "graph_g6", "executable", "method", "cr", "time", "success"])
     df = df.explode("executable").explode("method").reset_index(drop=True)
