@@ -145,4 +145,23 @@ void sat_solver::add_crossing_clauses(const edge_t& edge1, const edge_t& edge2, 
     ADD_CLAUSE4(kissat_solver, -order_variables[t][u], -order_variables[u][s], -order_variables[s][v], crossing_var)
     ADD_CLAUSE4(kissat_solver, -order_variables[s][v], -order_variables[v][t], -order_variables[t][u], crossing_var)
     ADD_CLAUSE4(kissat_solver, -order_variables[t][v], -order_variables[v][s], -order_variables[s][u], crossing_var)
+
+#ifdef SAT_EXACT_CROSS
+    ADD_CLAUSE4(kissat_solver, -order_variables[u][v], -order_variables[v][s], -order_variables[s][t], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[u][s], -order_variables[s][t], -order_variables[t][v], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[s][t], -order_variables[t][u], -order_variables[u][v], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[s][u], -order_variables[u][v], -order_variables[v][t], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[v][u], -order_variables[u][s], -order_variables[s][t], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[v][s], -order_variables[s][t], -order_variables[t][u], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[s][t], -order_variables[t][v], -order_variables[v][u], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[s][v], -order_variables[v][u], -order_variables[u][t], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[u][v], -order_variables[v][t], -order_variables[t][s], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[u][t], -order_variables[t][s], -order_variables[s][v], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[t][s], -order_variables[s][u], -order_variables[u][v], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[t][u], -order_variables[u][v], -order_variables[v][s], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[v][u], -order_variables[u][t], -order_variables[t][s], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[v][t], -order_variables[t][s], -order_variables[s][u], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[t][s], -order_variables[s][v], -order_variables[v][u], -crossing_var)
+    ADD_CLAUSE4(kissat_solver, -order_variables[t][v], -order_variables[v][u], -order_variables[u][s], -crossing_var)
+#endif
 }

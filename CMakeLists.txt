@@ -48,8 +48,8 @@ target_link_libraries(okp-recognition-full-cro ${LIBS})
 
 target_compile_definitions(okp-recognition-cro PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
 target_compile_definitions(okp-recognition-full-cro PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
-target_compile_definitions(okp-recognition-full PRIVATE ILP_EXACT_CROSS)
-target_compile_definitions(okp-recognition-full-cro PRIVATE ILP_EXACT_CROSS)
+target_compile_definitions(okp-recognition-full PRIVATE ILP_EXACT_CROSS SAT_EXACT_CROSS)
+target_compile_definitions(okp-recognition-full-cro PRIVATE ILP_EXACT_CROSS SAT_EXACT_CROSS)
 
 set(PROPERTIES
         PROPERTIES
