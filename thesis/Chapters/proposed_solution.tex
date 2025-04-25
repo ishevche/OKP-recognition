@@ -1,8 +1,10 @@
-\chapter{Proposed Solution}
+\chapter{Proposed Solution}\label{ch:proposed-solution}
 
 This chapter will discuss the methods this work considers to recognise the outer \(k\)-planar graphs. Besides recognition, these methods provide the outer \(k\)-planar drawings of the given graphs if possible. We represent the drawing as a sequence of vertices in the circular order in which they appear on the boundary of the outer face.
 
 For operations with graphs, we use C++ Boost Graph Library~\cite{boost}. As a graph class, we use \textsf{adjacency\_list} as for all methods described below, we require both \textsf{VertexList} and \textsf{EdgeList} concepts to be able to iterate over both vertices and edges. We prefer this class to an \textsf{adjacency\_matrix} as, according to the documentation\footnote{\url{https://www.boost.org/doc/libs/1_88_0/libs/graph/doc/adjacency_matrix.html}}, it trades memory consumption and speed of graph traversal for the speed of edge insertion and deletion, and neither of these operations is used for algorithms described below.
+
+\todo[inline]{Explicily specify the goals of the work: implement three algorithms, provide an interface.}
 
 
 \section{Bicomponent decomposition}
@@ -121,12 +123,10 @@ Combining everything together, we get the following formulation of the ILP probl
 
 After encoding the problem as an ILP problem, as we described above, we run the ILP solver. After optimisation, it returns assigned values for each variable used in the program. The variables of interest for us are ``ordering variables'' \(a_{u, v}\) and \(k\). The latter one indicates the minimal possible crossing number that is reported. The former one we use to reconstruct an outer \(k\)-planar drawing of the original graph. As the desired drawing is a sequence of vertices, we must order them. To do so, we can use the values of ``ordering variables'' to define the strict total order relation. We say that for two vertices \(u\) and \(v\) \(u < v\) if and only if \(a_{u, v}\) is assigned to \(1\). Due to the construction of these variables and transitivity constraint~\eqref{eq:ilp:con:transitivity}, this order satisfies all requirements of the strict total order. Thus, it can sort the vertices, resulting in an outer \(k\)-planar drawing.
 
-In addition to the described reduction, we also considered a small optimisation for the objective function. In the implementation we discussed, we only ensure that each ``crossing variable'' equals \(1\) if two edges actually cross, so for any non-crossing edges, the variable might take on both \(0\) and \(1\). As the variables' influence on the objective is not direct, but through a constraint on the variable \(k\), it might be hard for an optimiser to estimate the influence of each variable accurately. To help it, we included an extra term in the objective function~\eqref{eq:ilp:objective}: \(\frac{\sum c_{e_1, e_2}}{|E|^2}\). By using \(|E|^2\) as a dominator in the fraction, we ensure that the value of the inserted term never exceeds \(1\) so that the optimiser would always prioritise decreasing \(k\) over this term.
-
 
 \section{SAT-based algorithm}\label{sec:SAT-def}
 
-Another example of a thoroughly studied NP-hard problem is a Boolean Satisfiability problem~(SAT). As an input, the problem gets a boolean formula in a conjunctive normal form~(CNF). For the output, it asks for such an assignment of logic values \textsc{True} and \textsc{False} to the variables used in the input, such that the expression evaluates to \textsc{True}. In this section, we discuss the details of the reduction of the recognition problem to the SAT one. To do so, we represent our problem as a boolean expression, which is satisfied if and only if the graph admits an outer \(k\)-planar drawing. As an implementation of SAT solver, we used kissat~\todo{I can not find DOI for this article, so bib emtry looks different}\cite{kissat}\todo{Explain why we have chosen kissat}.
+Another example of a thoroughly studied NP-hard problem is a Boolean Satisfiability problem~(SAT). As an input, the problem gets a boolean formula in a conjunctive normal form~(CNF). For the output, it asks for such an assignment of logic values \textsc{True} and \textsc{False} to the variables used in the input, such that the expression evaluates to \textsc{True}. In this section, we discuss the details of the reduction of the recognition problem to the SAT one. To do so, we represent our problem as a boolean expression, which is satisfied if and only if the graph admits an outer \(k\)-planar drawing. As an implementation of SAT solver, we used kissat~\todo{I can not find DOI for this article, so bib emtry looks different}\cite{kissat, kissat-library}\todo{Explain why we have chosen kissat}.
 
 To encode the drawing, we use the ``ordering variables'' \(a_{u, v}\) we used in the ILP-based algorithm described in the section~\ref{sec:ILP-def} interpreting the value \(1\) as \textsc{True} and \(0\) as \textsc{False}. To encode the transitivity constraint, we follow the same logic, ending up with the same implication~\eqref{eq:ilp:transitivity:uv:1}. In terms of boolean algebra, this can be encoded as follows:
 \begin{align*}
@@ -161,7 +161,14 @@ Lastly we combine clauses~\eqref{sat:trans} for all triplets of vertices \(u\), 
 Unfortunately, unlike reduction to an ILP, this one does not solve the optimisation problem of finding the minimal possible \(k\). The resulting algorithm solves the decision problem~--~whether the graph admits an outer \(k\)-planar drawing or not. To transform this into an optimisation, we incrementally check each integer, starting from \(0\), until the boolean expression becomes satisfiable.
 
 
-\section{Dynamic algorithm}
+\section{Optimisations for ILP and SAT algorithms}\label{sec:optimisations}
+
+\todo[inline]{Not ready at all.}
+
+In addition to the described reduction, we also considered a small optimisation for the objective function. In the implementation we discussed, we only ensure that each ``crossing variable'' equals \(1\) if two edges actually cross, so for any non-crossing edges, the variable might take on both \(0\) and \(1\). As the variables' influence on the objective is not direct, but through a constraint on the variable \(k\), it might be hard for an optimiser to estimate the influence of each variable accurately. To help it, we included an extra term in the objective function~\eqref{eq:ilp:objective}: \(\frac{\sum c_{e_1, e_2}}{|E|^2}\). By using \(|E|^2\) as a dominator in the fraction, we ensure that the value of the inserted term never exceeds \(1\) so that the optimiser would always prioritise decreasing \(k\) over this term.
+
+
+\section{DP algorithm}
 
 The last algorithm we considered was introduced by \citeauthor{okp}~\cite{okp}. Unlike previously discussed ones, this algorithm was explicitly designed to solve the recognition problem. This method uses the approach of dynamic programming, where the solution for a problem is built based on solutions of similar but smaller problems. Thus, the final drawing of the graph is built incrementally each time for a larger part of the original graph.
 
@@ -202,3 +209,8 @@ If at any moment, the algorithm finds a \emph{drawable} configuration with the l
 In case of success, apart from a positive answer, we also have to return the graph drawing. There are multiple ways to accomplish this. One is to use a backtracking algorithm after finding the configuration to rediscover all smaller configurations with which the last one was built. Another approach is to store information on how each configuration was constructed alongside each arrangement. The latter trades the memory consumption required for additional information in each arrangement for the time required to perform backtracking. We used the second option in our implementation as it is much easier. Moreover, the bottleneck of the current implementation is running time and not memory. As additional information, we opted to store the drawing of the right side. To get this, we combine the drawings of two parts on each step, inserting the split vertex \(w\) between them. As a result, to get the drawing of \(G\) having the \emph{drawable} configuration \(G_{uv, R_{uv}}\), it is enough to add vertex \(u\) at the start and vertex \(v\) at the end of the drawing stored alongside the arrangement \(A_{uv}\) in the lookup table.
 
 Similar to the SAT-based algorithm from the section~\ref{sec:SAT-def}, this method only tests whether the graph admits an outer \(k\)-planar drawing or not for a fixed \(k\), so to find the minimal possible crossing number, we have to check each value incrementally.
+
+
+\section{Interface of the implementation}
+
+\todo[inline]{Graphviz format, neato layout engine, algorithm specification, result format}
