@@ -7,14 +7,14 @@ The ideal form of crossing minimising drawings~--~planar ones, has been focused 
 
 \section{Difficulty of dealing with beyond-planar graphs}
 
-Most relaxations of strict planarity dramatically increase the complexity of recognising such graphs. So, the general problem of minimising edge crossings in a graph drawing was known to be computationally intractable already in~\citeyear{cr_NPC} when \citeauthor{cr_NPC} demonstrated~\cite{cr_NPC} that the \textsc{Crossing Number} problem, where the task is to check whether a given graph can be drawn with at most \(k\) crossings, is NP-hard. Their proof relies on a reduction from the \textsc{Optimal Linear Arrangement} problem, which is known to be NP-hard.
+Most relaxations of strict planarity dramatically increase the complexity of recognising such graphs. So, the general problem of minimising edge crossings in a graph drawing was known to be computationally intractable already in~\citeyear{cr_NPC} when \citeauthor{cr_NPC}~\cite{cr_NPC} demonstrated that the \textsc{Crossing Number} problem, where the task is to check whether a given graph can be drawn with at most \(k\) crossings, is NP-hard. Their proof relies on a reduction from the \textsc{Optimal Linear Arrangement} problem, which is known to be NP-hard.
 
-Minimising the number of local crossings is also hard. \citeauthor{1p-NPH} showed~\cite{1p-NPH} that testing \(1\)-planarity, that is, recognising whether a graph can be drawn with at most one crossing per edge, is NP-hard. Later, \citeauthor{one-edge-NPH} showed~\cite{one-edge-NPH} that testing~\(1\)-planarity is NP-hard even for near-planar graphs, that is, graphs that can be obtained from planar graphs by adding a single edge.
+Minimising the number of local crossings is also hard. \citeauthor{1p-NPH}~\cite{1p-NPH} showed that testing \(1\)-planarity, that is, recognising whether a graph can be drawn with at most one crossing per edge, is NP-hard. Later, \citeauthor{one-edge-NPH}~\cite{one-edge-NPH} showed that testing~\(1\)-planarity is NP-hard even for near-planar graphs, that is, graphs that can be obtained from planar graphs by adding a single edge.
 
-Given the complexity of recognising \(k\)-planarity, researchers considered exploring more restrictive settings, hoping that imposed limitations could simplify the recognition. \hl{One of the considered is a circular setting, requiring that the vertices must be placed on a circle and the edges drawn as straight lines. This gives rise to the circular local crossing number of a graph, which we study in this thesis.}
+Given the complexity of recognising \(k\)-planarity, researchers considered exploring more restrictive settings, hoping that imposed limitations could simplify the recognition. \hl{One of the considered is a circular setting, requiring the vertices to be placed on a circle and the edges to be drawn as straight lines. This gives rise to the circular local crossing number of a graph, which we study in this thesis.}
 
 
-\section{Efficient recognition of some outer \(k\)-planar graph}
+\section{Efficient recognition of some outer \texorpdfstring{\(k\)}{k}-planar graph}
 
 Although the recognition problem for outer \(k\)-planar graphs is NP-hard if \(k\) is a part of the input, efficient algorithms have been developed for any constant value of \(k\).
 
@@ -24,10 +24,10 @@ In the case of \(k = 1\), two research groups independently presented linear-tim
 
 Considering a special case of this problem, \citeauthor{linear-full-o2p}~\cite{linear-full-o2p} proposed a linear-time algorithm for recognising full outer~\(2\)-planar graphs. An outer \(k\)-planar drawing is \emph{full} if no crossings lie on the boundary of the outer face. Later, \citeauthor{linear-full-okp}~\cite{linear-full-okp} extended their result by introducing an algorithm for recognising full outer \(k\)-planar graphs for every \(k\). Their algorithm runs in \(O(f(k) \cdot n)\) time, where \(f\) is a computable function.
 
-For the general version of the problem and values of \(k > 1\), no research was conducted until recently when a group of researchers proposed an algorithm for the general case, which we discuss in the next section.
+For the general version of the problem and values of \(k > 1\), no research was conducted until recently when a group of researchers proposed an algorithm for the general case, which we discuss in the~\Cref{sec:recognizing-general-outer-(k)-planar-graphs}.
 
 
-\section{Recognizing general outer \(k\)-planar graphs}
+\section{Recognizing general outer \texorpdfstring{\(k\)}{k}-planar graphs}\label{sec:recognizing-general-outer-(k)-planar-graphs}
 
 For a given outer \(k\)-planar drawing of a graph, \citeauthor{triangulations}~\cite{triangulations} proposed a method for constructing a triangulation with the property that each edge of the triangulation is crossed by at most \(k\) edges of the graph drawing. Since the edges of the triangulation do not necessarily belong to the original graph, they are termed \emph{links} to distinguish them from the original graph edges. The construction is done recursively.
 
