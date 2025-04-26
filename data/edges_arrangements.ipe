@@ -334,9 +334,9 @@ h
 <path stroke="black" fill="white">
 5 0 0 5 196 768 e
 </path>
-<text pos="100 765.85" stroke="black" type="label" depth="0" halign="center" valign="baseline">{first}</text>
-<text pos="132 765.85" stroke="black" type="label" depth="0" halign="center" valign="baseline">{second}</text>
-<text pos="164 765.85" stroke="black" type="label" depth="0" halign="center" valign="baseline">{third}</text>
-<text pos="196 765.85" stroke="black" type="label" depth="0" halign="center" valign="baseline">{forth}</text>
+<text pos="100 765.85" stroke="black" type="label" depth="0" halign="center" valign="baseline" style="math">{first}</text>
+<text pos="132 765.85" stroke="black" type="label" depth="0" halign="center" valign="baseline" style="math">{second}</text>
+<text pos="164 765.85" stroke="black" type="label" depth="0" halign="center" valign="baseline" style="math">{third}</text>
+<text pos="196 765.85" stroke="black" type="label" depth="0" halign="center" valign="baseline" style="math">{forth}</text>
 </page>
 </ipe>

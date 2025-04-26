@@ -3,7 +3,7 @@ from itertools import permutations
 import subprocess
 
 
-with open("edges_arrangements.ipe") as input_file:
+with open("data/edges_arrangements.ipe") as input_file:
     text = input_file.read()
 
 for perm in permutations("uvst"):
@@ -20,6 +20,6 @@ for perm in permutations("uvst"):
     e2_end = 100 + 32 * t_index
     e2_middle = (e2_start + e2_end) // 2
     e2_height = 768 + abs(e2_start - e2_end) // 2
-    with open("tmp.ipe", "w") as output_file:
+    with open("data/tmp.ipe", "w") as output_file:
         output_file.write(text.format(**locals()))
     subprocess.run(["iperender", "-eps", "data/tmp.ipe", f"thesis/Figures/edge_cross/{''.join(perm)}.eps"])

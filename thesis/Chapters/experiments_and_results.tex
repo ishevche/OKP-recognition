@@ -27,44 +27,43 @@ We save the results of each experiment in the \textsc{csv} format. For each entr
 
 \begin{figure}[tbh]
     \centering
-    \captionsetup{subrefformat=parens}
-    \subfloat[ILP]{
+    \subfloat[ILP-based algorithm]{
         \label{fig:bctree-results:ilp}
         \includegraphics[width=\textwidth]{experiments/bctree_ilp}
     } \hfill
-    \subfloat[SAT]{
+    \subfloat[SAT-based algorithm]{
         \label{fig:bctree-results:sat}
         \includegraphics[width=\textwidth]{experiments/bctree_sat}
     } \hfill
-    \subfloat[DP]{
+    \subfloat[DP-based algorithm]{
         \label{fig:bctree-results:okp}
         \includegraphics[width=\textwidth]{experiments/bctree_okp}
     }
-    \caption{Results of the experiment, demonstrating the influence of biconnected decomposition on the running time of ILP, SAT and DP algorithms.}
+    \caption{Results of the experiment, demonstrating the influence of biconnected decomposition on the running time of ILP- , SAT- and DP-based algorithms.}
     \label{fig:bctree-results}
 \end{figure}
 
-The first experiment we considered was comparing the performance of the algorithms with and without bicomponent decomposition. Here, we used only non-biconnected graphs from the dataset to show the difference between the two configurations. We ran this for all three methods. The results are presented in the figure~\ref{fig:bctree-results}.
+The first experiment we considered was comparing the performance of the algorithms with and without bicomponent decomposition. Here, we used only non-biconnected graphs from the dataset to show the difference between the two configurations. We ran this for all three methods. The results are presented in the~\Cref{fig:bctree-results}.
 
-The results prove that using decomposition indeed boosts performance for almost all methods and graphs. The only exceptions are small graphs for an ILP-based algorithm, for which the cost of initialising multiple environments outweighs the cost of decoupling the problem.
+The results prove that using decomposition indeed boosts performance for almost all methods and graphs. The only exceptions are small graphs for the \textsf{ILP}, for which the cost of initialising multiple environments outweighs the cost of decoupling the problem.
 
 As we demonstrated in this experiment, the non-biconnectivity of the graphs artificially decreases the complexity of the recognition task, as each one of them requires multiple times fewer resources compared to equally sized biconnected graphs. Thus, in the following experiments, we consider only biconnected graphs to exclude this source of noise from the results.
 
 
-\section{Algorithms conparison}
+\section{Comparison of the algorithms}
+
+In this experiment, we compared the performance of the algorithms. We grouped results by crossing numbers and the algorithm used for solving and displayed in~\Cref{fig:methods}. Due to the complexity of the problem, some runs ran out of allocated resources. So, to display the results, we used only the measurements from runs that successfully found the minimal crossing number. As a result, starting from \(k = 6\), boxes for \textsf{SAT} and \textsf{DP} depict fewer runs compared to an \textsf{ILP} as they required more resources for some graphs than were available.
 
 \begin{figure}[tbh]
     \centering
-    \includegraphics[width=.75\textwidth]{experiments/methods}
+    \includegraphics[width=\textwidth]{experiments/methods}
     \caption{Comparison of running times of different algorithms for graphs with different crossing numbers.}
     \label{fig:methods}
 \end{figure}
 
-In this experiment, we compared the performance of the algorithms. We grouped results by crossing numbers and the algorithm used for solving and displayed in figure~\ref{fig:methods}. Due to the complexity of the problem, some runs ran out of allocated resources. So, to display the results, we used only the measurements from runs that successfully found the minimal crossing number. As a result, starting from \(k = 6\), boxes for SAT and DP algorithms depict fewer runs compared to an ILP algorithm as they required more resources for some graphs than were available.
+\textsf{SAT} and \textsf{DP}, however, were limited primarily by different factors. Unlike \textsf{ILP}, encoding in \textsf{SAT} contains an exponential number of clauses. As a result, the solver ran out of allocated memory for \(185\) out of \(1326\) biconnected graphs. Similarly, the \textsf{DP} ran out of memory \(16\) times. However, the bigger limiting factor for this algorithm is time, as \(317\) runs exceeded the 10-minute time limit imposed on each one. All other runs finished successfully.
 
-SAT and DP algorithms, however, were primarily limited by different factors. Unlike ILP, SAT formulation results in a problem that requires an exponential number of clauses to write it down. As a result, the solver ran out of allocated memory for \(185\) out of \(1326\) biconnected graphs. Similarly, the algorithm based on dynamic programming ran out of memory \(16\) times. However, the bigger limiting factor for this algorithm is time, as \(317\) runs exceeded the 10-minute time limit imposed on each one. All other runs finished successfully.
-
-The results show that the time required by both SAT-based and DP algorithms grows much faster than the time required by ILP-based algorithm. The latter requires each instance to set up an environment for the graphs. With smaller crossing numbers, these costs outweigh the solver's speed. However, for instances with bigger \(k\), the time required for setup is negligible.
+The results show that the time required by both \textsf{SAT} and \textsf{DP} grows much faster than the time required by \textsf{ILP}. The latter requires each instance to set up an environment for the graphs. With smaller crossing numbers, these costs outweigh the solver's speed. However, for instances with bigger \(k\), the time required for setup is negligible.
 
 \begin{figure}[tbh]
     \centering
@@ -72,34 +71,31 @@ The results show that the time required by both SAT-based and DP algorithms grow
     \subfloat[\(k = 3\)]{\includegraphics[width=.48\textwidth]{experiments/method_3}} \hfill
     \subfloat[\(k = 4\)]{\includegraphics[width=.48\textwidth]{experiments/method_4}} \hfill
     \subfloat[\(k = 5\)]{\includegraphics[width=.48\textwidth]{experiments/method_5}} \hfill
-    \caption{Comparison of running times required by algorithms to recognise an outer \(k\)-planar graph for different values of \(k\).}
+    \caption{Comparison of running times required by algorithms to recognise outer \(k\)-planar graphs for various values of \(k\).}
     \label{fig:methods-vertices}
 \end{figure}
 
-As the algorithm's running time depends not only on crossing numbers but also on the size of the graph, we can represent the results more accurately by grouping them by both the crossing number and the number of vertices. Such plots for crossing numbers \(2\), \(3\), \(4\) and \(5\) are displayed in figure~\ref{fig:methods-vertices}. In these plots, we can more clearly see the time's dependency on the graph's size.
-
-\todo[inline]{Probably need a little bit more here about figure~\ref{fig:methods-vertices}.}
+As the algorithm's running time depends not only on crossing numbers but also on the size of the graph, we can represent the results more accurately by grouping them by both the crossing number and the number of vertices. \hl{To demonstrate this dependency, in~\mbox{\Cref{fig:methods-vertices}}, we created a plot for each crossing number represented by at least {\(150\)} graphs. These plots show that, for \mbox{\(k \in \{2, 3\}\)}, {\textsf{DP}} and {\textsf{SAT}} are consistently the two fastest methods, with the former being faster than the latter. However, starting from \mbox{\(k = 4\)} and graphs with at least {\(9\)} vertices, {\textsf{ILP}} outperforms the other two methods. Most importantly, these results agree with the ones displayed in~\mbox{\Cref{fig:methods}}, which aggregate them for each value {\(k\)}.}
 
 
 \section{Optimisation benchmark}
 
+The last experiment we considered is the comparison of optimisations we discussed for \textsf{ILP} and \textsf{SAT} in~\Cref{sec:optimisations}. For the \textsf{ILP}, we ran four configurations for each biconnected graph using none, one or both optimisations. For the \textsf{SAT}, we used two configurations with and without optimisation. The results are presented in~\Cref{fig:optimisation:ilp} and~\Cref{fig:optimisation:sat} respectively.
+
 \begin{figure}[tbh]
     \centering
-    \subfloat[ILP algorithm]{
-        \includegraphics[width=0.47\textwidth]{experiments/ilp}
-        \label{fig:optimisation:ilp}
-    } \hfill
-    \subfloat[SAT algorithm]{
-        \includegraphics[width=0.47\textwidth]{experiments/sat}
-        \label{fig:optimisation:sat}
-    }
-    \captionsetup{subrefformat=parens}
-    \caption{Comparison of different configurations for ILP and SAT algorithms.}
-    \label{fig:optimisation}
+    \includegraphics[width=\textwidth]{experiments/ilp}
+    \caption{Comparison of different configurations for ILP-based algorithm.}
+    \label{fig:optimisation:ilp}
 \end{figure}
 
-The last experiment we considered is the comparison of optimisations we discussed for ILP and SAT methods in section~\ref{sec:optimisations}. For the ILP-based algorithm, we ran four configurations for each biconnected graph using none, one or both optimisations. For the SAT-based, we used two configurations with and without optimisation. The results are presented in figures~\ref{fig:optimisation:ilp} and~\ref{fig:optimisation:sat} respectively.
+\begin{figure}[tbh]
+    \centering
+    \includegraphics[width=0.47\textwidth]{experiments/sat}
+    \caption{Comparison of different configurations for SAT-based algorithm.}
+    \label{fig:optimisation:sat}
+\end{figure}
 
-In the first plot, we can clearly see that adding additional constraints to enforce the exact value for each crossing variable degrades the performance. For SAT, however, this change does not influence this much. We can see a slight rise in execution time, but the difference is within the margin of error. Here, the difference might be caused by the algorithm writing down the required additional constraints, not the SAT solver.
+In the first plot, we can clearly see that adding additional constraints to enforce the exact value for each crossing variable degrades the performance. For \textsf{SAT}, however, this change does not influence this much. We can see a slight rise in execution time, but the difference is within the margin of error. Here, the difference may be caused by the algorithm writing down the required additional constraints, not the SAT solver.
 
-The objective optimisation for the ILP, which includes an extra term in the objective function, makes small but still an improvement. As a result, we consider the algorithm that includes this optimisation to be the most efficient ILP-based algorithm. Thus, we have used this configuration for all other experiments. For the SAT method, we used a configuration that did not include optimisation.
+The objective optimisation for the \textsf{ILP}, which includes an extra term in the objective function, makes small but still an improvement. As a result, we consider the algorithm that includes this optimisation to be the most efficient \textsf{ILP}. Thus, we have used this configuration for all other experiments. For the \textsf{SAT}, we used a configuration that did not include optimisation.
