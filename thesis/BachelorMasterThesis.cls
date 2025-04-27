@@ -216,8 +216,7 @@
  \def\ttitle{#2}%
 }
 \DeclareDocumentCommand{\author}{m}{\newcommand{\authorname}{#1}\renewcommand{\@author}{#1}}
-\NewDocumentCommand{\supervisorone}{m}{\newcommand{\supnameone}{#1}}
-\NewDocumentCommand{\supervisortwo}{m}{\newcommand{\supnametwo}{#1}}
+\NewDocumentCommand{\supervisor}{m}{\newcommand{\supname}{#1}}
 \NewDocumentCommand{\examiner}{m}{\newcommand{\examname}{#1}}
 \NewDocumentCommand{\degree}{m}{\newcommand{\degreename}{#1}}
 \NewDocumentCommand{\addresses}{m}{\newcommand{\addressname}{#1}}

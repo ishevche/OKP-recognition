@@ -11,10 +11,19 @@ Most relaxations of strict planarity dramatically increase the complexity of rec
 
 Minimising the number of local crossings is also hard. \citeauthor{1p-NPH}~\cite{1p-NPH} showed that testing \(1\)-planarity, that is, recognising whether a graph can be drawn with at most one crossing per edge, is NP-hard. Later, \citeauthor{one-edge-NPH}~\cite{one-edge-NPH} showed that testing~\(1\)-planarity is NP-hard even for near-planar graphs, that is, graphs that can be obtained from planar graphs by adding a single edge.
 
-Given the complexity of recognising \(k\)-planarity, researchers considered exploring more restrictive settings, hoping that imposed limitations could simplify the recognition. \hl{One of the considered is a circular setting, requiring the vertices to be placed on a circle and the edges to be drawn as straight lines. This gives rise to the circular local crossing number of a graph, which we study in this thesis.}
+\begin{figure}[tbh]
+    \centering
+    \captionsetup{subrefformat=parens}
+    \subfloat[\(1\)-planar drawing]{\includegraphics[width=0.3\textwidth]{k5_1planar}\label{fig:k5:1-planar}}
+    \subfloat[Outer \(2\)-planar drawing]{\includegraphics[width=0.3\textwidth]{k5_outer2planar}\label{fig:k5:o2p}}
+    \caption{Drawing of \(K_5\) \subref{fig:k5:1-planar}~non-restricted and \subref{fig:k5:o2p}~restricted to a circular setting.}
+    \label{fig:figure}
+\end{figure}
+
+Given the complexity of recognising \(k\)-planarity, researchers have considered exploring more restrictive settings, hoping that the imposed limitations could simplify the recognition. One of the considered restrictions is a circular setting that requires the vertices to be placed on a circle and the edges to be drawn as straight lines. This restriction gives rise to the \emph{circular local crossing number} of a graph, which we study in this thesis. The graphs whose circular crossing number is bounded by \(k\) are called \emph{outer \(k\)-planar} graphs. For example, \(K_5\), the complete graph with five vertices, is known to be the smallest non-planar graph. It can be drawn with a single crossing, hence it is \(1\)-planar (see~\Cref{fig:k5:1-planar}). When insisting on the circular setting, however, every second edge receives two crossings, hence \(K_5\) is outer \(2\)-planar (see~\Cref{fig:k5:o2p}).
 
 
-\section{Efficient recognition of some outer \texorpdfstring{\(k\)}{k}-planar graph}
+\section{Efficient recognition of some outer \texorpdfstring{\(k\)}{k}-planar graphs}
 
 Although the recognition problem for outer \(k\)-planar graphs is NP-hard if \(k\) is a part of the input, efficient algorithms have been developed for any constant value of \(k\).
 
@@ -24,10 +33,10 @@ In the case of \(k = 1\), two research groups independently presented linear-tim
 
 Considering a special case of this problem, \citeauthor{linear-full-o2p}~\cite{linear-full-o2p} proposed a linear-time algorithm for recognising full outer~\(2\)-planar graphs. An outer \(k\)-planar drawing is \emph{full} if no crossings lie on the boundary of the outer face. Later, \citeauthor{linear-full-okp}~\cite{linear-full-okp} extended their result by introducing an algorithm for recognising full outer \(k\)-planar graphs for every \(k\). Their algorithm runs in \(O(f(k) \cdot n)\) time, where \(f\) is a computable function.
 
-For the general version of the problem and values of \(k > 1\), no research was conducted until recently when a group of researchers proposed an algorithm for the general case, which we discuss in the~\Cref{sec:recognizing-general-outer-(k)-planar-graphs}.
+For the general version of the problem and values of \(k > 1\), no research was conducted until recently when a group of researchers proposed an algorithm for the general case, which we discuss in the~\Cref{sec:recognising-general-outer-(k)-planar-graphs}.
 
 
-\section{Recognizing general outer \texorpdfstring{\(k\)}{k}-planar graphs}\label{sec:recognizing-general-outer-(k)-planar-graphs}
+\section{Recognising general outer \texorpdfstring{\(k\)}{k}-planar graphs}\label{sec:recognising-general-outer-(k)-planar-graphs}
 
 For a given outer \(k\)-planar drawing of a graph, \citeauthor{triangulations}~\cite{triangulations} proposed a method for constructing a triangulation with the property that each edge of the triangulation is crossed by at most \(k\) edges of the graph drawing. Since the edges of the triangulation do not necessarily belong to the original graph, they are termed \emph{links} to distinguish them from the original graph edges. The construction is done recursively.
 
@@ -37,9 +46,9 @@ Later, \citeauthor{okp}~\cite{okp} extended this approach to address the recogni
 
 Moreover, instead of relying on recursion, the method utilises a dynamic programming approach. This framework combines solutions of smaller subproblems retrieved from a table to solve larger ones. To populate this table, the algorithm iterates over all possible configurations corresponding to different recursion steps. Several parameters characterise each such configuration. The first parameter is the active link~--~a pair of vertices that divides the graph into a left and a right region. The second parameter is a set of vertices in the right part, which is not uniquely determined as in the triangulation case. Additionally, the configuration depends on the order in which edges intersect the active link and the number of intersections on the right side for each one of them. These parameters are used to ensure that the drawing of the right part is compatible with the left part. For each configuration, the algorithm considers all possible ways to split the right region further. For each of them, the method checks whether these splits are compatible with each other and the left part of the drawing.
 
-Using the restriction on the number of edges crossing each link, the authors demonstrated that for a fixed \(k\), the number of possible right subgraphs grows only polynomially with respect to the size of the graph. They proceeded by arguing that the overall time complexity of the algorithm is~\(2^{O(k \log k)}n^{3k + O(1)}\), showing that the algorithm is efficient for any fixed parameter \(k\).
+Using the restriction on the number of edges crossing each link, the authors demonstrated that for a fixed \(k\), the number of possible right subgraphs grows only polynomially with respect to the size of the graph. They proceeded by arguing that the overall time complexity of the algorithm is~\(2^{O(k \log k)}n^{3k + O(1)}\), showing that the algorithm is efficient for any fixed parameter \(k\). This indicates that this problem belongs to the XP class~--~a class of problems that admit such ``slicewise polynomial'' algorithms.
 
 
 \section{Our contribution}
 
-A common drawback of the methods described above is the lack of practical validation. Although these algorithms have been analysed and discussed in a theoretical context, they have not been implemented or empirically tested. We address this gap by implementing the most recent recognition algorithm and introducing two alternative approaches based on Integer Linear Programming (ILP) and Satisfiability (SAT) formulations. While it is NP-hard to solve the general integer linear program or to find a satisfying truth assignment for general Boolean formulas, there are very advanced solvers for such formulations that could allow us to find exact solutions for small- to medium-sized instances within an acceptable amount of time. Then, we evaluate the performance and efficiency of these methods, demonstrating their practical applicability and limitations.
+A common drawback of the methods described above is the lack of practical validation. Although these algorithms have been analysed and discussed in a theoretical context, they have not been implemented or tested empirically. We address this gap by implementing the most recent recognition algorithm and introducing two alternative approaches based on Integer Linear Programming (ILP) and Satisfiability (SAT) formulations. While it is NP-hard to solve the general integer linear programming problem or to find a satisfying truth assignment for general Boolean formulas, there are very advanced solvers for such formulations that allow us to find exact solutions for small- to medium-sized instances within an acceptable amount of time. We evaluate the performance and efficiency of these methods, demonstrating their practical applicability and their limitations.
