@@ -105,57 +105,57 @@
 
 \begin{document}
 
-    \frontmatter % Use roman page numbering style (i, ii, iii, iv...) for the pre-content pages
+\frontmatter % Use roman page numbering style (i, ii, iii, iv...) for the pre-content pages
 
-    \pagestyle{plain} % Default to the plain heading style until the thesis style is called for the body content
+\pagestyle{plain} % Default to the plain heading style until the thesis style is called for the body content
 
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-    \begin{titlepage}
-        \begin{center}
+\begin{titlepage}
+\begin{center}
 
-            \vspace*{.06\textheight}
-            {\scshape\LARGE \univname\par}\vspace{1.5cm} % University name
-            \textsc{\Large Bachelor Thesis}\\[0.5cm] % Thesis type
+\vspace*{.06\textheight}
+{\scshape\LARGE \univname\par}\vspace{1.5cm} % University name
+\textsc{\Large Bachelor Thesis}\\[0.5cm] % Thesis type
 
-            \HRule \\[0.4cm] % Horizontal line
-            {\huge \bfseries \ttitle\par}\vspace{0.4cm} % Thesis title
-            \HRule \\[1.5cm] % Horizontal line
+\HRule \\[0.4cm] % Horizontal line
+{\huge \bfseries \ttitle\par}\vspace{0.4cm} % Thesis title
+\HRule \\[1.5cm] % Horizontal line
 
-            \begin{minipage}[t]{0.4\textwidth}
-                \begin{flushleft}
-                    \large
-                    \emph{Author:}\\
-                    \href{https://www.linkedin.com/in/ishevche/}{\authorname} % Author name - remove the \href bracket to remove the link
-                \end{flushleft}
-            \end{minipage}
-            \begin{minipage}[t]{0.4\textwidth}
-                \begin{flushright}
-                    \large
-                    \emph{Supervisor:} \\
-                    \href{https://www.informatik.uni-wuerzburg.de/algo/team/wolff-alexander/}{\supname} % Supervisor name - remove the \href bracket to remove the link
-                \end{flushright}
-            \end{minipage}\\[3cm]
+\begin{minipage}[t]{0.4\textwidth}
+\begin{flushleft}
+\large
+\emph{Author:}\\
+\href{https://www.linkedin.com/in/ishevche/}{\authorname} % Author name - remove the \href bracket to remove the link
+\end{flushleft}
+\end{minipage}
+\begin{minipage}[t]{0.4\textwidth}
+\begin{flushright}
+\large
+\emph{Supervisor:} \\
+\href{https://www.informatik.uni-wuerzburg.de/algo/team/wolff-alexander/}{\supname} % Supervisor name - remove the \href bracket to remove the link
+\end{flushright}
+\end{minipage}\\[3cm]
 
-            \vfill
+\vfill
 
-            \large \textit{A thesis submitted in fulfillment of the requirements\\ for the degree of \degreename}\\[0.3cm] % University requirement text
-            \textit{in the}\\[0.4cm]
-            \groupname\\\deptname\\[2cm] % Research group name and department name
+\large \textit{A thesis submitted in fulfillment of the requirements\\ for the degree of \degreename}\\[0.3cm] % University requirement text
+\textit{in the}\\[0.4cm]
+\groupname\\\deptname\\[2cm] % Research group name and department name
 
-            \vfill
-            \includegraphics[height=2.5cm]{UCU_APPS_logo} % University/department logo - uncomment to place it
+\vfill
+\includegraphics[height=2.5cm]{UCU_APPS_logo} % University/department logo - uncomment to place it
 % Logo taken from the official brandbook: https://ucu.edu.ua/brandbook/brand-book-sources/
 % UCU_APPS_logo.pdf 
 
-            \vfill
-            {\large Lviv 2025}\\{\today\quad\currenttime}\\[4cm] % Date
+\vfill
+{\large Lviv 2025}\\{\today\quad\currenttime}\\[4cm] % Date
 
-            \vfill
-        \end{center}
-    \end{titlepage}
+\vfill
+\end{center}
+\end{titlepage}
 
 %----------------------------------------------------------------------------------------
 %	DECLARATION PAGE
@@ -197,25 +197,25 @@
 %	ABSTRACT PAGE
 %----------------------------------------------------------------------------------------
 
-    \begin{abstract}
-        \addchaptertocentry{\abstractname} % Add the abstract to the table of contents
-        The Thesis Abstract is written here (and usually kept to just this page). The page is kept centered vertically so can expand into the blank space above the title too\ldots
-    \end{abstract}
+\begin{abstract}
+\addchaptertocentry{\abstractname} % Add the abstract to the table of contents
+Planar graphs have been thoroughly studied for decades as the simplest yet most interpretable class. The notion of planarity, however, imposes too harsh restrictions on the graph structure, significantly limiting their number. To resolve this issue, the research started shifting towards almost planar graphs. One such class is outer \(k\)-planar graphs. Unfortunately, the discussion about their recognition is held in a purely theoretical context, lacking practical validation. In this work, we focus on the practical aspect of the problem by implementing three different algorithms for recognising outer \(k\)-planar graphs. Two of these algorithms involve encoding the problem into other thoroughly studied NP-hard problems: integer linear programming and satisfiability. The last one is an implementation of a recently introduced algorithm based on a dynamic programming approach. Comparing the resulting implementation, we found out that one, based on the integer linear programming encoding, works best for most graphs due to the efficiency of the existing solvers and the simplicity of the encoding. The algorithm based on the satisfiability problem is more complex, requiring an exponential number of clauses in terms of the parameters of the input graph. The algorithm based on dynamic programming is outperformed by two others. However, it can present insights into how subgraphs can be drawn. In the future, these implementations can be used to solve the recognition problem for practical use and test any new implementations.
+\end{abstract}
 
 %----------------------------------------------------------------------------------------
 %	ACKNOWLEDGEMENTS
 %----------------------------------------------------------------------------------------
 
-    \begin{acknowledgements}
-        \addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
-        The acknowledgments and the people to thank go here, don't forget to include your project advisor\ldots
-    \end{acknowledgements}
+\begin{acknowledgements}
+\addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
+The acknowledgments and the people to thank go here, don't forget to include your project advisor\ldots
+\end{acknowledgements}
 
 %----------------------------------------------------------------------------------------
 %	LIST OF CONTENTS/FIGURES/TABLES PAGES
 %----------------------------------------------------------------------------------------
 
-    \tableofcontents % Prints the main table of contents
+\tableofcontents % Prints the main table of contents
 
 %\listoffigures % Prints the list of figures
 
@@ -271,26 +271,26 @@
 %	THESIS CONTENT - CHAPTERS
 %----------------------------------------------------------------------------------------
 
-    \mainmatter % Begin numeric (1,2,3...) page numbering
+\mainmatter % Begin numeric (1,2,3...) page numbering
 
-    \pagestyle{thesis} % Return the page headers back to the "thesis" style
+\pagestyle{thesis} % Return the page headers back to the "thesis" style
 
 % Include the chapters of the thesis as separate files from the Chapters folder
 % Uncomment the lines as you write the chapters
 % Remember -- some filesystems are case sensitive.
 
-    \input{Chapters/introduction}
-    \include{Chapters/related_work}
+\input{Chapters/introduction}
+\include{Chapters/related_work}
 %\include{Chapters/theoretical_background}
-    \include{Chapters/proposed_solution}
-    \include{Chapters/experiments_and_results}
-    \include{Chapters/conclusions}
+\include{Chapters/proposed_solution}
+\include{Chapters/experiments_and_results}
+\include{Chapters/conclusions}
 
 %----------------------------------------------------------------------------------------
 %	THESIS CONTENT - APPENDICES
 %----------------------------------------------------------------------------------------
 
-    \appendix % Cue to tell LaTeX that the following "chapters" are Appendices
+\appendix % Cue to tell LaTeX that the following "chapters" are Appendices
 
 % Include the appendices of the thesis as separate files from the Appendices folder
 % Uncomment the lines as you write the Appendices
@@ -303,7 +303,7 @@
 %	BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
-    \printbibliography[heading=bibintoc]
+\printbibliography[heading=bibintoc]
 
 %----------------------------------------------------------------------------------------
 
