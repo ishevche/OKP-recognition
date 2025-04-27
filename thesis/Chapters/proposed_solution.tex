@@ -1,10 +1,16 @@
 \chapter{Algorithms}\label{ch:proposed-solution}
 
-This chapter will discuss the methods this work considers to recognise the outer \(k\)-planar graphs. Besides recognition, these methods provide the outer \(k\)-planar drawings of the given graphs if possible. We represent the drawing as a sequence of vertices in the circular order in which they appear on the boundary of the outer face.
+As discussed in~\Cref{ch:related-work}, the studies conducted in the field of beyond planar graphs lie purely in the theoretical domain, lacking practical validation. In this thesis, we aim to address this problem. To do so, we intend to provide:
+\begin{itemize}
+    \item An implementation of three different algorithms for recognising outer \(k\)-planar graphs.
+    \item A command line interface to invoke implemented algorithms.
+    \item Ability to provide a graph and a method as an input to the algorithm.
+    \item As an output receive minimal possible value \(k\) for which the provided graph is outer \(k\)-planar and an outer \(k\)-planar drawing of this graph.
+\end{itemize}
 
-For operations with graphs, we use C++ Boost Graph Library~\cite{boost}. As a graph class, we use \textsf{adjacency\_list} as for all methods described below, we require both \textsf{VertexList} and \textsf{EdgeList} concepts to be able to iterate over both vertices and edges. We prefer this class to an \textsf{adjacency\_matrix} as, according to the documentation\footnote{\url{https://www.boost.org/doc/libs/1_88_0/libs/graph/doc/adjacency_matrix.html}}, it trades memory consumption and speed of graph traversal for the speed of edge insertion and deletion, and neither of these operations is used for algorithms described below.
+This chapter discusses three algorithms for recognising outer \(k\)-planar graphs. Besides recognition, these methods provide outer \(k\)-planar drawings of the given graphs if such exists. We represent the drawing as a sequence of vertices in the order in which they appear on the circle.
 
-\todo[inline]{Explicily specify the goals of the work: implement three algorithms provide an interface.}
+For operations with graphs, we use the C++ Boost Graph Library~\cite{boost}. As a graph class, we use \textsf{adjacency\_list} as for all methods described below, we require both \textsf{VertexList} and \textsf{EdgeList} concepts to be able to iterate over both vertices and edges. We prefer this class to an \textsf{adjacency\_matrix} as, according to the documentation\footnote{\url{https://www.boost.org/doc/libs/1_88_0/libs/graph/doc/adjacency_matrix.html}}, it trades memory consumption and speed of graph traversal for the speed of edge insertion and deletion, and neither of these operations is used for algorithms described below.
 
 
 \section{Bicomponent decomposition}
