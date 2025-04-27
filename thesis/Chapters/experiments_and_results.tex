@@ -1,4 +1,4 @@
-\chapter{Experiments and Results}
+\chapter{Experiments and Results}\label{ch:experiments-and-results}
 
 This chapter discusses our experiments that evaluate the performance of the methods described above.
 
@@ -75,7 +75,7 @@ The results show that the time required by both \textsf{SAT} and \textsf{DP} gro
     \label{fig:methods-vertices}
 \end{figure}
 
-As the algorithm's running time depends not only on crossing numbers but also on the size of the graph, we can represent the results more accurately by grouping them by both the crossing number and the number of vertices. \hl{To demonstrate this dependency, in~\mbox{\Cref{fig:methods-vertices}}, we created a plot for each crossing number represented by at least {\(150\)} graphs. These plots show that, for \mbox{\(k \in \{2, 3\}\)}, {\textsf{DP}} and {\textsf{SAT}} are consistently the two fastest methods, with the former being faster than the latter. However, starting from \mbox{\(k = 4\)} and graphs with at least {\(9\)} vertices, {\textsf{ILP}} outperforms the other two methods. Most importantly, these results agree with the ones displayed in~\mbox{\Cref{fig:methods}}, which aggregate them for each value {\(k\)}.}
+As the algorithm's running time depends not only on crossing numbers but also on the size of the graph, we can represent the results more accurately by grouping them by both the crossing number and the number of vertices. To demonstrate this dependency, in~\Cref{fig:methods-vertices}, we created a plot for each crossing number represented by at least \(150\) graphs. These plots show that, for \(k \in \{2, 3\}\), \textsf{DP} and \textsf{SAT} are consistently the two fastest methods, with the former being faster than the latter. However, starting from \(k = 4\) and graphs with at least \(9\) vertices, \textsf{ILP} outperforms the other two methods. Most importantly, these results agree with the ones displayed in~\Cref{fig:methods}, which aggregate them for each value \(k\).
 
 
 \section{Optimisation benchmark}

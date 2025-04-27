@@ -1,8 +1,19 @@
-\chapter{Introduction}
+\chapter{Introduction}\label{ch:introduction}
 
-%Тест кирилиці: ІіЇїҐґ, \textbf{ІіЇїҐґ}, \textit{ІіЇїҐґ}.
+Nowadays, graphs are widely used across different domains and occupations to represent relational systems. However, as the size of the graph grows, so does its complexity, making understanding their internal structure increasingly difficult. This problem was acknowledged in early studies of graph drawing~\cite{early-few-crossing} alongside a suspicion that reducing the number of crossings would mitigate this problem. Consequently, the planar graphs that altogether forbid the crossings have been studied for decades. On the other, however, this imposes massive constraints on the structure of the graph. As a result, many processes cannot be represented in a planar manner.
 
+This led to the exploration of graphs allowing a bounded number of crossings, offering a balance between visual recognisability and structural flexibility. As a result, in recent years, such ``almost'' planar graphs have gained popularity in the community. Unfortunately, though, unlike recognising planar graphs~\cite{linear-p}, the task of recognising ``almost'' planar ones is, in most cases, NP-hard. This work focused on outer \(k\)-planar graphs. The vertices of these graph's drawings lie on a single (outer) face, and each edge is intersected at most \(k\) times.
 
 \section{Contributions}
 
+However, despite all recent advances in this area, all studies are conducted in a theoretical context and were not implemented or tested empirically. Thus, all discussed methods lack practical validation. In this thesis we want to address this gap by implementing the most recent recognition algorithm and introducing two alternative approaches based on Integer Linear Programming (ILP) and Satisfiability (SAT) problems. While it is NP-hard to solve the general integer linear programming problem or to find a satisfying truth assignment for general Boolean formulas, there are very advanced solvers that can help us find the exact solutions for small- to medium-sized instances within an acceptable amount of time. We also evaluate the performance and efficiency of these methods, demonstrating their practical applicability and their limitations.
+
+
 \section{Structure of the thesis}
+
+\begin{itemize}
+    \item \Cref{ch:related-work} discusses the current state of the research by reviewing the key works in the context of planar and almost planar graph drawings. Here, we also discuss the complexity of the problem.
+    \item \Cref{ch:proposed-solution} describes three algorithms for recognising outer \(k\)-planar graphs. Additionally, it presents the optimisations we used to improve the performance of the implemented methods.
+    \item \Cref{ch:experiments-and-results} demonstrates the results of the implemented algorithms. It also describes the experiments we conducted to evaluate the performance and discusses the obtained results.
+    \item \Cref{ch:conclusions} summarises the key accomplishments and overviews the results. It also discusses the limitations and outlines potential improvements that can be made to overcome them.
+\end{itemize}
