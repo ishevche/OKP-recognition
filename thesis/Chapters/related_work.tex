@@ -1,9 +1,6 @@
 \chapter{Related Work}\label{ch:related-work}
 
-Already in the~1980s, researchers in the field of graph drawing acknowledged the importance of reducing the edge crossings for improving visualisation clarity~\cite{early-few-crossing}. The suspicion that a drawing with fewer edge crossings was easier to comprehend was later confirmed by several experimental studies~\cite{graph-aesthetic-survey}. These studies showed that minimising the crossings in graph representations significantly improves the ability of humans to interpret the structure, particularly when dealing with complex or large graphs.
-
-The ideal form of crossing minimising drawings~--~planar ones, has been focused on by the research community for a long time, with the first of linear-time algorithms for recognising planar graphs presented already in~\citeyear{linear-p}~\cite{linear-p}. However, requiring the drawing to be completely crossing free imposes severe limitations on an underlying graph. While providing a clean structure, these restrictions are often too constraining for many real-world graphs, especially large ones. This has led to a growing interest in exploring graphs close to being planar; see the survey by \citeauthor{beyond-planarity-survey}~\cite{beyond-planarity-survey}. Such graphs allow a limited number of crossings while still retaining some of the beneficial structural properties of planar graphs.
-
+As we discussed in~\Cref{ch:introduction}, to get the easily interpretable graph, its drawing should minimise the number of crossings. The first algorithms, designed to do so programmatically, were designed to recognise planar graphs, and construct a drawing for those who admit such. The first linear-time algorithm for doing so was introduced as early as~\citeyear{linear-p} by \citeauthor{linear-p}~\cite{linear-p}. In this chapter we discuss studies that address the recognition problem for \emph{almost} planar graphs.
 
 \section{Difficulty of dealing with beyond-planar graphs}
 
