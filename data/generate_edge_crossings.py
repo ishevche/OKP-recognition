@@ -22,4 +22,4 @@ for perm in permutations("uvst"):
     e2_height = 768 + abs(e2_start - e2_end) // 2
     with open("data/tmp.ipe", "w") as output_file:
         output_file.write(text.format(**locals()))
-    subprocess.run(["iperender", "-eps", "data/tmp.ipe", f"thesis/Figures/edge_cross/{''.join(perm)}.eps"])
+    subprocess.run(["iperender", "-pdf", "data/tmp.ipe", f"thesis/Figures/edge_cross/{''.join(perm)}.pdf"])

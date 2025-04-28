@@ -12,20 +12,20 @@ For complex problems, a decomposition into smaller subproblems often leads to a 
 \begin{figure}[tbh]
     \centering
     \subcaptionbox{An original graph with highlighted biconnected components and cut vertices \label{fig:bidec:original_graph}} {
-        \includegraphics[width=0.4\textwidth]{TODO}
+        \includegraphics[width=0.4\textwidth]{bct_decomposed}
     }
     \hfill
     \subcaptionbox{Block-cut tree of a graph \label{fig:bidec:bctree}} {
-        \includegraphics[width=0.4\textwidth]{TODO}
+        \includegraphics[width=0.4\textwidth]{bct_tree}
     }
     \hfill
     \subcaptionbox{Outer \(k\)-planar drawing of each component \label{fig:bidec:componnents_drawings}}{
-        \includegraphics[width=0.4\textwidth]{TODO}
+        \includegraphics[width=0.4\textwidth]{bct_component_okp}
     }
     \hfill
     \subcaptionbox{
         Outer \(k\)-planar drawing of the original graph \label{fig:bidec:graph_drawing}} {
-        \includegraphics[width=0.4\textwidth]{TODO}
+        \includegraphics[width=0.4\textwidth]{bct_okp}
     }
     \caption{An example of a bicomponent decomposition}
 \end{figure}
@@ -198,23 +198,7 @@ Another optimisation that we considered can be implemented only for an ILP-based
 
 The last algorithm we considered was introduced by \citeauthor{okp}~\cite{okp}. Unlike previously discussed ones, this algorithm was explicitly designed to solve the recognition problem. This method uses the approach of dynamic programming, where the solution for a problem is built based on solutions of similar but smaller problems. Thus, the final drawing of the graph is built incrementally each time for a larger part of the original graph.
 
-\begin{figure}[tbh]
-    \centering
-    \captionsetup{subrefformat=parens}
-    \subfloat[]{\label{fig:okp:config-graph}
-    \includegraphics[width=0.4\textwidth]{TODO}
-    }
-    \hfill
-    \subfloat[]{\label{fig:okp:triangle}
-    \includegraphics[width=0.4\textwidth]{TODO}
-    }
-    \caption{
-        An example of \protect\subref{fig:okp:config-graph}~a graph \(G_{uv, R_{uv}}\) representing a configuration and \protect\subref{fig:okp:triangle}~a corresponding triangle.
-        \emph{Something similar to\cite[Figure 4]{okp}}
-    }
-\end{figure}
-
-The whole process can be divided into steps. Each one of them can be parameterised by three parameters. The first is a pair of vertices \(u\) and \(v\) that split a graph into two parts, denoted as a link. The next is a set \(R_{uv}\) of vertices lying to the right of the link. And lastly the set \(E_{uv} = \{e_1, e_2, \dots, e_l\}\) of \(l\) edges crossing the \(uv\) link from the right to the left side. To represent each step separately, we introduce a graph \(G_{uv, R_{uv}}\) (see~\Cref{fig:okp:config-graph}) which consists of vertices \(\{u, v\} \cup R_{uv}\) alongside all connecting edges from an original graph \(G\) with inserted vertices \(t_1, t_2, \dots, t_l\) connected to corresponding vertices by edges \(e_1, e_2, \dots, e_l\). We call a configuration on each step \emph{drawable} if exists an outer \(k\)-planar drawing of a corresponding graph \(G_{uv, R_{uv}}\) which cyclic order contains \((u, t_{\tau(1)}, t_{\tau(2)}, \dots, t_{\tau(l)}, v)\) as a consecutive subsequence for some permutation \(\tau\). On each step, the algorithm finds all possible permutations for which the configuration is drawable and stores them in the lookup table.
+The whole process can be divided into steps. Each one of them can be parameterised by three parameters. The first is a pair of vertices \(u\) and \(v\) that split a graph into two parts, denoted as a link. The next is a set \(R_{uv}\) of vertices lying to the right of the link. And lastly the set \(E_{uv} = \{e_1, e_2, \dots, e_l\}\) of \(l\) edges crossing the \(uv\) link from the right to the left side. To represent each step separately, we introduce a graph \(G_{uv, R_{uv}}\) which consists of vertices \(\{u, v\} \cup R_{uv}\) alongside all connecting edges from an original graph \(G\) with inserted vertices \(t_1, t_2, \dots, t_l\) connected to corresponding vertices by edges \(e_1, e_2, \dots, e_l\). We call a configuration on each step \emph{drawable} if exists an outer \(k\)-planar drawing of a corresponding graph \(G_{uv, R_{uv}}\) which cyclic order contains \((u, t_{\tau(1)}, t_{\tau(2)}, \dots, t_{\tau(l)}, v)\) as a consecutive subsequence for some permutation \(\tau\). On each step, the algorithm finds all possible permutations for which the configuration is drawable and stores them in the lookup table.
 
 In the implementation of the algorithm, we first construct an index of all possible configurations. It allows us to simply iterate through it later without searching for the next configuration. Since, on each step, we try to draw a configuration using two smaller drawable ones, we group them by the size of the right part, guaranteeing that all smaller drawable configurations are already discovered at any point of the process. Unfortunately, it is unfeasible to consider all possible configurations due to the sheer number of them. For a graph with \(n\) vertices, there are \(\frac{n(n-1)}{2}\) links with \(2^{n-2}\) possible right sides each. As the link together with the right side uniquely determines the edges that cross the link, totally there are \(n(n-1)\cdot2^{n-3}\) possible configurations.
 
@@ -228,7 +212,7 @@ After constructing an index, we proceed to fill the lookup table. In there, for 
 
 To fill the corresponding cell of the lookup table, we have to find all arrangements for which a specific configuration is drawable. We start by selecting a split vertex \(w\) that belongs to the right side \(R_{uv}\). For each \(w\), we iterate over all configurations with a link \(uw\) and a right side \(R_{uw}\) that is a subset of \(R_{uv}\). Additionally, we also consider a complementary configuration with a link \(vw\) and right side \(R_{vw} = R_{uv} \setminus (R_{uw} \cup \{w\})\). For each such pair of configurations, we iterate over all pairs of drawable arrangements \(A_{uw}\) and \(A_{vw}\) saved in the lookup table and search for all possible ways to combine them into an outer \(k\)-planar drawing of \(G_{uv, R_{uv}}\).
 
-There is only one way to glue drawings of two configurations together. However, to form a valid drawing of \(G_{uv, R_{uv}}\), we also have to decide on the order of edges crossing the link \(uv\) represented by a permutation \(\tau_{uv}\). To ensure the correctness of the solution, we go through all possible ones. For each permutation, we check whether the resulting drawing is valid~--~each edge is crossed at most \(k\) times~--~and construct a mapping \(f_{uv}\) if so. To do that, we focus on an inner triangle (see~\Cref{fig:okp:triangle} on page~\pageref{fig:okp:triangle}) consisting of three vertices \(u\), \(v\) and \(w\), and all the edges crossing at least one of the links \(uv\), \(uw\) and \(vw\). Additionally, we include edge \((u, v)\) if such exists. Crucially, to calculate all the intersections apart from the edges, we also need the order in which they enter the triangle. As sides of the triangle are exactly the links, this order is represented in corresponding permutations: \(\tau_{uw}\) from \(A_{uw}\), \(\tau_{vw}\) from \(A_{vw}\) and \(\tau_{uv}\) which is considered one by one. To represent the order in the triangle, we insert \(l_{uv}\) helper vertices between \(u\) and \(v\), given that \(l_{uv}\coloneq|E_{uv}|\). We treat them as endpoints of corresponding edges that enter the triangle by crossing the link \(uv\). Similarly, we insert vertices along the links \(uw\) and \(vw\). Importantly, each inserted vertex is an endpoint only for one edge, and along each link, they are ordered according to the corresponding permutations. By considering these vertices as edges' endpoints, we limit the view to the intersections created by the combination of two parts, ignoring those in \(R_{uw}\) and \(R_{vw}\). So, to get the crossing number for each edge, apart from the ones we count in the triangle, we also have to add those accounted by \(f_{uw}\) and \(f_{vw}\). If the crossing number of any edge exceeds \(k\), we discard the permutation \(\tau_{uv}\) and proceed to the next one. Otherwise, we extract the mapping \(f_{uv}\) and, together with the current permutation \(\tau_{uv}\), add it as a new arrangement to the lookup table.
+There is only one way to glue drawings of two configurations together. However, to form a valid drawing of \(G_{uv, R_{uv}}\), we also have to decide on the order of edges crossing the link \(uv\) represented by a permutation \(\tau_{uv}\). To ensure the correctness of the solution, we go through all possible ones. For each permutation, we check whether the resulting drawing is valid~--~each edge is crossed at most \(k\) times~--~and construct a mapping \(f_{uv}\) if so. To do that, we focus on an inner triangle consisting of three vertices \(u\), \(v\) and \(w\), and all the edges crossing at least one of the links \(uv\), \(uw\) and \(vw\). Additionally, we include edge \((u, v)\) if such exists. Crucially, to calculate all the intersections apart from the edges, we also need the order in which they enter the triangle. As sides of the triangle are exactly the links, this order is represented in corresponding permutations: \(\tau_{uw}\) from \(A_{uw}\), \(\tau_{vw}\) from \(A_{vw}\) and \(\tau_{uv}\) which is considered one by one. To represent the order in the triangle, we insert \(l_{uv}\) helper vertices between \(u\) and \(v\), given that \(l_{uv}\coloneq|E_{uv}|\). We treat them as endpoints of corresponding edges that enter the triangle by crossing the link \(uv\). Similarly, we insert vertices along the links \(uw\) and \(vw\). Importantly, each inserted vertex is an endpoint only for one edge, and along each link, they are ordered according to the corresponding permutations. By considering these vertices as edges' endpoints, we limit the view to the intersections created by the combination of two parts, ignoring those in \(R_{uw}\) and \(R_{vw}\). So, to get the crossing number for each edge, apart from the ones we count in the triangle, we also have to add those accounted by \(f_{uw}\) and \(f_{vw}\). If the crossing number of any edge exceeds \(k\), we discard the permutation \(\tau_{uv}\) and proceed to the next one. Otherwise, we extract the mapping \(f_{uv}\) and, together with the current permutation \(\tau_{uv}\), add it as a new arrangement to the lookup table.
 
 If at any moment, the algorithm finds a drawable configuration with the link \(uv\) and right side \(R_{uv} = V(G)\setminus\{u, v\}\), it halts indicating that \(G\) is outer \(k\)-planar. In this case, the graph \(G_{uv, R_{uv}}\) is equivalent to the original graph \(G\) and admits an outer \(k\)-planar drawing. If, on the other hand, we reach the end of the index and do not find such a configuration, the algorithm halts, indicating that the graph is not outer \(k\)-planar.
 
@@ -250,4 +234,4 @@ Speaking more precise, the command-line interface has \(1\) required parameter~-
     \label{fig:demo}
 \end{figure}
 
-To transform the returned drawing into a picture, we use the \textsf{neato} layout engine~\cite{neato}. An example of the drawing returned by an ILP-based algorithm for \todo{Is it a good example? Or maybe ther should be multiple of them?}the Petersen graph is demonstrated in~\Cref{fig:demo}. Here, we use blue for edges that cross exactly \(k\) other edges, where \(k\) is the local circular crossing number.\todo{Should I mention that edges that exceed \(k\) crossings are coloured in red, but this should never happen?}
+To transform the returned drawing into a picture, we use the \textsf{neato} layout engine~\cite{neato}. An example of the drawing returned by an ILP-based algorithm for the Petersen graph is demonstrated in~\Cref{fig:demo}. Here, we use blue for edges that cross exactly \(k\) other edges, where \(k\) is the local circular crossing number.

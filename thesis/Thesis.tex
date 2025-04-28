@@ -151,7 +151,7 @@
 % UCU_APPS_logo.pdf 
 
 \vfill
-{\large Lviv 2025}\\{\today\quad\currenttime}\\[4cm] % Date
+{\large Lviv 2025}\\[4cm] % Date
 
 \vfill
 \end{center}
@@ -199,8 +199,8 @@
 
 \begin{abstract}
 \addchaptertocentry{\abstractname} % Add the abstract to the table of contents
-Planar graphs have been thoroughly studied for decades as one of the simplest classes. The notion of planarity, however, imposes too harsh restrictions on the structure, significantly limiting the number of planar graphs. As a result, the research started shifting towards graphs that allow for a few crossings. One such class is the class of \emph{outer \(k\)-planar graphs} that admit straight-line circular drawing with at most \(k\) intersections per edge.
-So far, their recognition has been discussed in a purely theoretical context, lacking practical validation. In this work, \todo{we address this gap by implementing ...?} we focus on the practical aspect of the problem by implementing three different algorithms for recognising outer \(k\)-planar graphs. Two of these algorithms involve formulating the problem as an integer linear program and \todo{as a Boolean formula for satisfiability problem.?}via the satisfiability of a Boolean formula. The third implementation follows a recently introduced algorithm based on dynamic programming.
+Planar graphs have been thoroughly studied for decades as one of the simplest graph classes. The notion of planarity, however, imposes too harsh restrictions on the structure, significantly limiting the number of planar graphs. As a result, the research started shifting towards graphs that allow for a few crossings. One such class is the class of \emph{outer \(k\)-planar} graphs, that is, the graphs that admit a circular drawing with straight-line edges and at most \(k\) crossings per edge.
+So far, their recognition has been discussed in a purely theoretical context, lacking practical validation. In this work, we focus on the practical aspect of the problem by implementing three different algorithms for recognising outer \(k\)-planar graphs. The first implementation is based on a formulation of the recognition problem as an integer linear program. The second implementation solves the problem by reducing it to the satisfiability of a Boolean formula. The third implementation follows a recently introduced algorithm based on dynamic programming.
 Comparing the resulting implementations, we found out that the one based on integer linear programming works best for most graphs due to the efficiency of the existing solvers and the simplicity of the encoding. The algorithm based on satisfiability is more complex, requiring an exponential number of clauses in terms of \(k\). Finally, the algorithm based on dynamic programming is outperformed by the other two approaches for values of \(k\geqslant4\). Also we demonstrated the positive effect of biconnected decomposition on the performance of the algorithms.
 In the future, these implementations can be used to solve the recognition problem for small instances and to verify new implementations.
 \end{abstract}

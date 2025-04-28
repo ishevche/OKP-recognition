@@ -7,8 +7,8 @@ We have also demonstrated an example of the program's output for a sample graph 
     \item Despite the overhead required to perform the biconnected decomposition, doing so significantly improves the performance of all methods.
     \item In the ILP-based algorithm, including constraints for all arrangements of two edges' endpoints significantly worsens its performance. On the other hand, including an extra symetry-breaking term in the objective function slightly improves the performance.
     \item In the SAT-based algorithm, including clauses for all arrangements does not influence the performance.
-    \item The computational resources required for executing an ILP-based algorithm grow more slowly compared to both the SAT- and DP-based algorithms with increasing local circular crossing number.
-    \item The computational time required to execute any of the algorithms grows exponentially in terms of local circular crossing number of the graph.
+    \item The computational resources required for executing the ILP-based algorithm grow more slowly compared to both the SAT- and DP-based algorithms with increasing local circular crossing number.
+    \item The computational time required to execute any of the algorithms grows exponentially in terms of the local circular crossing number of the graph.
 \end{itemize}
 
 \section{Limitations}
@@ -21,7 +21,7 @@ The current version also limits the number of vertices to \(64\) in the input gr
 
 There are many directions to explore as future work. First of all, we could combine our implementations into a library. By doing so, the algorithms could more easily be called by other programs.
 
-Secondly, we could optimise the underlying algorithms discussed in this work. In particular, it would be desirable to simplify the algorithm for very small values of \(k\). \todo{Was this sentence there as a suggestion, or as a comment to me?}Can outer \(2\)-planar graphs be recognised in, say, quadratic time?
+Secondly, we could optimise the underlying algorithms discussed in this work. In particular, it would be desirable to simplify the algorithm for very small values of \(k\). Can outer \(2\)-planar graphs be recognised in, say, quadratic time?
 
 Another direction of improvement might be developing an algorithm that, for the given embedding of an outer \(k\)-planar graph, draws it using Bézier curves for edges instead of straight lines. Using this approach, we can improve the readability of the drawings.
 
