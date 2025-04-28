@@ -243,4 +243,15 @@ Similar to the SAT-based algorithm from the~\Cref{sec:SAT-def}, this method only
 
 \section{Interface of the implementation}
 
-\todo[inline]{Graphviz format, neato layout engine, algorithm specification, result format}
+To have the ability to invoke the implemented algorithms for some specific graph, we designed a command-line interface. As an input, it receives a graph and a name of the algorithm the user wants to invoke. As an output, the user receives a local circular crossing number \(k\) of the passed graph alongside its circular drawing, where each edge is intersected at most \(k\) times. To communicate with a user, we use the Graphviz~\cite{graphviz} \textsc{DOT} language for both the graph and its drawing. We use this representation as it is easily interpretable by humans and computers.
+
+Speaking more precise, the command-line interface has \(1\) required parameter~--~an undirected graph, represented as a string in Graphviz \textsc{DOT} language~--~and \(2\) optional arguments: method specifying one of the three implemented algorithms and output file specifying a path to file in which the graph's drawing should be saved. By default, the former holds the value corresponding to the ILP-based algorithm, and the latter holds an empty string, indicating that the drawing should not be saved anywhere. After running the algorithm, the tool will display the local circular crossing number and/or potential error messages.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.4\textwidth]{petersen}
+    \caption{An example of the resulting drawing for the Petersen graph.}
+    \label{fig:demo}
+\end{figure}
+
+To transform the returned drawing into a picture, we use the \textsf{neato} layout engine~\cite{neato}. An example of the drawing returned by an ILP-based algorithm for \todo{Is it a good example? Or maybe ther should be multiple of them?}the Petersen graph is demonstrated in~\Cref{fig:demo}. Here, we use blue for edges that cross exactly \(k\) other edges, where \(k\) is the local circular crossing number.\todo{Should I mention that edges that exceed \(k\) crossings are coloured in red, but this should never happen?}

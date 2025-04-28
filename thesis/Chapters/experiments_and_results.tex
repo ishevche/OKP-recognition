@@ -1,9 +1,6 @@
 \chapter{Experiments and Results}\label{ch:experiments-and-results}
 
-This chapter discusses our experiments that evaluate the performance of the methods described above.
-
-\section{Results}
-\todo[inline]{Demonstration of the implementation}
+This chapter describes our experiments that evaluate and compare the performance of the methods described above and reports the results. For conciseness, here we refer to the ILP-, SAT- and DP-based algorithm as \textsf{ILP}, \textsf{SAT}, and \textsf{DP} respectively.
 
 \section{Data}
 
@@ -22,8 +19,9 @@ For each experiment, we chose a set of graphs, a set of methods, and a set of co
 
 We save the results of each experiment in \textsc{csv} format. For each entry, we specify the Graphviz representation of the graph, the configuration, the method, and the execution results. The latter includes the local circular crossing number, the time required to compute it and whether the algorithm succeeded or not.
 
+Apart from reporting, we also use the results obtained by all experiments to cross-validate the correctness of the implementations. Since no algorithm has been previously implemented for recognising outer \(k\)-planar graph, we do not have a reliable source to provide the correct local circular crossing numbers for test graphs. This cross-validation acts as a primary method for testing the implemented algorithm, with the only other one being manual verification of the returned drawing for small instances.
 
-\section{Biconnected decomposition}
+It is worth noting that the Gurobi optimiser supports multithreading. However, to make the comparison of the algorithms fair, we limited it to a single thread.
 
 \begin{figure}[tbh]
     \centering
@@ -42,6 +40,8 @@ We save the results of each experiment in \textsc{csv} format. For each entry, w
     \caption{Results of the experiment, demonstrating the influence of biconnected decomposition on the running time of \textsf{ILP} , \textsf{SAT} and \textsf{DP}.}
     \label{fig:bctree-results}
 \end{figure}
+
+\section{Biconnected decomposition}
 
 The first experiment we considered was comparing the performance of the algorithms with and without bicomponent decomposition. Here, we used only non-biconnected graphs from the dataset to show the difference between the two configurations. We ran this for all three methods. The results are presented in the~\Cref{fig:bctree-results}.
 
