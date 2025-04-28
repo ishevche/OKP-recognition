@@ -9,7 +9,7 @@ This chapter discusses our experiments that evaluate the performance of the meth
 
 To evaluate the implementation, we require a set of graphs which will be provided as input to the algorithm. To acquire them, we used the online database The House of Graphs~\cite{HoG} that contains interesting graphs. We decided to conduct experiments on these graphs, as they are most likely to be typical targets of the algorithms. In this work, we experimented with a small subset of all those graphs.
 
-The problem of computing the circular local crossing number is NP-hard. Consequently, the resources required by all implemented algorithms grow exponentially with the input size. To be able to perform the experiments, we had to limit the size of the graphs. We have done this by picking only graphs with at most \(10\) vertices. This constraint leaves plenty of graphs to experiment with while significantly limiting the computational resources. Also, as we designed the implementation only for connected graphs, we filtered out unconnected graphs.
+The problem of computing the local circular crossing number is NP-hard. Consequently, the resources required by all implemented algorithms grow exponentially with the input size. To be able to perform the experiments, we had to limit the size of the graphs. We have done this by picking only graphs with at most \(10\) vertices. This constraint leaves plenty of graphs to experiment with while significantly limiting the computational resources. Also, as we designed the implementation only for connected graphs, we filtered out unconnected graphs.
 
 This query resulted in \(2007\) different graphs. Among them \(1326\) are biconnected and \(681\) are not.
 
@@ -18,9 +18,9 @@ This query resulted in \(2007\) different graphs. Among them \(1326\) are biconn
 
 All experiments described below were conducted on a virtual cloud server provided by Amazon Web Services. The hardware available was limited to a single core of an AWS Graviton4 Processor and 2GiB of random access memory. As an operating system, we used Linux.
 
-For each experiment, we chose a set of graphs, a set of methods, and a set of configurations. We constructed all possible triplets of these parameters. For each one of them, we compute the circular local crossing number of the given graph using the specified method in a given configuration. Apart from recording the number itself, we also track the time required by the corresponding algorithm, which does not include the time required to start up and parse the graph, as it is part of any algorithm. Unfortunately, some methods require an unreasonable amount of time to calculate the result for some graphs. To mitigate this, we limit the execution time to \(10\) minutes for each triplet, indicating the outcome in the results.
+For each experiment, we chose a set of graphs, a set of methods, and a set of configurations. We constructed all possible triplets of these parameters. For each one of them, we compute the local circular crossing number of the given graph using the specified method in a given configuration. Apart from recording the number itself, we also track the time required by the corresponding algorithm, which does not include the time required to start up and parse the graph, as it is part of any algorithm. Unfortunately, some methods require an unreasonable amount of time to calculate the result for some graphs. To mitigate this, we limit the execution time to \(10\) minutes for each triplet, indicating the outcome in the results.
 
-We save the results of each experiment in \textsc{csv} format. For each entry, we specify the Graphviz representation of the graph, the configuration, the method, and the execution results. The latter includes the circular local crossing number, the time required to compute it and whether the algorithm succeeded or not.
+We save the results of each experiment in \textsc{csv} format. For each entry, we specify the Graphviz representation of the graph, the configuration, the method, and the execution results. The latter includes the local circular crossing number, the time required to compute it and whether the algorithm succeeded or not.
 
 
 \section{Biconnected decomposition}
@@ -61,7 +61,7 @@ In this experiment, we compared the performance of the algorithms. We grouped re
     \label{fig:methods}
 \end{figure}
 
-\textsf{SAT} and \textsf{DP}, however, were limited primarily by different factors. Unlike \textsf{ILP}, encoding in \textsf{SAT} contains an exponential number of clauses in terms of circular local crossing number. As a result, the solver ran out of allocated memory for \(185\) out of \(1326\) biconnected graphs. Similarly, \textsf{DP} ran out of memory \(16\) times. However, the bigger limiting factor for this algorithm is time, as \(317\) runs exceeded the 10-minute time limit imposed on each one. All other runs finished successfully.
+\textsf{SAT} and \textsf{DP}, however, were limited primarily by different factors. Unlike \textsf{ILP}, encoding in \textsf{SAT} contains an exponential number of clauses in terms of local circular crossing number. As a result, the solver ran out of allocated memory for \(185\) out of \(1326\) biconnected graphs. Similarly, \textsf{DP} ran out of memory \(16\) times. However, the bigger limiting factor for this algorithm is time, as \(317\) runs exceeded the 10-minute time limit imposed on each one. All other runs finished successfully.
 
 The results show that the time required by both \textsf{SAT} and \textsf{DP} grows much faster than the time required by \textsf{ILP}. The latter requires each instance to set up an environment for the graphs. With smaller crossing numbers, these costs outweigh the solver's speed. However, for instances with bigger \(k\), the time required for setup is negligible.
 

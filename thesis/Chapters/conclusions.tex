@@ -1,26 +1,28 @@
 \chapter{Conclusions}\label{ch:conclusions}
 
-In this bachelor thesis, we provide three implementations of algorithms designed to recognise outer \(k\)-planar graphs. Two of them are based on the encoding into the integer linear programming and satisfiability problems and were introduced in this thesis. The last one uses a dynamic programming approach. Additionally, we provide a command line interface to invoke the desired method for a specific graph and receive a minimal circular local crossing number \(k\) alongside the graph's circular drawing where each edge is crossed at most \(k\) times.
+In this bachelor thesis, we have provided implementations of three algorithms for recognising outer \(k\)-planar graphs. Two of them are based on integer linear programming and satisfiability formulation and have been introduced in this thesis. The last one uses a dynamic programming approach, recently presented by \citeauthor{okp}~\cite{okp}. Additionally, we provide a command line tool to invoke the desired method for a specific graph \(G\). The tool returns the local circular crossing number \(k\) of \(G\) together with a circular drawing of \(G\) where each edge is intersected at most \(k\) times.
 
-We also demonstrated an example of the program's output for a sample graph and the results of the experiments designed to test, evaluate the performance and compare the algorithms with each other. After analysing the results of the experiments, we concluded the following:
+We have also demonstrated an example of the program's output for a sample graph and the results of the experiments designed to test, evaluate the performance and compare the algorithms with each other. After having analysed the results of the experiments, we conclude as follows:
 \begin{itemize}
     \item Despite the overhead required to perform the biconnected decomposition, doing so significantly improves the performance of all methods.
-    \item In the ILP-based algorithm, including constraints for all arrangements of two edges' endpoints significantly worsens its performance. On the other hand, including an extra term in the objective function slightly improves it.
-    \item In the SAT-based algorithm, including clauses for all arrangements does not influence performance.
-    \item The computational resources required for executing an ILP-based algorithm grow slower compared to both SAT- and DP-based algorithms with the increase of minimal local crossing number.
-    \item The computational time required to execute any of the algorithms grows exponentially in both size and minimal local crossing number of the graph.
+    \item In the ILP-based algorithm, including constraints for all arrangements of two edges' endpoints significantly worsens its performance. On the other hand, including an extra symetry-breaking term in the objective function slightly improves the performance.
+    \item In the SAT-based algorithm, including clauses for all arrangements does not influence the performance.
+    \item The computational resources required for executing an ILP-based algorithm grow more slowly compared to both the SAT- and DP-based algorithms with increasing local circular crossing number.
+    \item The computational time required to execute any of the algorithms grows exponentially in terms of local circular crossing number of the graph.
 \end{itemize}
 
 \section{Limitations}
 
-The first and most major limitation of our implementations is the complexity of the underlying algorithm. The exponential dependency of the running time on the parameters of the input graph significantly limits the number of graphs for which using these implementations is practically reasonable.
+The first and most major limitation of our implementations is the complexity of the underlying algorithm. The exponential dependency of the running time on local circular crossing number of the input graph significantly limits the number of graphs for which using these implementations is practically reasonable.
 
-The current version also limits the number of vertices to \(64\) in the input graph for the DP-based algorithm, as it uses a bitmask for storing subsets of vertices. We implemented this using an integer as a bitmask to lower the memory consumption; hence, this limit might differ for different systems.
+The current version also limits the number of vertices to \(64\) in the input graph for the DP-based algorithm, as it uses a bitmask for storing subsets of vertices. We implemented this using an integer as a bitmask to lower the memory consumption; hence, this limit may be different for other systems.
 
 \section{Future work}
 
-There are many directions to explore as a future work. First of all, we could combine the designed implementation into a library. By doing so, we make the algorithms accessible from inside the program. Secondly, we could optimise the underlying algorithms discussed in this work.
+There are many directions to explore as future work. First of all, we could combine our implementations into a library. By doing so, the algorithms could more easily be called by other programs.
 
-Another direction of improvement might be developing an algorithm that, for the given embedding of an outer \(k\)-planar graph, draws it using Bézier curves for edges instead of straight lines. Using this approach, we can further improve the interpretability of the drawing.
+Secondly, we could optimise the underlying algorithms discussed in this work. In particular, it would be desirable to simplify the algorithm for very small values of \(k\). \todo{Was this sentence there as a suggestion, or as a comment to me?}Can outer \(2\)-planar graphs be recognised in, say, quadratic time?
 
-Finally, we can explore the options for multithreaded implementation of the BP-based algorithm. This direction seems highly promising. By ensuring all threads check configurations with the right sides of the same size, we eliminate the requirement of memory synchronisation. This makes this algorithm embarrassingly parallel, as it requires synchronising all threads less than \(|V(G)|\) times throughout the whole execution.
+Another direction of improvement might be developing an algorithm that, for the given embedding of an outer \(k\)-planar graph, draws it using Bézier curves for edges instead of straight lines. Using this approach, we can improve the readability of the drawings.
+
+Finally, we can explore the options for further optimisations of the implemented algorithms. One of the highly promising directions to do so would be to make the implementation of the DP-based algorithm multithreaded. By ensuring that all threads check configurations with the right sides of the same size, we eliminate the requirement of memory synchronisation. This makes this algorithm embarrassingly parallel, as it requires synchronising all threads less than \(|V(G)|\) times throughout the whole execution.
