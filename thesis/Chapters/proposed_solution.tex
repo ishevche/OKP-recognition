@@ -11,21 +11,20 @@ For complex problems, a decomposition into smaller subproblems often leads to a 
 
 \begin{figure}[tbh]
     \centering
-    \subcaptionbox{An original graph with highlighted biconnected components and cut vertices \label{fig:bidec:original_graph}} {
-        \includegraphics[width=0.4\textwidth]{bct_decomposed}
+    \subfloat[An original graph with highlighted biconnected components and cut vertices \label{fig:bidec:original_graph}]{
+        \includegraphics[width=0.47\textwidth]{bct_decomposed}
     }
     \hfill
-    \subcaptionbox{Block-cut tree of a graph \label{fig:bidec:bctree}} {
-        \includegraphics[width=0.4\textwidth]{bct_tree}
+    \subfloat[Block-cut tree of a graph \label{fig:bidec:bctree}] {
+        \includegraphics[width=0.47\textwidth]{bct_tree}
     }
     \hfill
-    \subcaptionbox{Outer \(k\)-planar drawing of each component \label{fig:bidec:componnents_drawings}}{
-        \includegraphics[width=0.4\textwidth]{bct_component_okp}
+    \subfloat[Outer \(k\)-planar drawing of each component \label{fig:bidec:componnents_drawings}]{
+        \includegraphics[width=0.47\textwidth]{bct_component_okp}
     }
     \hfill
-    \subcaptionbox{
-        Outer \(k\)-planar drawing of the original graph \label{fig:bidec:graph_drawing}} {
-        \includegraphics[width=0.4\textwidth]{bct_okp}
+    \subfloat[Outer \(k\)-planar drawing of the original graph \label{fig:bidec:graph_drawing}] {
+        \includegraphics[width=0.47\textwidth]{bct_okp}
     }
     \caption{An example of a bicomponent decomposition}
 \end{figure}
@@ -99,26 +98,26 @@ To transform this into a constraint for an ILP formulation, we can use the same 
 Lastly, the algorithm has to encode each edge's crossing number and minimise the maximal value out of them. The crossing number of each edge can be easily represented as a sum of the corresponding crossing variables:
 \begin{align}
     \label{eq:ilp:crossing-number}
-    cr_{e_1} \leqslant \sum_{e_2 \in E(G)} c_{e1, e2}
+    cr_{e} \leqslant \sum_{e' \in E(G)} c_{e, e'}
 \end{align}
-However, as the maximum is not a linear function, constructing the objective function out of the per-edge crossing numbers is not as simple. To get around this limitation, we have to introduce a new continuous variable \(k\), which represents the crossing number of the whole graph \(G\). To ensure that, we have to bound \(k\) from below by the crossing number of each edge: \(k \geqslant cr_{e_1} \forall e_1 \in E(G)\). Combining this with~\Cref{eq:ilp:crossing-number}, we get~\Cref{eq:ilp:con:crossing-number} as a constraint for the ILP problem. As a result, minimising for \(k\) would give the desired result.
+However, as the maximum is not a linear function, constructing the objective function out of the per-edge crossing numbers is not as simple. To get around this limitation, we have to introduce a new continuous variable \(k\), which represents the crossing number of the whole graph \(G\). To ensure that, we have to bound \(k\) from below by the crossing number of each edge: \(k \geqslant cr_{e} \forall e \in E(G)\). Combining this with~\Cref{eq:ilp:crossing-number}, we get~\Cref{eq:ilp:con:crossing-number} as a constraint for the ILP problem. As a result, minimising for \(k\) would give the desired result.
 
 Combining everything together, we get the following formulation of the ILP problem:
 \begin{align}
-    \textbf{minimize}\quad&k  \label{eq:ilp:objective}\\
-    \textbf{subject to}\quad
+    &\textbf{minimize}&\quad&k  \label{eq:ilp:objective}\\
+    &\textbf{subject to}&\quad
     &&a_{u, v} &\geqslant a_{u, v} + a_{v, w} - 1,&&\forall u, v, w \in V(G)  \label{eq:ilp:con:transitivity}\\
-    &&c_{uv, st} &\geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2,&&\forall uv, st \in E(G)  \label{eq:ilp:con:cross-example}\\
-    &&c_{uv, st} &\geqslant a_{u,t} + a_{t,v} + a_{v,s} - 2,&&\forall uv, st \in E(G) \label{eq:ilp:con:cross-begin}\\
-    &&c_{uv, st} &\geqslant a_{v,s} + a_{s,u} + a_{u,t} - 2,&&\forall uv, st \in E(G)\\
-    &&c_{uv, st} &\geqslant a_{v,t} + a_{t,u} + a_{u,s} - 2,&&\forall uv, st \in E(G)\\
-    &&c_{uv, st} &\geqslant a_{s,u} + a_{u,t} + a_{t,v} - 2,&&\forall uv, st \in E(G)\\
-    &&c_{uv, st} &\geqslant a_{t,u} + a_{u,s} + a_{s,v} - 2,&&\forall uv, st \in E(G)\\
-    &&c_{uv, st} &\geqslant a_{s,v} + a_{v,t} + a_{t,u} - 2,&&\forall uv, st \in E(G)\\
-    &&c_{uv, st} &\geqslant a_{t,v} + a_{v,s} + a_{s,u} - 2,&&\forall uv, st \in E(G)  \label{eq:ilp:con:cross-end}\\
-    &&k &\geqslant \sum_{st \in E(G)} c_{uv, st},&&\forall uv \in E(G)  \label{eq:ilp:con:crossing-number}\\
-    &&c_{uv, st} &\in \{0, 1\},&&\forall uv, st \in E(G)  \label{eq:ilp:con:cross-var}\\
-    &&a_{u, v} &\in \{0, 1\},&&\forall u, v \in V(G)  \label{eq:ilp:con:order-var}
+    &&&&c_{uv, st} &\geqslant a_{u,s} + a_{s,v} + a_{v,t} - 2,&&\forall uv, st \in E(G)  \label{eq:ilp:con:cross-example}\\
+    &&&&c_{uv, st} &\geqslant a_{u,t} + a_{t,v} + a_{v,s} - 2,&&\forall uv, st \in E(G) \label{eq:ilp:con:cross-begin}\\
+    &&&&c_{uv, st} &\geqslant a_{v,s} + a_{s,u} + a_{u,t} - 2,&&\forall uv, st \in E(G)\\
+    &&&&c_{uv, st} &\geqslant a_{v,t} + a_{t,u} + a_{u,s} - 2,&&\forall uv, st \in E(G)\\
+    &&&&c_{uv, st} &\geqslant a_{s,u} + a_{u,t} + a_{t,v} - 2,&&\forall uv, st \in E(G)\\
+    &&&&c_{uv, st} &\geqslant a_{t,u} + a_{u,s} + a_{s,v} - 2,&&\forall uv, st \in E(G)\\
+    &&&&c_{uv, st} &\geqslant a_{s,v} + a_{v,t} + a_{t,u} - 2,&&\forall uv, st \in E(G)\\
+    &&&&c_{uv, st} &\geqslant a_{t,v} + a_{v,s} + a_{s,u} - 2,&&\forall uv, st \in E(G)  \label{eq:ilp:con:cross-end}\\
+    &&&&k &\geqslant \sum_{st \in E(G)} c_{uv, st},&&\forall uv \in E(G)  \label{eq:ilp:con:crossing-number}\\
+    &&&&c_{uv, st} &\in \{0, 1\},&&\forall uv, st \in E(G)  \label{eq:ilp:con:cross-var}\\
+    &&&&a_{u, v} &\in \{0, 1\},&&\forall u, v \in V(G)  \label{eq:ilp:con:order-var}
 \end{align}
 
 To estimate the complexity of the formulation, we can calculate the number of constraints used in the encoding. So considering them in the order they are mentioned above, we have \(O(n^3) + 8\cdot O(m^2) + O(m) + O(m) + O(n) = O(n^3 + m^2)\) constraints, where \(n\) is the number of vertices and \(m\) is the number of edges in the input graph. Note that the size of the ILP formulation does not depend on the graph's local circular crossing number.
@@ -128,9 +127,9 @@ After encoding the problem as an ILP problem, as we described above, we run the 
 
 \section{SAT-based algorithm}\label{sec:SAT-def}
 
-Another example of a thoroughly studied problem with an exponential-time solver is a Boolean Satisfiability problem~(SAT). As an input, the problem gets a boolean formula in a conjunctive normal form~(CNF). For the output, it asks for such an assignment of logic values \textsc{True} and \textsc{False} to the variables used in the input, such that the expression evaluates to \textsc{True}. This section discusses our process of encoding the recognition task into the SAT problem. To do so, we represent our problem as a boolean expression, which is satisfied if and only if the graph admits an outer \(k\)-planar drawing. As an implementation of SAT solver, we used kissat~\cite{kissat,kissat-library}. We chose it for our work as this solver is one of the best-performing ones~\cite{sat-competition}.
+Another example of a thoroughly studied problem with an exponential-time solver is a Boolean Satisfiability problem~(SAT). As an input, the problem gets a Boolean formula in a conjunctive normal form~(CNF). For the output, it asks for such an assignment of logic values \textsc{True} and \textsc{False} to the variables used in the input, such that the expression evaluates to \textsc{True}. This section discusses our process of encoding the recognition task into the SAT problem. To do so, we represent our problem as a Boolean expression, which is satisfied if and only if the graph admits an outer \(k\)-planar drawing. As an implementation of SAT solver, we used kissat~\cite{kissat,kissat-library}. We chose it for our work as this solver is one of the best-performing ones~\cite{sat-competition}.
 
-To encode the drawing, we use the ordering variables \(a_{u, v}\) we used in the ILP-based algorithm described in the~\Cref{sec:ILP-def} interpreting the value \(1\) as \textsc{True} and \(0\) as \textsc{False}. To encode the transitivity constraint, we follow the same logic, ending up with the same~\Cref{eq:ilp:transitivity:uv:1}. In terms of boolean algebra, this can be encoded as follows:
+To encode the drawing, we use the ordering variables \(a_{u, v}\) we used in the ILP-based algorithm described in the~\Cref{sec:ILP-def} interpreting the value \(1\) as \textsc{True} and \(0\) as \textsc{False}. To encode the transitivity constraint, we follow the same logic, ending up with the same~\Cref{eq:ilp:transitivity:uv:1}. In terms of Boolean algebra, this can be encoded as follows:
 \begin{align*}
     a_{u, v} \land a_{v, w} \rightarrow a_{u, w}
 \end{align*}
@@ -152,15 +151,15 @@ To get a clause out of it, we expand the implication and apply De Morgan's law:
     & \equiv \overline{a_{u,s}} \lor \overline{a_{s,v}} \lor \overline{a_{v,t}} \lor c_{uv, st} \label{sat:crossing-vars}
 \end{align}
 
-The last thing to encode is the limit of \(k\) intersections per edge. Unlike the ILP-based algorithm, we cannot add the corresponding variable. To impose this restriction, we ensure that no edges are crossed at least \(k+1\) times. For that, for each edge \(e_0\) and every set of \(k+1\) edges \(E = \{e_1, e_2, \dots, e_{k+1}\}\) we add a following clause to the boolean formula:
+The last thing to encode is the limit of \(k\) intersections per edge. Unlike the ILP-based algorithm, we cannot add the corresponding variable. To impose this restriction, we ensure that no edges are crossed at least \(k+1\) times. For that, for each edge \(e_0\) and every set of \(k+1\) edges \(E = \{e_1, e_2, \dots, e_{k+1}\}\) we add a following clause to the Boolean formula:
 \begin{align}
     \overline{c_{e_0, e_1}} \lor \overline{c_{e_0, e_2}} \lor \cdots \lor \overline{c_{e_0, e_{k+1}}} \label{sat:cr-limit}
 \end{align}
-which evaluates to \textsc{True} if and only if at least one variable is set to \textsc{False}. By inserting this clause for every possible set \(E\), we ensure that no \(k+1\) edges cross the same edge. Thus, if the resulting boolean expression is satisfiable by some realisation of the variables, the values of ordering variables from this realisation would indicate an outer \(k\)-planar drawing.
+which evaluates to \textsc{True} if and only if at least one variable is set to \textsc{False}. By inserting this clause for every possible set \(E\), we ensure that no \(k+1\) edges cross the same edge. Thus, if the resulting Boolean expression is satisfiable by some realisation of the variables, the values of ordering variables from this realisation would indicate an outer \(k\)-planar drawing.
 
-Lastly we combine clauses from~\Cref{sat:trans} for all triplets of vertices \(u\), \(v\) and \(w\), with clauses from~\Cref{sat:crossing-vars} for all pairs of edges \(uv\) and \(st\), and with clauses from~\Cref{sat:cr-limit} for all edges \(e_0\) and all sets \(E\) of \(k+1\) edges. We combine the clauses using logical and operator (\(\land\)), as every single clause must be satisfied to graph to be outer \(k\)-planar. Then, we run the SAT solver using the resulting boolean expression as an input. If the solver fails to find a satisfiable instance, the algorithm halts, indicating that the graph is not outer \(k\)-planar. Otherwise, the algorithm halts returning the desired graph drawing. To reconstruct an outer \(k\)-planar drawing, similar to the ILP approach, we sort the vertices using the values of the ordering variables assigned by the solver to specify the order.
+Lastly we combine clauses from~\Cref{sat:trans} for all triplets of vertices \(u\), \(v\) and \(w\), with clauses from~\Cref{sat:crossing-vars} for all pairs of edges \(uv\) and \(st\), and with clauses from~\Cref{sat:cr-limit} for all edges \(e_0\) and all sets \(E\) of \(k+1\) edges. We combine the clauses using logical and operator (\(\land\)), as every single clause must be satisfied to graph to be outer \(k\)-planar. Then, we run the SAT solver using the resulting Boolean expression as an input. If the solver fails to find a satisfiable instance, the algorithm halts, indicating that the graph is not outer \(k\)-planar. Otherwise, the algorithm halts returning the desired graph drawing. To reconstruct an outer \(k\)-planar drawing, similar to the ILP approach, we sort the vertices using the values of the ordering variables assigned by the solver to specify the order.
 
-Unfortunately, unlike the algorithm based on ILP, this one does not solve the optimisation problem of finding the minimal possible \(k\). The resulting algorithm solves the decision problem~--~whether the graph admits an outer \(k\)-planar drawing or not. To transform this into an optimisation, we incrementally check each integer, starting from \(0\), until the boolean expression becomes satisfiable.
+Unfortunately, unlike the algorithm based on ILP, this one does not solve the optimisation problem of finding the minimal possible \(k\). The resulting algorithm solves the decision problem~--~whether the graph admits an outer \(k\)-planar drawing or not. To transform this into an optimisation, we incrementally check each integer, starting from \(0\), until the Boolean expression becomes satisfiable.
 
 Finally, to estimate the complexity of the described formulation, we calculate the number of clauses in the Boolean expression. So by considering them in the order they are mentioned above, we get \(O(n^3) + O(m^2) + O(m^{k+2}) = O(n^3 + m^{k+2})\) clauses, where \(n\) is the number of vertices and \(m\) is number of edges in the graph. Unlike in the ILP-based algorithm, here, the size of the encoded problem grows exponentially in terms of \(k\), which makes this encoding more complex.
 
@@ -229,9 +228,11 @@ Speaking more precise, the command-line interface has \(1\) required parameter~-
 
 \begin{figure}
     \centering
-    \includegraphics[width=.4\textwidth]{petersen}
-    \caption{An example of the resulting drawing for the Petersen graph.}
+    \subfloat[Cubical graph (\(k = 2\))]{\includegraphics[width=.31\textwidth]{cube}}
+    \subfloat[Peterson graph (\(k = 4\))]{\includegraphics[width=.31\textwidth]{petersen}}
+    \subfloat[Goldner-Harary Graph (\(k = 6\))]{\includegraphics[width=.31\textwidth]{goldner-harary}}
+    \caption{An example of the resulting drawing for some well-know graphs.}
     \label{fig:demo}
 \end{figure}
 
-To transform the returned drawing into a picture, we use the \textsf{neato} layout engine~\cite{neato}. An example of the drawing returned by an ILP-based algorithm for the Petersen graph is demonstrated in~\Cref{fig:demo}. Here, we use blue for edges that cross exactly \(k\) other edges, where \(k\) is the local circular crossing number.
+To transform the returned drawing into a picture, we use the \textsf{neato} layout engine~\cite{neato}. In~\Cref{fig:demo} we demonstrate the drawings returned by the ILP-based algorithm for some well-known graphs, depicted by \textsf{neato} engine. In the returned drawings, we use blue to indicate the edges that cross exactly \(k\) other edges, where \(k\) is the local circular crossing number.

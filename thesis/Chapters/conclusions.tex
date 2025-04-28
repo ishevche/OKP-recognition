@@ -8,7 +8,8 @@ We have also demonstrated an example of the program's output for a sample graph 
     \item In the ILP-based algorithm, including constraints for all arrangements of two edges' endpoints significantly worsens its performance. On the other hand, including an extra symetry-breaking term in the objective function slightly improves the performance.
     \item In the SAT-based algorithm, including clauses for all arrangements does not influence the performance.
     \item The computational resources required for executing the ILP-based algorithm grow more slowly compared to both the SAT- and DP-based algorithms with increasing local circular crossing number.
-    \item The computational time required to execute any of the algorithms grows exponentially in terms of the local circular crossing number of the graph.
+    \item The running times of the SAT- and DP-based algorithm grow
+    exponentially in terms of the local circular crossing number of the graph.
 \end{itemize}
 
 \section{Limitations}

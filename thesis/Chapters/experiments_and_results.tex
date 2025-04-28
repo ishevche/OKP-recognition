@@ -2,12 +2,22 @@
 
 This chapter describes our experiments that evaluate and compare the performance of the methods described above and reports the results. For conciseness, here we refer to the implementations of the ILP-, SAT- and DP-based algorithm as \textsf{ILP}, \textsf{SAT}, and \textsf{DP} respectively.
 
+
 \section{Data}
 
 To evaluate the implementation, we require a set of graphs which will be provided as input to the algorithm. To acquire them, we used the online database The House of Graphs~\cite{HoG} that contains interesting graphs. We decided to conduct experiments on these graphs, as they are most likely to be typical targets of the algorithms. In this work, we experimented with a small subset of all those graphs.
 
 The problem of computing the local circular crossing number is NP-hard. Consequently, the resources required by all implemented algorithms grow exponentially with the input size. To be able to perform the experiments, we had to limit the size of the graphs. We have done this by picking only graphs with at most \(10\) vertices. This constraint leaves plenty of graphs to experiment with while significantly limiting the computational resources. Also, as we designed the implementation only for connected graphs, we filtered out unconnected graphs.
 
+\begin{figure}
+    \centering
+    \subfloat[\textsf{ILP}]{\includegraphics[width=.3\textwidth]{experiments/outcome_ilp}}
+    \subfloat[\textsf{SAT}]{\includegraphics[width=.3\textwidth]{experiments/outcome_sat}}
+    \subfloat[\textsf{DP}]{\includegraphics[width=.3\textwidth]{experiments/outcome_okp}}
+    \caption{}
+    \label{fig:vertex-dist}
+\end{figure}
+\todo{Why the plots whould be placed here? We obtained this data from the results of Section 4.3}
 This query resulted in \(2007\) different graphs. Among them \(1326\) are biconnected and \(681\) are not.
 
 
@@ -17,22 +27,18 @@ All experiments described below were conducted on a virtual cloud server provide
 
 For each experiment, we chose a set of graphs, a set of methods, and a set of configurations. We constructed all possible triplets of these parameters. For each one of them, we compute the local circular crossing number of the given graph using the specified method in a given configuration. Apart from recording the number itself, we also track the time required by the corresponding algorithm, which does not include the time required to start up and parse the graph, as it is part of any algorithm. Unfortunately, some methods require an unreasonable amount of time to calculate the result for some graphs. To mitigate this, we limit the execution time to \(10\) minutes for each triplet, indicating the outcome in the results.
 
-We save the results of each experiment in \textsc{csv} format. For each entry, we specify the Graphviz representation of the graph, the configuration, the method, and the execution results. The latter includes the local circular crossing number, the time required to compute it and whether the algorithm succeeded or not.
-
-Apart from reporting, we also use the results obtained by all experiments to cross-validate the correctness of the implementations. Since no algorithm has been previously implemented for recognising outer \(k\)-planar graph, we do not have a reliable source to provide the correct local circular crossing numbers for test graphs. This cross-validation acts as a primary method for testing the implemented algorithm, with the only other one being manual verification of the returned drawing for small instances.
-
-It is worth noting that the Gurobi optimiser supports multithreading. However, to make the comparison of the algorithms fair, we limited it to a single thread.
-
-\begin{figure}[tbh]
+\begin{figure}
     \centering
     \subfloat[\textsf{ILP}]{
         \label{fig:bctree-results:ilp}
         \includegraphics[width=.97\textwidth]{experiments/bctree_ilp}
-    } \hfill
+    }\\[3em]
+    \vfill
     \subfloat[\textsf{SAT}]{
         \label{fig:bctree-results:sat}
         \includegraphics[width=.97\textwidth]{experiments/bctree_sat}
-    } \hfill
+    }\\[3em]
+    \vfill
     \subfloat[\textsf{DP}]{
         \label{fig:bctree-results:okp}
         \includegraphics[width=.97\textwidth]{experiments/bctree_okp}
@@ -40,6 +46,13 @@ It is worth noting that the Gurobi optimiser supports multithreading. However, t
     \caption{Results of the experiment, demonstrating the influence of biconnected decomposition on the running time of \textsf{ILP} , \textsf{SAT} and \textsf{DP}.}
     \label{fig:bctree-results}
 \end{figure}
+
+We save the results of each experiment in \textsc{csv} format. For each entry, we specify the Graphviz representation of the graph, the configuration, the method, and the execution results. The latter includes the local circular crossing number, the time required to compute it and whether the algorithm succeeded or not.
+
+Apart from reporting, we also use the results obtained by all experiments to cross-validate the correctness of the implementations. Since no algorithm has been previously implemented for recognising outer \(k\)-planar graph, we do not have a reliable source to provide the correct local circular crossing numbers for test graphs. This cross-validation acts as a primary method for testing the implemented algorithm, with the only other one being manual verification of the returned drawing for small instances.
+
+It is worth noting that the Gurobi optimiser supports multithreading. However, to make the comparison of the algorithms fair, we limited it to a single thread.
+
 
 \section{Biconnected decomposition}
 
@@ -54,7 +67,7 @@ As we demonstrated in this experiment, the non-biconnectivity of the graphs arti
 
 In this experiment, we compared the performance of the algorithms. We grouped results by crossing numbers and the algorithm used for solving and displayed in~\Cref{fig:methods}. Due to the complexity of the problem, some runs ran out of allocated resources. So, to display the results, we used only the measurements from runs that successfully found the minimal crossing number. As a result, starting from \(k = 6\), boxes for \textsf{SAT} and \textsf{DP} depict fewer runs compared to \textsf{ILP} as they required more resources for some graphs than were available.
 
-\begin{figure}[tbh]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{experiments/methods}
     \caption{Comparison of running times of different algorithms for graphs with different crossing numbers.}
@@ -65,7 +78,7 @@ In this experiment, we compared the performance of the algorithms. We grouped re
 
 The results show that the time required by both \textsf{SAT} and \textsf{DP} grows much faster than the time required by \textsf{ILP}. The latter requires each instance to set up an environment for the graphs. With smaller crossing numbers, these costs outweigh the solver's speed. However, for instances with bigger \(k\), the time required for setup is negligible.
 
-\begin{figure}[tbh]
+\begin{figure}
     \centering
     \subfloat[\(k = 2\)]{\includegraphics[width=.48\textwidth]{experiments/method_2}} \hfill
     \subfloat[\(k = 3\)]{\includegraphics[width=.48\textwidth]{experiments/method_3}} \hfill
@@ -82,14 +95,14 @@ As the algorithm's running time depends not only on crossing numbers but also on
 
 The last experiment we considered is the comparison of optimisations we discussed for \textsf{ILP} and \textsf{SAT} in~\Cref{sec:optimisations}. For \textsf{ILP}, we ran four configurations for each biconnected graph using none, one, or both optimisations. For \textsf{SAT}, we used two configurations with and without optimisation. The results are presented in~\Cref{fig:optimisation:ilp} and~\Cref{fig:optimisation:sat} respectively.
 
-\begin{figure}[tbh]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{experiments/ilp}
     \caption{Comparison of different configurations for \textsf{ILP}.}
     \label{fig:optimisation:ilp}
 \end{figure}
 
-\begin{figure}[tbh]
+\begin{figure}
     \centering
     \includegraphics[width=0.47\textwidth]{experiments/sat}
     \caption{Comparison of different configurations for \textsf{SAT}.}

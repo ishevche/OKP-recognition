@@ -8,8 +8,8 @@ void save_dot(const std::string& file_name, graph_t& graph,
     int vertices_count = static_cast<int>(num_vertices(graph));
     for (int j = 0; j < static_cast<int>(ordering.size()); ++j) {
         graph[ordering[j]].order = j;
-        double x = 5. * std::cos(2. * j * M_PI / vertices_count);
-        double y = 5. * std::sin(2. * j * M_PI / vertices_count);
+        double x = 2. * std::cos(2. * j * M_PI / vertices_count);
+        double y = 2. * std::sin(2. * j * M_PI / vertices_count);
         graph[ordering[j]].location = std::to_string(x) + ','
                                       + std::to_string(y) + '!';
     }
