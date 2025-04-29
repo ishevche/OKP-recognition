@@ -9,7 +9,7 @@ To evaluate the implementation, we require a set of graphs which will be provide
 
 The problem of computing the local circular crossing number is XNLP-hard. Consequently, the resources required by all implemented algorithms grow exponentially with the input size. To be able to perform the experiments, we had to limit the size of the graphs. We have done this by picking only graphs with at most \(10\) vertices. This constraint leaves plenty of graphs to experiment with while significantly limiting the computational resources. Also, as we designed the implementation only for connected graphs, we filtered out unconnected graphs.
 
-This query resulted in \(2007\) different graphs. Among them \(1326\) are biconnected and \(681\) are not. The distribution of the number of vertices among these graphs is displayed in~\Cref{fig:vertex-dist} alongside the experiment outcomes for each method.
+This query resulted in \(2007\) different graphs. Among them \(1326\) are biconnected and \(681\) are not. The distribution of the number of vertices among these graphs is displayed in~\Cref{fig:vertex-dist} on page~\pageref{fig:vertex-dist} alongside the experiment outcomes for each method.
 
 
 \section{Experiment setup}
@@ -53,29 +53,16 @@ The results prove that using decomposition indeed boosts performance for almost 
 
 As we demonstrated in this experiment, the non-biconnectivity of the graphs artificially decreases the complexity of the recognition task, as each one of them requires multiple times fewer resources compared to equally sized biconnected graphs. Thus, in the following experiments, we consider only biconnected graphs to exclude this source of noise from the results.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{experiments/methods}
-    \caption{Comparison of running times of different algorithms for graphs with different crossing numbers.}
-    \label{fig:methods}
-\end{figure}
-
 \section{Comparison of the algorithms}
 
 In this experiment, we compared the performance of the algorithms. We grouped results by crossing numbers and the algorithm used for solving and displayed in~\Cref{fig:methods}. Due to the complexity of the problem, some runs ran out of allocated resources. So, to display the results, we used only the measurements from runs that successfully found the minimal crossing number. As a result, starting from \(k = 6\), boxes for \textsf{SAT} and \textsf{DP} depict fewer runs compared to \textsf{ILP} as they required more resources for some graphs than were available.
 
 \begin{figure}
     \centering
-    \subfloat[\textsf{ILP}]{\includegraphics[width=.32\textwidth]{experiments/outcome_ilp}}
-    \subfloat[\textsf{SAT}]{\includegraphics[width=.32\textwidth]{experiments/outcome_sat}}
-    \subfloat[\textsf{DP}]{\includegraphics[width=.32\textwidth]{experiments/outcome_okp}}
-    \caption{The outcomes of the experiment for each method grouped by the number of vertices.}
-    \label{fig:vertex-dist}
+    \includegraphics[width=\textwidth]{experiments/methods}
+    \caption{Comparison of running times of different algorithms for graphs with different crossing numbers.}
+    \label{fig:methods}
 \end{figure}
-
-\textsf{SAT} and \textsf{DP}, however, were limited primarily by different factors. Unlike \textsf{ILP}, encoding in \textsf{SAT} contains an exponential number of clauses in terms of local circular crossing number. As a result, the solver ran out of allocated memory for \(185\) out of \(1326\) biconnected graphs. Similarly, \textsf{DP} ran out of memory \(16\) times. However, the bigger limiting factor for this algorithm is time, as \(317\) runs exceeded the 10-minute time limit imposed on each one. All other runs finished successfully. A more detailed breakdown of the execution outcomes grouped by the number of vertices in the graph is displayed in~\Cref{fig:vertex-dist}.
-
-The results show that the time required by both \textsf{SAT} and \textsf{DP} grows much faster than the time required by \textsf{ILP}. The latter requires each instance to set up an environment for the graphs. With smaller crossing numbers, these costs outweigh the solver's speed. However, for instances with bigger \(k\), the time required for setup is negligible.
 
 \begin{figure}
     \centering
@@ -87,6 +74,19 @@ The results show that the time required by both \textsf{SAT} and \textsf{DP} gro
     \label{fig:methods-vertices}
 \end{figure}
 
+\begin{figure}
+    \centering
+    \subfloat[\textsf{ILP}]{\includegraphics[width=.32\textwidth]{experiments/outcome_ilp}}\hfill
+    \subfloat[\textsf{SAT}]{\includegraphics[width=.32\textwidth]{experiments/outcome_sat}}\hfill
+    \subfloat[\textsf{DP}]{\includegraphics[width=.32\textwidth]{experiments/outcome_okp}}
+    \caption{The outcomes of the experiment for each method grouped by the number of vertices.}
+    \label{fig:vertex-dist}
+\end{figure}
+
+\textsf{SAT} and \textsf{DP}, however, were limited primarily by different factors. Unlike \textsf{ILP}, encoding in \textsf{SAT} contains an exponential number of clauses in terms of local circular crossing number. As a result, the solver ran out of allocated memory for \(185\) out of \(1326\) biconnected graphs. Similarly, \textsf{DP} ran out of memory \(16\) times. However, the bigger limiting factor for this algorithm is time, as \(317\) runs exceeded the 10-minute time limit imposed on each one. All other runs finished successfully. A more detailed breakdown of the execution outcomes grouped by the number of vertices in the graph is displayed in~\Cref{fig:vertex-dist}.
+
+The results show that the time required by both \textsf{SAT} and \textsf{DP} grows much faster than the time required by \textsf{ILP}. The latter requires each instance to set up an environment for the graphs. With smaller crossing numbers, these costs outweigh the solver's speed. However, for instances with bigger \(k\), the time required for setup is negligible.
+
 As the algorithm's running time depends not only on crossing numbers but also on the size of the graph, we can represent the results more accurately by grouping them by both the crossing number and the number of vertices. To demonstrate this dependency, in~\Cref{fig:methods-vertices}, we created a plot for each crossing number represented by at least \(150\) graphs. These plots show that, for \(k \in \{2, 3\}\), \textsf{DP} and \textsf{SAT} are consistently the two fastest methods, with the former being faster than the latter. However, starting from \(k = 4\) and graphs with at least \(9\) vertices, \textsf{ILP} outperforms the other two methods. Most importantly, these results agree with the ones displayed in~\Cref{fig:methods}, which aggregate them for each value \(k\).
 
 
@@ -96,16 +96,10 @@ The last experiment we considered is the comparison of optimisations we discusse
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{experiments/ilp}
-    \caption{Comparison of different configurations for \textsf{ILP}.}
-    \label{fig:optimisation:ilp}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.47\textwidth]{experiments/sat}
-    \caption{Comparison of different configurations for \textsf{SAT}.}
-    \label{fig:optimisation:sat}
+    \subfloat[\textsf{ILP}\label{fig:optimisation:ilp}]{\includegraphics[width=\textwidth]{experiments/ilp}}
+    \hfill
+    \subfloat[\textsf{SAT}\label{fig:optimisation:sat}]{\includegraphics[width=0.5\textwidth]{experiments/sat}}
+    \caption{Comparison of different configurations for \textsf{ILP} and \textsf{SAT}.}
 \end{figure}
 
 In the first plot, we can clearly see that adding additional constraints to enforce the exact value for each crossing variable degrades the performance. For \textsf{SAT}, however, this change does not influence this much. We can see a slight rise in execution time, but the difference is within the margin of error. Here, the difference may be caused by the algorithm writing down the required additional constraints, not the SAT solver.
