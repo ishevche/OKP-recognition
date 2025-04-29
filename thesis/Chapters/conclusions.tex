@@ -22,8 +22,8 @@ The current version also limits the number of vertices to \(64\) in the input gr
 
 There are many directions to explore as future work. First of all, we could combine our implementations into a library. By doing so, the algorithms could more easily be called by other programs.
 
-Secondly, we could optimise the underlying algorithms discussed in this work. In particular, it would be desirable to simplify the algorithm for very small values of \(k\). Can outer \(2\)-planar graphs be recognised in, say, quadratic time?
+Secondly, we could optimise the developed solution. Here, we distinguish between two possible directions: theoretical and practical. Optimising the theoretical part means tweaking the underlying algorithms discussed in this work. In particular, it would be desirable to simplify the algorithm for very small values of \(k\). Can outer \(2\)-planar graphs be recognised in, say, quadratic time?
+
+Meanwhile, optimising the practical part means doing so with the implementation of the algorithms. One of the highly promising ways to do so would be to make the implementation of the DP-based algorithm multithreaded. By ensuring that all threads check configurations with the right sides of the same size, we eliminate the requirement of memory synchronisation. This makes this algorithm embarrassingly parallel, as it requires synchronising all threads less than \(|V(G)|\) times throughout the whole execution.
 
 Another direction of improvement might be developing an algorithm that, for the given embedding of an outer \(k\)-planar graph, draws it using Bézier curves for edges instead of straight lines. Using this approach, we can improve the readability of the drawings.
-
-Finally, we can explore the options for further optimisations of the implemented algorithms. One of the highly promising directions to do so would be to make the implementation of the DP-based algorithm multithreaded. By ensuring that all threads check configurations with the right sides of the same size, we eliminate the requirement of memory synchronisation. This makes this algorithm embarrassingly parallel, as it requires synchronising all threads less than \(|V(G)|\) times throughout the whole execution.

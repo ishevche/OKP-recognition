@@ -203,6 +203,8 @@ Planar graphs have been thoroughly studied for decades as one of the simplest gr
 So far, their recognition has been discussed in a purely theoretical context, lacking practical validation. In this work, we focus on the practical aspect of the problem by implementing three different algorithms for recognising outer \(k\)-planar graphs. The first implementation is based on a formulation of the recognition problem as an integer linear program. The second implementation solves the problem by reducing it to the satisfiability of a Boolean formula. The third implementation follows a recently introduced algorithm based on dynamic programming.
 Comparing the resulting implementations, we found out that the one based on integer linear programming works best for most graphs due to the efficiency of the existing solvers and the simplicity of the encoding. The algorithm based on satisfiability is more complex, requiring an exponential number of clauses in terms of \(k\). Finally, the algorithm based on dynamic programming is faster than the other two approaches only for small values of \(k\) (at most 3). Also we demonstrated the positive effect of biconnected decomposition on the performance of the algorithms.
 In the future, these implementations can be used to solve the recognition problem for small instances and to verify new implementations.
+
+The code for this thesis is available on GitHub: \url{https://github.com/ishevche/OKP-recognition}.
 \end{abstract}
 
 %----------------------------------------------------------------------------------------
@@ -211,7 +213,7 @@ In the future, these implementations can be used to solve the recognition proble
 
 \begin{acknowledgements}
 \addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
-First and foremost, I would like to express my deepest gratitude to my supervisor, Prof. Dr. Alexander Wolf, who, together with Yuto Okada, guided me through every stage of writing this thesis. I am incredibly thankful for your invaluable support, commitment, and encouragement throughout our collaboration. This work would not have been possible without you. I want to thank Otfried Cheong for creating a wonderful drawing editor Ipe, that was used to create illustrations for this thesis.
+First and foremost, I would like to express my deepest gratitude to my supervisor, Prof. Dr. Alexander Wolf, who, together with Yuto Okada, guided me through every stage of writing this thesis. I am incredibly thankful for your invaluable support, commitment, and encouragement throughout our collaboration. This work would not have been possible without you. I want to thank Otfried Cheong for creating a wonderful drawing editor, Ipe, that was used to create illustrations for this thesis.
 I am profoundly grateful to my family and closest friends for their unwavering love and support over the past years. You have shaped me into the person I am today.
 My sincere appreciation goes to the Faculty of Applied Sciences and the Ukrainian Catholic University as a whole for the growth I had the opportunity to experience -- professional at the former and personal at the latter. I will always cherish the sense of community I felt within the walls of this university.
 Last but certainly not least, I want to express my deepest respect and gratitude to the Armed Forces of Ukraine. Your courage and sacrifice allow us to study, work, and simply live our lives. Without your heroism, none of this would be possible.
