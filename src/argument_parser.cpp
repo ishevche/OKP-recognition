@@ -15,7 +15,7 @@ command_line_options_t::command_line_options_t() {
         ("output_file,o", po::value<std::string>(&output_file)->default_value(""),
          "Path to output file used to save graph drawing in Graphviz format")
         ("method,m", po::value<solver_type>(&method)->default_value(ILP_SOLVER),
-         "Method to use for calculating the drawing of the input graph. One of the ILP, SAT, OKP")
+         "Method to use for calculating the drawing of the input graph. One of the ILP, SAT, DP")
         ("no_bct,b", po::bool_switch(&no_bct_decomposition)->default_value(false),
          "Whether to decompose the graph in biconnected components before passing it to the solver");
     popt_conf.add("input_graph", 1);

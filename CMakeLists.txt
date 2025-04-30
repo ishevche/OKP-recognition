@@ -6,16 +6,15 @@ set(CXX ON)
 set(SOURCES
         src/main.cpp
         src/graphIO.cpp
-        src/ilp.cpp
-        src/sat.cpp
-        src/bctree.cpp
+        src/ilp_solver.cpp
+        src/sat_solver.cpp
+        src/dp_solver.cpp
         src/argument_parser.cpp
-        src/okp_solver.cpp
 )
 
-add_executable(okp-recognition-full-cro ${SOURCES})
-add_executable(okp-recognition-full ${SOURCES})
-add_executable(okp-recognition-cro ${SOURCES})
+add_executable(okp-recognition-exact-obj ${SOURCES})
+add_executable(okp-recognition-exact ${SOURCES})
+add_executable(okp-recognition-obj ${SOURCES})
 add_executable(okp-recognition ${SOURCES})
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -38,18 +37,18 @@ set(LIBS
 )
 
 target_include_directories(okp-recognition PRIVATE ${INCLUDES})
-target_include_directories(okp-recognition-cro PRIVATE ${INCLUDES})
-target_include_directories(okp-recognition-full PRIVATE ${INCLUDES})
-target_include_directories(okp-recognition-full-cro PRIVATE ${INCLUDES})
+target_include_directories(okp-recognition-obj PRIVATE ${INCLUDES})
+target_include_directories(okp-recognition-exact PRIVATE ${INCLUDES})
+target_include_directories(okp-recognition-exact-obj PRIVATE ${INCLUDES})
 target_link_libraries(okp-recognition ${LIBS})
-target_link_libraries(okp-recognition-cro ${LIBS})
-target_link_libraries(okp-recognition-full ${LIBS})
-target_link_libraries(okp-recognition-full-cro ${LIBS})
+target_link_libraries(okp-recognition-obj ${LIBS})
+target_link_libraries(okp-recognition-exact ${LIBS})
+target_link_libraries(okp-recognition-exact-obj ${LIBS})
 
-target_compile_definitions(okp-recognition-cro PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
-target_compile_definitions(okp-recognition-full-cro PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
-target_compile_definitions(okp-recognition-full PRIVATE ILP_EXACT_CROSS SAT_EXACT_CROSS)
-target_compile_definitions(okp-recognition-full-cro PRIVATE ILP_EXACT_CROSS SAT_EXACT_CROSS)
+target_compile_definitions(okp-recognition-obj PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
+target_compile_definitions(okp-recognition-exact-obj PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
+target_compile_definitions(okp-recognition-exact PRIVATE ILP_EXACT_CROSS SAT_EXACT_CROSS)
+target_compile_definitions(okp-recognition-exact-obj PRIVATE ILP_EXACT_CROSS SAT_EXACT_CROSS)
 
 set(PROPERTIES
         PROPERTIES
@@ -59,6 +58,6 @@ set(PROPERTIES
 )
 
 set_target_properties(okp-recognition ${PROPERTIES})
-set_target_properties(okp-recognition-cro ${PROPERTIES})
-set_target_properties(okp-recognition-full ${PROPERTIES})
-set_target_properties(okp-recognition-full-cro ${PROPERTIES})
+set_target_properties(okp-recognition-obj ${PROPERTIES})
+set_target_properties(okp-recognition-exact ${PROPERTIES})
+set_target_properties(okp-recognition-exact-obj ${PROPERTIES})

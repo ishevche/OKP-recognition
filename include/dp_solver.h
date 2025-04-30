@@ -2,9 +2,9 @@
 #define OKP_RECOGNITION_OKP_SOLVER_H
 
 
-#include "solver.h"
+#include "abstract_solver.h"
 
-class okp_solver : public solver {
+class dp_solver : public abstract_solver {
     typedef boost::property_map<graph_t, boost::edge_index_t>::const_type edge_index_map_t;
     typedef boost::property_map<graph_t, boost::vertex_index_t>::const_type vertex_index_map_t;
 
@@ -12,8 +12,8 @@ class okp_solver : public solver {
     const edge_index_map_t edge_index_map;
 
 public:
-    explicit okp_solver(const graph_t& graph, int crossing_number = 0)
-        : solver(graph, crossing_number),
+    explicit dp_solver(const graph_t& graph, int crossing_number = 0)
+        : abstract_solver(graph, crossing_number),
           vertex_index_map(get(boost::vertex_index, graph)),
           edge_index_map(get(boost::edge_index, graph)),
           filtered_graph(graph, [&](const edge_t& v) {

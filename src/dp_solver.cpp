@@ -1,14 +1,14 @@
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/biconnected_components.hpp>
 #include <boost/graph/bipartite.hpp>
-#include "okp_solver.h"
+#include "dp_solver.h"
 
 #include <numeric>
 #include <ranges>
 
-bool okp_solver::solve() {
+bool dp_solver::solve() {
     if (!is_biconnected()) {
-        std::cout << "WARNING: The input graph is not biconnected. Use bicomponent_solver<okp_solver>" << std::endl;
+        std::cout << "WARNING: The input graph is not biconnected. Use bicomponent_solver<dp_solver>" << std::endl;
     }
     vertex_order.clear();
     vertex_order.insert(vertex_order.end(), vertices(graph).first, vertices(graph).second);
@@ -46,12 +46,12 @@ bool okp_solver::solve() {
     return false;
 }
 
-bool okp_solver::is_biconnected() const {
+bool dp_solver::is_biconnected() const {
     const int num_components = static_cast<int>(biconnected_components(graph, boost::dummy_property_map()));
     return num_components == 1;
 }
 
-void okp_solver::fill_edge_order(std::vector<edge_t>& order_vector,
+void dp_solver::fill_edge_order(std::vector<edge_t>& order_vector,
                                  const std::vector<edge_t>& edges,
                                  const std::vector<std::pair<int, int>>& edge_order) {
     order_vector.resize(edges.size());
@@ -60,7 +60,7 @@ void okp_solver::fill_edge_order(std::vector<edge_t>& order_vector,
     }
 }
 
-bool okp_solver::check_triangle_consistency(const std::ranges::range auto& edges,
+bool dp_solver::check_triangle_consistency(const std::ranges::range auto& edges,
                                             group_t common_group, group_t prev_group) {
     std::pair prev_trg{prev_group, 0};
     for (const edge_t& edge : edges) {
@@ -79,7 +79,7 @@ bool okp_solver::check_triangle_consistency(const std::ranges::range auto& edges
     return true;
 }
 
-void okp_solver::add_triangle_edges(const std::ranges::range auto& edges,
+void dp_solver::add_triangle_edges(const std::ranges::range auto& edges,
                                     vertex_t opposite_vertex,
                                     group_t opposite_group,
                                     group_t common_group) {
@@ -98,7 +98,7 @@ void okp_solver::add_triangle_edges(const std::ranges::range auto& edges,
     }
 }
 
-bool okp_solver::count_triangle_intersections(const std::ranges::range auto& part_a_edges,
+bool dp_solver::count_triangle_intersections(const std::ranges::range auto& part_a_edges,
                                               const std::ranges::range auto& part_b_edges,
                                               const std::ranges::range auto& piercing_edges,
                                               vertex_t split_vertex) {
@@ -143,7 +143,7 @@ bool okp_solver::count_triangle_intersections(const std::ranges::range auto& par
     return true;
 }
 
-void okp_solver::process_split(size_t right_side, int right_size, const std::vector<edge_t>& piercing_edges,
+void dp_solver::process_split(size_t right_side, int right_size, const std::vector<edge_t>& piercing_edges,
                                vertex_t split_vertex) {
     std::pair uw_link(active_link.first, split_vertex);
     std::pair vw_link(split_vertex, active_link.second);
@@ -272,7 +272,7 @@ void okp_solver::process_split(size_t right_side, int right_size, const std::vec
     }
 }
 
-bool okp_solver::is_drawable() {
+bool dp_solver::is_drawable() {
     dp_table.clear();
     int num_vertices = static_cast<int>(boost::num_vertices(graph));
     dp_table.resize(num_vertices);
@@ -305,7 +305,7 @@ bool okp_solver::is_drawable() {
     return false;
 }
 
-void okp_solver::add_table_entries(int k) {
+void dp_solver::add_table_entries(int k) {
     int num_vertices = static_cast<int>(boost::num_vertices(graph));
     for (int v_index = 0; v_index < num_vertices; ++v_index) {
         active_link.first = v_index;
@@ -319,7 +319,7 @@ void okp_solver::add_table_entries(int k) {
 }
 
 
-void okp_solver::initialise_table() {
+void dp_solver::initialise_table() {
     dp_table_initialisation.clear();
     int num_vertices = static_cast<int>(boost::num_vertices(graph));
     dp_table_initialisation.resize(num_vertices);
@@ -332,7 +332,7 @@ void okp_solver::initialise_table() {
     for (int k = 0; k <= crossing_number; add_table_entries(k++)) {}
 }
 
-void okp_solver::select_edges(filtered_graph_t::edge_iterator start,
+void dp_solver::select_edges(filtered_graph_t::edge_iterator start,
                               const filtered_graph_t::edge_iterator& end,
                               int k) {
     if (k == 0) {
@@ -346,7 +346,7 @@ void okp_solver::select_edges(filtered_graph_t::edge_iterator start,
     }
 }
 
-void okp_solver::fill_right_sides() {
+void dp_solver::fill_right_sides() {
     std::vector<int> component_map(num_vertices(graph));
     int num_components = connected_components(
         filtered_graph,
@@ -390,7 +390,7 @@ void okp_solver::fill_right_sides() {
     populate_right_sides(sides.begin(), sides.end(), 0, 0);
 }
 
-void okp_solver::populate_right_sides(
+void dp_solver::populate_right_sides(
     std::vector<std::pair<std::pair<size_t, int>, std::pair<size_t, int>>>::iterator start,
     std::vector<std::pair<std::pair<size_t, int>, std::pair<size_t, int>>>::iterator end,
     size_t cur_side, int count) {
@@ -405,7 +405,7 @@ void okp_solver::populate_right_sides(
 }
 
 #ifndef NDEBUG
-void okp_solver::print_table() {
+void dp_solver::print_table() {
     for (int i = 0; i < static_cast<int>(dp_table.size()); ++i) {
         for (int j = 0; j < static_cast<int>(dp_table[i].size()); ++j) {
             std::cout << "Active link: " << i << "-" << j << std::endl;

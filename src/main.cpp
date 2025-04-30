@@ -5,7 +5,7 @@
 #include "argument_parser.h"
 #include "timer.h"
 
-std::unique_ptr<solver> get_solver(solver_type type, bool use_bct, const graph_t& graph) {
+std::unique_ptr<abstract_solver> get_solver(solver_type type, bool use_bct, const graph_t& graph) {
     switch (type) {
     case ILP_SOLVER:
         if (!use_bct) {
@@ -17,11 +17,11 @@ std::unique_ptr<solver> get_solver(solver_type type, bool use_bct, const graph_t
             return std::make_unique<sat_solver>(graph, 0);
         }
         return std::make_unique<bicomponent_solver<sat_solver>>(graph, 0);
-    case OKP_SOLVER:
+    case DP_SOLVER:
         if (!use_bct) {
-            return std::make_unique<okp_solver>(graph, 0);
+            return std::make_unique<dp_solver>(graph, 0);
         }
-        return std::make_unique<bicomponent_solver<okp_solver>>(graph, 0);
+        return std::make_unique<bicomponent_solver<dp_solver>>(graph, 0);
     default:
         return std::make_unique<bicomponent_solver<ilp_solver>>(graph, 0);
     }
@@ -44,7 +44,7 @@ int main(int ac, char** av) {
         put(edge_index_map, *ei, edge_id++);
     }
 
-    std::unique_ptr<solver> solver = get_solver(cmd_arguments.method, !cmd_arguments.no_bct_decomposition, graph);
+    std::unique_ptr<abstract_solver> solver = get_solver(cmd_arguments.method, !cmd_arguments.no_bct_decomposition, graph);
     auto start = get_current_time_fenced();
     bool solved = solver->solve();
     auto end = get_current_time_fenced();

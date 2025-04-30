@@ -16,8 +16,8 @@ def get_arguments():
     parser.add_argument("-p", "--subprocesses", help="number of subprocesses to use at the same time (default: 1)",
                         dest="subprocesses", type=int, default=1)
     parser.add_argument("-b", "--bin-executables",
-                        help="path to an executables separated by ',' (default: bin/okp-recognition-cro)",
-                        dest="execs", default="bin/okp-recognition-cro")
+                        help="path to an executables separated by ',' (default: bin/okp-recognition-obj)",
+                        dest="execs", default="bin/okp-recognition-obj")
     parser.add_argument("-o", "--output", help="output file for all evaluations (default: data/results.csv)",
                         dest="out", default="data/results.csv")
     parser.add_argument("-m", "--methods",
