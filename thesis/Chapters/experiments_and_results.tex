@@ -28,7 +28,7 @@ This query resulted in \(2007\) different graphs. Among them \(1326\) are biconn
     \vfill
     \subfloat[\textsf{DP}]{
         \label{fig:bctree-results:okp}
-        \includegraphics[width=.97\textwidth]{experiments/bctree_okp}
+        \includegraphics[width=.97\textwidth]{experiments/bctree_dp}
     }
     \caption{Results of the experiment, demonstrating the influence of biconnected decomposition on the running time of \textsf{ILP} , \textsf{SAT} and \textsf{DP}.}
     \label{fig:bctree-results}
@@ -59,17 +59,17 @@ In this experiment, we compared the performance of the algorithms. We grouped re
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{experiments/methods}
+    \includegraphics[width=\textwidth]{experiments/comparison}
     \caption{Comparison of running times of different algorithms for graphs with different crossing numbers.}
     \label{fig:methods}
 \end{figure}
 
 \begin{figure}
     \centering
-    \subfloat[\(k = 2\)]{\includegraphics[width=.48\textwidth]{experiments/method_2}} \hfill
-    \subfloat[\(k = 3\)]{\includegraphics[width=.48\textwidth]{experiments/method_3}} \hfill
-    \subfloat[\(k = 4\)]{\includegraphics[width=.48\textwidth]{experiments/method_4}} \hfill
-    \subfloat[\(k = 5\)]{\includegraphics[width=.48\textwidth]{experiments/method_5}} \hfill
+    \subfloat[\(k = 2\)]{\includegraphics[width=.48\textwidth]{experiments/comparison_cr2}} \hfill
+    \subfloat[\(k = 3\)]{\includegraphics[width=.48\textwidth]{experiments/comparison_cr3}} \hfill
+    \subfloat[\(k = 4\)]{\includegraphics[width=.48\textwidth]{experiments/comparison_cr4}} \hfill
+    \subfloat[\(k = 5\)]{\includegraphics[width=.48\textwidth]{experiments/comparison_cr5}} \hfill
     \caption{Comparison of running times required by algorithms to recognise outer \(k\)-planar graphs for various values of \(k\).}
     \label{fig:methods-vertices}
 \end{figure}
@@ -78,7 +78,7 @@ In this experiment, we compared the performance of the algorithms. We grouped re
     \centering
     \subfloat[\textsf{ILP}]{\includegraphics[width=.32\textwidth]{experiments/outcome_ilp}}\hfill
     \subfloat[\textsf{SAT}]{\includegraphics[width=.32\textwidth]{experiments/outcome_sat}}\hfill
-    \subfloat[\textsf{DP}]{\includegraphics[width=.32\textwidth]{experiments/outcome_okp}}
+    \subfloat[\textsf{DP}]{\includegraphics[width=.32\textwidth]{experiments/outcome_dp}}
     \caption{The outcomes of the experiment for each method grouped by the number of vertices.}
     \label{fig:vertex-dist}
 \end{figure}
@@ -96,9 +96,9 @@ The last experiment we considered is the comparison of optimisations we discusse
 
 \begin{figure}
     \centering
-    \subfloat[\textsf{ILP}\label{fig:optimisation:ilp}]{\includegraphics[width=\textwidth]{experiments/ilp}}
+    \subfloat[\textsf{ILP}\label{fig:optimisation:ilp}]{\includegraphics[width=\textwidth]{experiments/ilp_optimisations}}
     \hfill
-    \subfloat[\textsf{SAT}\label{fig:optimisation:sat}]{\includegraphics[width=0.5\textwidth]{experiments/sat}}
+    \subfloat[\textsf{SAT}\label{fig:optimisation:sat}]{\includegraphics[width=0.5\textwidth]{experiments/sat_optimisations}}
     \caption{Comparison of different configurations for \textsf{ILP} and \textsf{SAT}.}
 \end{figure}
 
