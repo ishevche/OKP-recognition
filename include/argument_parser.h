@@ -31,8 +31,6 @@ private:
         "Allowed options:"
     };
     boost::program_options::positional_options_description popt_conf{};
-
-    static void assert_exists(const std::string& file);
 };
 
 #endif //OKP_RECOGNITION_ARGUMENT_PARSER_H

@@ -35,13 +35,4 @@ void command_line_options_t::parse(int ac, char** av) {
         exit(EXIT_SUCCESS);
     }
     notify(var_map);
-    if (!output_file.empty()) {
-        fs::create_directories(fs::path(output_file).parent_path());
-    }
-}
-
-void command_line_options_t::assert_exists(const std::string& file) {
-    if (!std::filesystem::exists(file)) {
-        throw std::invalid_argument("File " + file + " not found!");
-    }
 }

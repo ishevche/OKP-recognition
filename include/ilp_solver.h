@@ -29,10 +29,10 @@ public:
     bool solve() override;
 
 private:
-    void ilp_solver::initialise_model(GRBModel& model);
+    void initialise_model(GRBModel& model);
     void setup_order_variables(GRBModel model);
     void transitivity_constraints(GRBModel model);
-    void ilp_solver::setup_crossing_variables(GRBModel& model);
+    void setup_crossing_variables(GRBModel& model);
 
     std::vector<GRBLinExpr> edge_crossing_numbers;
     std::vector<std::vector<GRBLinExpr>> order_variables;
