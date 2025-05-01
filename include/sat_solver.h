@@ -31,7 +31,10 @@ public:
 
 private:
     void initialise_solver();
-
+    void setup_order_variables(int& variable_count);
+    void transitivity_constraints();
+    void setup_crossing_variables(int& variable_count);
+    void local_crossing_constraint();
     void add_crossing_clauses(const edge_t& edge1, const edge_t& edge2, int crossing_var) const;
 
     std::vector<std::vector<int>> order_variables;

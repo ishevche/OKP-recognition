@@ -37,18 +37,23 @@ bool sat_solver::is_drawable() {
 
 void sat_solver::initialise_solver() {
     if (kissat_solver != nullptr) { kissat_release(kissat_solver); }
-    int num_vertices = static_cast<int>(boost::num_vertices(graph));
 
     kissat_solver = kissat_init();
     kissat_set_option(kissat_solver, "quiet", 1);
-
     // First variable is FALSE
     kissat_add(kissat_solver, -1);
     kissat_add(kissat_solver, 0);
 
     int variable_count = 1;
 
-    // Order variables initialization
+    setup_order_variables(variable_count);
+    transitivity_constraints();
+    setup_crossing_variables(variable_count);
+    local_crossing_constraint();
+}
+
+void sat_solver::setup_order_variables(int& variable_count) {
+    int num_vertices = static_cast<int>(boost::num_vertices(graph));
     order_variables.clear();
     order_variables.resize(num_vertices);
     for (int i = 0; i < num_vertices; ++i) {
@@ -67,9 +72,10 @@ void sat_solver::initialise_solver() {
             }
         }
     }
+}
 
-    // Transitivity constraints
-    // (sm && me) -> se   <=>   -sm || -me || se
+void sat_solver::transitivity_constraints() {
+    int num_vertices = static_cast<int>(boost::num_vertices(graph));
     for (int start = 0; start < num_vertices; ++start) {
         for (int middle = 0; middle < num_vertices; ++middle) {
             for (int end = 0; end < num_vertices; ++end) {
@@ -80,8 +86,9 @@ void sat_solver::initialise_solver() {
             }
         }
     }
+}
 
-    // Edge crossings variables definition
+void sat_solver::setup_crossing_variables(int& variable_count) {
     int num_edges = static_cast<int>(boost::num_edges(graph));
     crossing_variables.resize(num_edges);
     for (int i = 0; i < num_edges; ++i) {
@@ -110,23 +117,6 @@ void sat_solver::initialise_solver() {
             int edge2_idx = get(edge_index_map, *e2i);
             add_crossing_clauses(*e1i, *e2i, crossing_variables[edge1_idx][edge2_idx]);
         }
-    }
-
-    // Restricting number of crossings for every edge
-    for (edge_t edge : make_iterator_range(edges(graph))) {
-        std::string crossings(crossing_number + 1, 1);
-        int edge_idx = get(edge_index_map, edge);
-        crossings.resize(num_edges, 0);
-        do {
-            int i = 0;
-            for (edge_t other : make_iterator_range(edges(graph))) {
-                if (crossings[i++]) {
-                    int other_idx = get(edge_index_map, other);
-                    kissat_add(kissat_solver, -crossing_variables[edge_idx][other_idx]);
-                }
-            }
-            kissat_add(kissat_solver, 0);
-        } while (std::ranges::prev_permutation(crossings).found);
     }
 }
 
@@ -164,4 +154,22 @@ void sat_solver::add_crossing_clauses(const edge_t& edge1, const edge_t& edge2, 
     ADD_CLAUSE4(kissat_solver, -order_variables[t][s], -order_variables[s][v], -order_variables[v][u], -crossing_var)
     ADD_CLAUSE4(kissat_solver, -order_variables[t][v], -order_variables[v][u], -order_variables[u][s], -crossing_var)
 #endif
+}
+
+void sat_solver::local_crossing_constraint() {
+    for (edge_t edge : make_iterator_range(edges(graph))) {
+        std::string crossings(crossing_number + 1, 1);
+        int edge_idx = get(edge_index_map, edge);
+        crossings.resize(boost::num_edges(graph), 0);
+        do {
+            int i = 0;
+            for (edge_t other : make_iterator_range(edges(graph))) {
+                if (crossings[i++]) {
+                    int other_idx = get(edge_index_map, other);
+                    kissat_add(kissat_solver, -crossing_variables[edge_idx][other_idx]);
+                }
+            }
+            kissat_add(kissat_solver, 0);
+        } while (std::ranges::prev_permutation(crossings).found);
+    }
 }
