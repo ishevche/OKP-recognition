@@ -29,9 +29,14 @@ public:
     bool solve() override;
 
 private:
-    void initialise_gurobi();
+    void ilp_solver::initialise_model(GRBModel& model);
+    void setup_order_variables(GRBModel model);
+    void transitivity_constraints(GRBModel model);
+    void ilp_solver::setup_crossing_variables(GRBModel& model);
 
+    std::vector<GRBLinExpr> edge_crossing_numbers;
     std::vector<std::vector<GRBLinExpr>> order_variables;
+    GRBLinExpr crossing_upper_bound;
     static inline std::unique_ptr<GRBEnv> gurobi_env = nullptr;
 };
 
