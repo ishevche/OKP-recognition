@@ -10,15 +10,15 @@ namespace fs = std::filesystem;
 command_line_options_t::command_line_options_t() {
     opt_conf.add_options()
         ("help,h", "Show help message")
-        ("input_graph,i", po::value<std::string>(&input_graph)->required(),
-         "Input graph in Graphviz format")
-        ("output_file,o", po::value<std::string>(&output_file)->default_value(""),
-         "Path to output file used to save graph drawing in Graphviz format")
+        ("input-graph,i", po::value<std::string>(&input_graph)->required(),
+         "Input graph in Graphviz format. Required.")
+        ("output-file,o", po::value<std::string>(&output_file)->default_value(""),
+         "Path to output file used to save graph drawing in Graphviz format. Default: \"\" (output is ignored)")
         ("method,m", po::value<solver_type>(&method)->default_value(ILP_SOLVER),
-         "Method to use for calculating the drawing of the input graph. One of the ILP, SAT, DP")
-        ("no_bct,b", po::bool_switch(&no_bct_decomposition)->default_value(false),
-         "Whether to decompose the graph in biconnected components before passing it to the solver");
-    popt_conf.add("input_graph", 1);
+         "Method to use for calculating the drawing of the input graph. One of the ILP, SAT, DP. Default: ILP")
+        ("no-bct,b", po::bool_switch(&no_bct_decomposition)->default_value(false),
+         "Include this to disable biconnected decomposition before passing it to the solver");
+    popt_conf.add("input-graph", 1);
 }
 
 command_line_options_t::command_line_options_t(int ac, char** av) :

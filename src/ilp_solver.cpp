@@ -46,7 +46,7 @@ void ilp_solver::initialise_model(GRBModel& model) {
 #endif
 }
 
-void ilp_solver::setup_order_variables(GRBModel model) {
+void ilp_solver::setup_order_variables(GRBModel& model) {
     int num_vertices = static_cast<int>(boost::num_vertices(graph));
     order_variables = std::vector<std::vector<GRBLinExpr>>(num_vertices);
     for (int i = 0; i < num_vertices; ++i) {
@@ -68,7 +68,7 @@ void ilp_solver::setup_order_variables(GRBModel model) {
     }
 }
 
-void ilp_solver::transitivity_constraints(GRBModel model) {
+void ilp_solver::transitivity_constraints(GRBModel &model) {
     int num_vertices = static_cast<int>(boost::num_vertices(graph));
     for (int start = 0; start < num_vertices; ++start) {
         for (int middle = 0; middle < num_vertices; ++middle) {

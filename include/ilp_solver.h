@@ -30,8 +30,8 @@ public:
 
 private:
     void initialise_model(GRBModel& model);
-    void setup_order_variables(GRBModel model);
-    void transitivity_constraints(GRBModel model);
+    void setup_order_variables(GRBModel& model);
+    void transitivity_constraints(GRBModel& model);
     void setup_crossing_variables(GRBModel& model);
 
     std::vector<GRBLinExpr> edge_crossing_numbers;

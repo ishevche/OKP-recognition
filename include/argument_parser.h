@@ -27,8 +27,8 @@ public:
 private:
     boost::program_options::variables_map var_map{};
     boost::program_options::options_description opt_conf{
-        "Usage:\n\tokp-recognition [options]\n"
-        "Allowed options:"
+        "Usage:\n\tokp-recognition[-exact|-obj|-exact-obj] <input_graph> [options]\n"
+        "Allowed options"
     };
     boost::program_options::positional_options_description popt_conf{};
 };

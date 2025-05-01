@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31.1)
+cmake_minimum_required(VERSION 3.21.1)
 project(okp-recognition CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CXX ON)

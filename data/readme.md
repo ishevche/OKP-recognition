@@ -17,3 +17,5 @@ Files with the `CSV` extension in this folder contain the results of the followi
  - `results_biconnected.csv`: experiment was run on only non-biconnected graphs and all methods in two configurations; one of them used biconnected decomposition, another did not;
  - `results_ilp_optimisations.csv`: experiment comparing optimisations for `ilp`; was run on all biconnected graphs;
  - `results_sat_optimisations.csv`: similar to `results_ilp_optimisations.csv`, but for `sat` optimisations.
+
+Files `cubical.dot` and `cubical.png` demonstrate the result returned from the code. See `README.md` on the root level of the project. 
