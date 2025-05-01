@@ -12,7 +12,7 @@ import networkx as nx
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("graphs_file", help="file containing graphs in Graphviz format", default="data/graphs.txt")
+    parser.add_argument("graphs_file", help="file containing graphs in Graphviz format")
     parser.add_argument("-p", "--subprocesses", help="number of subprocesses to use at the same time (default: 1)",
                         dest="subprocesses", type=int, default=1)
     parser.add_argument("-b", "--bin-executables",
@@ -21,8 +21,8 @@ def get_arguments():
     parser.add_argument("-o", "--output", help="output file for all evaluations (default: data/results.csv)",
                         dest="out", default="data/results.csv")
     parser.add_argument("-m", "--methods",
-                        help="methods to use, separated by ','; possible values: ilp, sat, okp (default: ilp,sat,okp)",
-                        dest="methods", default="ilp,sat,okp")
+                        help="methods to use, separated by ','; possible values: ilp, sat, dp (default: ilp,sat,dp)",
+                        dest="methods", default="ilp,sat,dp")
     parser.add_argument("-t", "--timeout", help="timeout for each subprocess in seconds (default: 600)",
                         dest="timeout", type=int, default=600)
     parser.add_argument("--resume", help="resume the experiments from the output file (default: no-resume)",
