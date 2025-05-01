@@ -3,6 +3,8 @@ project(okp-recognition CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CXX ON)
 
+set(PERFORMANCE_BUILD OFF)
+
 set(SOURCES
         src/main.cpp
         src/graphIO.cpp
@@ -49,6 +51,13 @@ target_compile_definitions(okp-recognition-obj PRIVATE ILP_CROSSING_SUM_OPTIMIZA
 target_compile_definitions(okp-recognition-exact-obj PRIVATE ILP_CROSSING_SUM_OPTIMIZATION)
 target_compile_definitions(okp-recognition-exact PRIVATE ILP_EXACT_CROSS SAT_EXACT_CROSS)
 target_compile_definitions(okp-recognition-exact-obj PRIVATE ILP_EXACT_CROSS SAT_EXACT_CROSS)
+
+if (${PERFORMANCE_BUILD})
+    target_compile_definitions(okp-recognition PRIVATE PERF_TEST)
+    target_compile_definitions(okp-recognition-obj PRIVATE PERF_TEST)
+    target_compile_definitions(okp-recognition-exact PRIVATE PERF_TEST)
+    target_compile_definitions(okp-recognition-exact-obj PRIVATE PERF_TEST)
+endif ()
 
 set(PROPERTIES
         PROPERTIES

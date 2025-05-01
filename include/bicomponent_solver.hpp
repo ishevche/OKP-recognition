@@ -3,8 +3,21 @@
 
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/biconnected_components.hpp>
-#include "bctree.h"
 #include "abstract_solver.h"
+
+enum bctree_node_type_t {
+    B_NODE, C_NODE
+};
+
+struct bctree_vertex_t {
+    bctree_node_type_t node_type;
+    graph_t bi_component;
+    std::vector<vertex_t> original_vertices;
+    vertex_t articulation_point;
+};
+
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, bctree_vertex_t> bctree_t;
+typedef bctree_t::vertex_descriptor bctree_vertex;
 
 template <class sub_solver>
 class bicomponent_solver : public abstract_solver {

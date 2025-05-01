@@ -6,10 +6,23 @@
 #include <numeric>
 #include <ranges>
 
-bool dp_solver::solve() {
-    if (!is_biconnected()) {
+bool dp_solver::check_input() {
+#ifndef PERF_TEST
+    if (static_cast<int>(biconnected_components(graph, boost::dummy_property_map())) != 1) {
         std::cout << "WARNING: The input graph is not biconnected. Use bicomponent_solver<dp_solver>" << std::endl;
     }
+#endif
+    if (boost::num_vertices(graph) > 64) {
+#ifndef PERF_TEST
+        std::cout << "ERROR: The input graph is too big for dp_solver." << std::endl;
+#endif
+        return false;
+    }
+    return true;
+}
+
+bool dp_solver::solve() {
+    if (!check_input()) { return false; }
     vertex_order.clear();
     vertex_order.insert(vertex_order.end(), vertices(graph).first, vertices(graph).second);
     if (vertex_order.size() <= 3) {
@@ -41,19 +54,15 @@ bool dp_solver::solve() {
             }
         }
     }
-
+#ifndef PERF_TEST
     std::cout << "Something went wrong" << std::endl;
+#endif
     return false;
 }
 
-bool dp_solver::is_biconnected() const {
-    const int num_components = static_cast<int>(biconnected_components(graph, boost::dummy_property_map()));
-    return num_components == 1;
-}
-
 void dp_solver::fill_edge_order(std::vector<edge_t>& order_vector,
-                                 const std::vector<edge_t>& edges,
-                                 const std::vector<std::pair<int, int>>& edge_order) {
+                                const std::vector<edge_t>& edges,
+                                const std::vector<std::pair<int, int>>& edge_order) {
     order_vector.resize(edges.size());
     for (int i = 0; i < static_cast<int>(edges.size()); i++) {
         order_vector[i] = edges[edge_order[i].first];
@@ -61,13 +70,14 @@ void dp_solver::fill_edge_order(std::vector<edge_t>& order_vector,
 }
 
 bool dp_solver::check_triangle_consistency(const std::ranges::range auto& edges,
-                                            group_t common_group, group_t prev_group) {
-    std::pair prev_trg{prev_group, 0};
+                                           triangle_vertex_type_t edge_type,
+                                           triangle_vertex_type_t prev_type) {
+    std::pair prev_trg{prev_type, 0};
     for (const edge_t& edge : edges) {
         const auto& triangle_edge = triangle_edges_map[get(edge_index_map, edge)];
         auto src = triangle_edge.first;
         auto trg = triangle_edge.second;
-        if (src.first != common_group) {
+        if (src.first != edge_type) {
             std::swap(src, trg);
         }
         if ((trg < src && (trg > prev_trg || prev_trg >= src)) ||
@@ -80,38 +90,38 @@ bool dp_solver::check_triangle_consistency(const std::ranges::range auto& edges,
 }
 
 void dp_solver::add_triangle_edges(const std::ranges::range auto& edges,
-                                    vertex_t opposite_vertex,
-                                    group_t opposite_group,
-                                    group_t common_group) {
+                                   vertex_t opposite_vertex,
+                                   triangle_vertex_type_t opposite_type,
+                                   triangle_vertex_type_t common_type) {
     for (int i = 0; i < static_cast<int>(edges.size()); ++i) {
         int edge_index = get(edge_index_map, edges[i]);
         if (source(edges[i], graph) == opposite_vertex ||
             target(edges[i], graph) == opposite_vertex) {
-            triangle_edges_map[edge_index].second = {opposite_group, 0};
+            triangle_edges_map[edge_index].second = {opposite_type, 0};
         }
         if (triangle_edges_map[edge_index].first.first == NONE) {
-            triangle_edges_map[edge_index].first = {common_group, i};
+            triangle_edges_map[edge_index].first = {common_type, i};
             triangle_edges.push_back(edge_index);
         } else {
-            triangle_edges_map[edge_index].second = {common_group, i};
+            triangle_edges_map[edge_index].second = {common_type, i};
         }
     }
 }
 
 bool dp_solver::count_triangle_intersections(const std::ranges::range auto& part_a_edges,
-                                              const std::ranges::range auto& part_b_edges,
-                                              const std::ranges::range auto& piercing_edges,
-                                              vertex_t split_vertex) {
+                                             const std::ranges::range auto& part_b_edges,
+                                             const std::ranges::range auto& piercing_edges,
+                                             vertex_t split_vertex) {
     auto default_entry = std::make_pair(std::make_pair(NONE, 0), std::make_pair(NONE, 0));
     std::ranges::fill(triangle_edges_map, default_entry);
     triangle_edges.clear();
 
-    add_triangle_edges(part_a_edges, active_link.second, LINK_TRG, PART_A);
-    add_triangle_edges(part_b_edges, active_link.first, LINK_SRC, PART_B);
-    add_triangle_edges(piercing_edges, split_vertex, SPLIT, PIERCE);
+    add_triangle_edges(part_a_edges, active_link.second, LINK_TRG, HELPER_PART_A);
+    add_triangle_edges(part_b_edges, active_link.first, LINK_SRC, HELPER_PART_B);
+    add_triangle_edges(piercing_edges, split_vertex, SPLIT, HELPER_PIERCE);
 
-    if (!check_triangle_consistency(part_a_edges, PART_A, LINK_SRC)) return false;
-    if (!check_triangle_consistency(part_b_edges, PART_B, SPLIT)) return false;
+    if (!check_triangle_consistency(part_a_edges, HELPER_PART_A, LINK_SRC)) return false;
+    if (!check_triangle_consistency(part_b_edges, HELPER_PART_B, SPLIT)) return false;
 
     auto [link, ok] = edge(active_link.first, active_link.second, graph);
     if (ok) {
@@ -143,8 +153,111 @@ bool dp_solver::count_triangle_intersections(const std::ranges::range auto& part
     return true;
 }
 
+bool dp_solver::check_inner_triangle(vertex_t split_vertex) {
+    if (split_vertex < active_link.first) {
+        if (split_vertex > active_link.second) {
+            return count_triangle_intersections(
+                part_a_edges_order | std::views::reverse,
+                part_b_edges_order | std::views::reverse,
+                piercing_edges_order | std::views::reverse,
+                split_vertex
+            );
+        }
+        return count_triangle_intersections(
+            part_a_edges_order | std::views::reverse,
+            part_b_edges_order,
+            piercing_edges_order | std::views::reverse,
+            split_vertex
+        );
+    }
+    if (split_vertex > active_link.second) {
+        return count_triangle_intersections(
+            part_a_edges_order,
+            part_b_edges_order | std::views::reverse,
+            piercing_edges_order | std::views::reverse,
+            split_vertex
+        );
+    }
+    return count_triangle_intersections(
+        part_a_edges_order,
+        part_b_edges_order,
+        piercing_edges_order | std::views::reverse,
+        split_vertex
+    );
+}
+
+void dp_solver::combine_vertex_order(vertex_t split_vertex,
+                                     const table_entry_t& part_a_entry,
+                                     const table_entry_t& part_b_entry) {
+    combined_entry.vertex_order.clear();
+    if (split_vertex < active_link.first) {
+        combined_entry.vertex_order.insert(combined_entry.vertex_order.end(),
+                                           part_a_entry.vertex_order.rbegin(),
+                                           part_a_entry.vertex_order.rend());
+    } else {
+        combined_entry.vertex_order.insert(combined_entry.vertex_order.end(),
+                                           part_a_entry.vertex_order.begin(),
+                                           part_a_entry.vertex_order.end());
+    }
+    combined_entry.vertex_order.push_back(split_vertex);
+    if (split_vertex > active_link.second) {
+        combined_entry.vertex_order.insert(combined_entry.vertex_order.end(),
+                                           part_b_entry.vertex_order.rbegin(),
+                                           part_b_entry.vertex_order.rend());
+    } else {
+        combined_entry.vertex_order.insert(combined_entry.vertex_order.end(),
+                                           part_b_entry.vertex_order.begin(),
+                                           part_b_entry.vertex_order.end());
+    }
+}
+
+void dp_solver::process_all_arrangements(const std::vector<edge_t>& piercing_edges,
+                                         vertex_t split_vertex, size_t right_side,
+                                         const table_entry_t& part_a_entry,
+                                         const table_entry_t& part_b_entry) {
+    do {
+        bool ok = true;
+        fill_edge_order(piercing_edges_order, piercing_edges, combined_entry.edge_order);
+        std::ranges::fill(edges_intersection_count, 0);
+        for (int i = 0; i < static_cast<int>(part_a_edges_order.size()); i++) {
+            int edge_index = get(edge_index_map, part_a_edges_order[i]);
+            edges_intersection_count[edge_index] += part_a_entry.edge_order[i].second;
+        }
+        for (int i = 0; i < static_cast<int>(part_b_edges_order.size()); i++) {
+            int edge_index = get(edge_index_map, part_b_edges_order[i]);
+            edges_intersection_count[edge_index] += part_b_entry.edge_order[i].second;
+            if (edges_intersection_count[edge_index] > crossing_number) {
+                ok = false;
+                break;
+            }
+        }
+        if (!ok) { continue; }
+
+        if (!check_inner_triangle(split_vertex)) continue;
+
+        std::string key;
+        for (int i = 0; i < static_cast<int>(piercing_edges_order.size()); i++) {
+            int edge_index = get(edge_index_map, piercing_edges_order[i]);
+            combined_entry.edge_order[i].second = edges_intersection_count[edge_index];
+            key += std::to_string(combined_entry.edge_order[i].first) +
+                "_" + std::to_string(combined_entry.edge_order[i].second) + " ";
+        }
+        combine_vertex_order(split_vertex, part_a_entry, part_b_entry);
+
+        auto& cell = dp_table[active_link.first][active_link.second][right_side];
+        if (!cell.contains(key)) {
+            cell[key] = combined_entry;
+#ifndef NDEBUG
+                            misses++;
+                        } else {
+                            hits++;
+#endif
+        }
+    } while (std::ranges::next_permutation(combined_entry.edge_order).found);
+}
+
 void dp_solver::process_split(size_t right_side, int right_size, const std::vector<edge_t>& piercing_edges,
-                               vertex_t split_vertex) {
+                              vertex_t split_vertex) {
     std::pair uw_link(active_link.first, split_vertex);
     std::pair vw_link(split_vertex, active_link.second);
     if (split_vertex < active_link.first) { std::swap(uw_link.first, uw_link.second); }
@@ -164,108 +277,15 @@ void dp_solver::process_split(size_t right_side, int right_size, const std::vect
             if (!vw_index.contains(part_b)) { continue; }
             const auto& part_b_edges = vw_index.at(part_b);
 
-            for (const auto& part_a_arrangement :
-                 dp_table[uw_link.first][uw_link.second][part_a] | std::views::values) {
-                fill_edge_order(part_a_edges_order, part_a_edges, part_a_arrangement.edge_order);
-                for (const auto& part_b_arrangement :
-                     dp_table[vw_link.first][vw_link.second][part_b] | std::views::values) {
-                    fill_edge_order(part_b_edges_order, part_b_edges, part_b_arrangement.edge_order);
-                    combined_arrangement.edge_order.resize(piercing_edges.size());
+            for (const auto& part_a_entry : dp_table[uw_link.first][uw_link.second][part_a] | std::views::values) {
+                fill_edge_order(part_a_edges_order, part_a_edges, part_a_entry.edge_order);
+                for (const auto& part_b_entry : dp_table[vw_link.first][vw_link.second][part_b] | std::views::values) {
+                    fill_edge_order(part_b_edges_order, part_b_edges, part_b_entry.edge_order);
+                    combined_entry.edge_order.resize(piercing_edges.size());
                     for (int i = 0; i < static_cast<int>(piercing_edges.size()); i++) {
-                        combined_arrangement.edge_order[i].first = i;
+                        combined_entry.edge_order[i].first = i;
                     }
-
-                    do {
-                        bool ok = true;
-                        fill_edge_order(piercing_edges_order, piercing_edges, combined_arrangement.edge_order);
-                        std::ranges::fill(edges_intersection_count, 0);
-                        for (int i = 0; i < static_cast<int>(part_a_edges_order.size()); i++) {
-                            int edge_index = get(edge_index_map, part_a_edges_order[i]);
-                            edges_intersection_count[edge_index] += part_a_arrangement.edge_order[i].second;
-                        }
-                        for (int i = 0; i < static_cast<int>(part_b_edges_order.size()); i++) {
-                            int edge_index = get(edge_index_map, part_b_edges_order[i]);
-                            edges_intersection_count[edge_index] += part_b_arrangement.edge_order[i].second;
-                            if (edges_intersection_count[edge_index] > crossing_number) {
-                                ok = false;
-                                break;
-                            }
-                        }
-                        if (!ok) { continue; }
-
-                        if (split_vertex < active_link.first) {
-                            if (split_vertex > active_link.second) {
-                                ok = count_triangle_intersections(
-                                    part_a_edges_order | std::views::reverse,
-                                    part_b_edges_order | std::views::reverse,
-                                    piercing_edges_order | std::views::reverse,
-                                    split_vertex
-                                );
-                            } else {
-                                ok = count_triangle_intersections(
-                                    part_a_edges_order | std::views::reverse,
-                                    part_b_edges_order,
-                                    piercing_edges_order | std::views::reverse,
-                                    split_vertex
-                                );
-                            }
-                        } else {
-                            if (split_vertex > active_link.second) {
-                                ok = count_triangle_intersections(
-                                    part_a_edges_order,
-                                    part_b_edges_order | std::views::reverse,
-                                    piercing_edges_order | std::views::reverse,
-                                    split_vertex
-                                );
-                            } else {
-                                ok = count_triangle_intersections(
-                                    part_a_edges_order,
-                                    part_b_edges_order,
-                                    piercing_edges_order | std::views::reverse,
-                                    split_vertex
-                                );
-                            }
-                        }
-                        if (!ok) { continue; }
-
-                        std::string key;
-                        for (int i = 0; i < static_cast<int>(piercing_edges_order.size()); i++) {
-                            int edge_index = get(edge_index_map, piercing_edges_order[i]);
-                            combined_arrangement.edge_order[i].second = edges_intersection_count[edge_index];
-                            key += std::to_string(combined_arrangement.edge_order[i].first) +
-                                "_" + std::to_string(combined_arrangement.edge_order[i].second) + " ";
-                        }
-                        combined_arrangement.vertex_order.clear();
-                        if (split_vertex < active_link.first) {
-                            combined_arrangement.vertex_order.insert(combined_arrangement.vertex_order.end(),
-                                                                     part_a_arrangement.vertex_order.rbegin(),
-                                                                     part_a_arrangement.vertex_order.rend());
-                        } else {
-                            combined_arrangement.vertex_order.insert(combined_arrangement.vertex_order.end(),
-                                                                     part_a_arrangement.vertex_order.begin(),
-                                                                     part_a_arrangement.vertex_order.end());
-                        }
-                        combined_arrangement.vertex_order.push_back(split_vertex);
-                        if (split_vertex > active_link.second) {
-                            combined_arrangement.vertex_order.insert(combined_arrangement.vertex_order.end(),
-                                                                     part_b_arrangement.vertex_order.rbegin(),
-                                                                     part_b_arrangement.vertex_order.rend());
-                        } else {
-                            combined_arrangement.vertex_order.insert(combined_arrangement.vertex_order.end(),
-                                                                     part_b_arrangement.vertex_order.begin(),
-                                                                     part_b_arrangement.vertex_order.end());
-                        }
-
-                        auto& cell = dp_table[active_link.first][active_link.second][right_side];
-                        if (!cell.contains(key)) {
-                            cell[key] = combined_arrangement;
-#ifndef NDEBUG
-                            misses++;
-                        } else {
-                            hits++;
-#endif
-                        }
-                    } while (std::ranges::next_permutation(combined_arrangement.edge_order).found);
+                    process_all_arrangements(piercing_edges, split_vertex, right_side, part_a_entry, part_b_entry);
                 }
             }
         }
@@ -333,8 +353,8 @@ void dp_solver::initialise_table() {
 }
 
 void dp_solver::select_edges(filtered_graph_t::edge_iterator start,
-                              const filtered_graph_t::edge_iterator& end,
-                              int k) {
+                             const filtered_graph_t::edge_iterator& end,
+                             int k) {
     if (k == 0) {
         fill_right_sides();
         return;
