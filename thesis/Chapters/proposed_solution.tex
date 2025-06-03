@@ -1,8 +1,8 @@
-\chapter{Proposed solution}\label{ch:proposed-solution}
+\chapter{Proposed Solution}\label{ch:proposed-solution}
 
-T he studies conducted in the field of beyond planar graphs lie purely in the theoretical domain, lacking practical validation. In this thesis, we aim to address this gap by implementing three different algorithms for computing the local circular crossing number of a given graph. Additionally, we aim to develop a command-line interface that would allow invoking the implemented algorithms, receiving the graph and a method as an input and returning the local circular crossing number \(k\) and a circular drawing of the provided graph with at most \(k\) intersections per edge as an output.
+The studies conducted in the field of outer \(k\)-planar graphs lie purely in the theoretical domain, lacking practical validation. In this thesis, we aim to address this gap by implementing three different algorithms for computing the local circular crossing number of a given graph. Additionally, we aim to develop a command-line interface that would allow invoking the implemented algorithms, receiving the graph and a method as an input and returning the local circular crossing number \(k\) and a circular drawing of the provided graph with at most \(k\) intersections per edge as an output.
 
-For operations with graphs, we use the C++ Boost Graph Library~\cite{boost}. As a graph class, we use \textsf{adjacency\_list} since, for all methods described below, we require both \textsf{VertexList} and \textsf{EdgeList} concepts to be able to iterate over both vertices and edges. We prefer this class to an \textsf{adjacency\_matrix} as, according to the library documentation\footnote{\url{https://www.boost.org/doc/libs/1_88_0/libs/graph/doc/adjacency_matrix.html}}, it trades memory consumption and speed of graph traversal for the speed of edge insertion and deletion, and neither of these operations is used for algorithms described in this chapter. To represent a circular graph drawing, we simply use the sequence of vertices in the order in which they appear on the circle.
+For operations with graphs, we use the C++ Boost Graph Library~\cite{boost}. As a graph class, we use \textsf{adjacency\_list} since, for all methods described below, we require both \textsf{VertexList} and \textsf{EdgeList} concepts to be able to iterate over both vertices and edges. We prefer this class to an \textsf{adjacency\_matrix} as, according to the library documentation\footnote{\url{https://www.boost.org/doc/libs/1_88_0/libs/graph/doc/adjacency_matrix.html}}, it trades memory consumption and speed of graph traversal for the speed of edge insertion and deletion, and neither of these operations is used for the algorithms described in this chapter. To represent a circular graph drawing, we simply use the sequence of vertices in the order in which they appear on the circle.
 
 
 \section{Bicomponent decomposition}
@@ -230,7 +230,7 @@ Speaking more precise, the command-line interface has \(1\) required parameter~-
     \centering
     \subfloat[Cubical graph (\(k = 2\))]{\includegraphics[width=.27\textwidth]{cube}}
     \hfill
-    \subfloat[Peterson graph (\(k = 4\))]{\includegraphics[width=.27\textwidth]{petersen}}
+    \subfloat[Petersen graph (\(k = 4\))]{\includegraphics[width=.27\textwidth]{petersen}}
     \hfill
     \subfloat[Goldner-Harary graph (\(k = 6\))]{\includegraphics[width=.27\textwidth]{goldner-harary}}
     \caption{An example of the resulting drawing for some well-know graphs.}

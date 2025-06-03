@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70218" creator="Ipe 7.2.30">
-<info created="D:20250428164336" modified="D:20250428182532"/>
+<info created="D:20250428164336" modified="D:20250602222829"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -276,13 +276,13 @@ h
 <dashstyle name="dash dotted" value="[4 2 1 2] 0"/>
 <dashstyle name="dashed" value="[4] 0"/>
 <dashstyle name="dotted" value="[1 3] 0"/>
+<gridsize name="1 pts" value="1"/>
 <gridsize name="10 pts (~3.5 mm)" value="10"/>
 <gridsize name="14 pts (~5 mm)" value="14"/>
 <gridsize name="16 pts (~6 mm)" value="16"/>
 <gridsize name="20 pts (~7 mm)" value="20"/>
 <gridsize name="28 pts (~10 mm)" value="28"/>
 <gridsize name="32 pts (~12 mm)" value="32"/>
-<gridsize name="1 pts" value="1"/>
 <gridsize name="56 pts (~20 mm)" value="56"/>
 <gridsize name="8 pts (~3 mm)" value="8"/>
 <opacity name="10%" value="0.1"/>
@@ -311,66 +311,49 @@ h
 <page>
 <layer name="alpha"/>
 <view layers="alpha" active="alpha"/>
-<path stroke="black"> 47.604265000000005 53.581425 m 32.03406 83.247915 l </path>
-<path stroke="black"> 32.03406 83.247915 m 32.03406 116.752085 l </path>
-<path stroke="black"> 32.03406 116.752085 m 108.437555 30.51037000000001 l </path>
-<path stroke="black"> 108.437555 30.51037000000001 m 47.604265000000005 53.581425 l </path>
-<path stroke="black"> 75.17765 34.54888 m 32.03406 83.247915 l </path>
-<path stroke="black"> 75.17765 34.54888 m 108.437555 30.51037000000001 l </path>
-
-<path stroke="black"> 32.03406 116.752085 m 47.604265000000005 146.418575 l </path>
-<path stroke="black"> 32.03406 116.752085 m 108.437555 169.48962999999998 l </path>
-<path stroke="black"> 47.604265000000005 146.418575 m 108.437555 169.48962999999998 l </path>
-
-<path stroke="black"> 108.437555 169.48962999999998 m 139.764515 42.391119999999994 l </path>
-<path stroke="black"> 108.437555 169.48962999999998 m 161.98192 67.46939 l </path>
-<path stroke="black"> 139.764515 42.391119999999994 m 161.98192 67.46939 l </path>
-
-<path stroke="black"> 108.437555 169.48962999999998 m 139.764515 157.60888 l </path>
-<path stroke="black"> 108.437555 169.48962999999998 m 161.98192 132.53061 l </path>
-<path stroke="black"> 108.437555 169.48962999999998 m 170.0 100.0 l </path>
-<path stroke="black"> 139.764515 157.60888 m 161.98192 132.53061 l </path>
-<path stroke="black"> 139.764515 157.60888 m 170.0 100.0 l </path>
-<path stroke="black"> 161.98192 132.53061 m 170.0 100.0 l </path>
-
-<path stroke="black"> 47.604265000000005 146.418575 m 75.17765 165.45112 l </path>
-
-<path stroke="black" fill="white">5 0 0 5 47.604265000000005 53.581425 e</path>
-<text pos="47.604265000000005 51.651425" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">a</text>
-<path stroke="black" fill="white">5 0 0 5 108.437555 30.51037000000001 e</path>
-<text pos="108.437555 28.58037000000001" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">b</text>
-<path stroke="black" fill="white">5 0 0 5 75.17765 34.54888 e</path>
-<text pos="75.17765 32.61888" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">c</text>
-<path stroke="black" fill="white">5 0 0 5 32.03406 83.247915 e</path>
-<text pos="32.03406 81.317915" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">d</text>
-
-<path stroke="black" fill="white">5 0 0 5 161.98192 67.46939 e</path>
-<text pos="161.98192 65.53939" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">h</text>
-<path stroke="black" fill="white">5 0 0 5 139.764515 42.391119999999994 e</path>
-<text pos="139.764515 40.461119999999994" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">i</text>
-
-<path stroke="black" fill="white">5 0 0 5 170.0 100.0 e</path>
-<text pos="170.0 98.07" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">j</text>
-<path stroke="black" fill="white">5 0 0 5 139.764515 157.60888 e</path>
-<text pos="139.764515 155.67888" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">k</text>
-<path stroke="black" fill="white">5 0 0 5 161.98192 132.53061 e</path>
-<text pos="161.98192 130.60061" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">l</text>
-
-<path stroke="black" fill="white">5 0 0 5 75.17765 165.45112 e</path>
-<text pos="75.17765 163.52112" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">m</text>
-
-<path fill="violet" opacity="10%"> 18.4832 147.57 78.388 82.3459 139.436 14.3848 65.1867 21.8225 17.3067 74.2331 u </path>
-<path fill="yellow" opacity="10%"> 88.5995 161.236 76.9594 179.499 32.9657 149.831 45.0113 132.02 u </path>
-<path fill="green" opacity="10%"> 5.77021 85.2463 41.5815 167.082 72.5975 148.322 100.525 180.993 124.254 172.566 96.9726 144.392 u </path>
-<path fill="blue" opacity="10%"> 100.072 164.593 129.893 46.4091 137.386 25.438 171.456 65.9181 168.067 70.9052 125.221 159.106 114.809 175.757 101.805 175.796 u </path>
-<path fill="red" opacity="10%"> 98.3606 165.712 99.2121 180.836 132.368 170.835 144.494 164.547 171.17 133.663 174.575 122.279 181.008 86.6305 162.377 92.1672 u </path>
-
-<path stroke="black" fill="orange">5 0 0 5 32.03406 116.752085 e</path>
-<text pos="32.03406 114.82208499999999" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">e</text>
-<path stroke="black" fill="orange">5 0 0 5 108.437555 169.48962999999998 e</path>
-<text pos="108.437555 167.55962999999997" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">f</text>
-<path stroke="black" fill="orange">5 0 0 5 47.604265000000005 146.418575 e</path>
-<text pos="47.604265000000005 144.488575" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">g</text>
-
+<path layer="alpha" stroke="black" fill="white">
+125 105 m
+125 95 l
+135 95 l
+135 105 l
+h
+</path>
+<text pos="130 98.07" stroke="black" type="label" width="5.303" height="3.861" depth="0" halign="center" valign="baseline" size="small" style="math">u</text>
+<path stroke="black">
+145 105 m
+135 105 l
+135 95 l
+145 95 l
+</path>
+<path stroke="black">
+115 105 m
+125 105 l
+125 95 l
+115 95 l
+115 95 l
+</path>
+<text matrix="1 0 0 1 21 0" pos="130 98.07" stroke="black" type="label" width="10.751" height="4.033" depth="0" halign="center" valign="baseline" size="small" style="math">\cdots</text>
+<path matrix="1 0 0 1 40 0" stroke="black" fill="white">
+125 105 m
+125 95 l
+135 95 l
+135 105 l
+h
+</path>
+<text matrix="1 0 0 1 40 0" pos="130 98.07" stroke="black" type="label" width="4.798" height="3.861" depth="0" halign="center" valign="baseline" size="small" style="math">v
+</text>
+<path matrix="1 0 0 1 40 0" stroke="black">
+145 105 m
+135 105 l
+135 95 l
+145 95 l
+</path>
+<path matrix="1 0 0 1 40 0" stroke="black">
+115 105 m
+125 105 l
+125 95 l
+115 95 l
+115 95 l
+</path>
 </page>
 </ipe>

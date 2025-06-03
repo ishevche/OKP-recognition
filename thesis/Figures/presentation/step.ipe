@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70218" creator="Ipe 7.2.30">
-<info created="D:20250428164336" modified="D:20250428182532"/>
+<info created="D:20250603080841" modified="D:20250603082652"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -282,7 +282,7 @@ h
 <gridsize name="20 pts (~7 mm)" value="20"/>
 <gridsize name="28 pts (~10 mm)" value="28"/>
 <gridsize name="32 pts (~12 mm)" value="32"/>
-<gridsize name="1 pts" value="1"/>
+<gridsize name="4 pts" value="4"/>
 <gridsize name="56 pts (~20 mm)" value="56"/>
 <gridsize name="8 pts (~3 mm)" value="8"/>
 <opacity name="10%" value="0.1"/>
@@ -291,7 +291,6 @@ h
 <opacity name="75%" value="0.75"/>
 <pen name="fat" value="1.2"/>
 <pen name="heavier" value="0.8"/>
-<pen name="slim" value="0.1"/>
 <pen name="ultrafat" value="2"/>
 <symbolsize name="large" value="5"/>
 <symbolsize name="small" value="2"/>
@@ -305,72 +304,177 @@ h
 <textsize name="script" value="\scriptsize"/>
 <textsize name="small" value="\small"/>
 <textsize name="tiny" value="\tiny"/>
+<textstyle name="center" begin="\begin{center}" end="\end{center}"/>
+<textstyle name="item" begin="\begin{itemize}\item{}" end="\end{itemize}"/>
+<textstyle name="itemize" begin="\begin{itemize}" end="\end{itemize}"/>
 <tiling name="falling" angle="-60" step="4" width="1"/>
 <tiling name="rising" angle="30" step="4" width="1"/>
 </ipestyle>
 <page>
 <layer name="alpha"/>
-<view layers="alpha" active="alpha"/>
-<path stroke="black"> 47.604265000000005 53.581425 m 32.03406 83.247915 l </path>
-<path stroke="black"> 32.03406 83.247915 m 32.03406 116.752085 l </path>
-<path stroke="black"> 32.03406 116.752085 m 108.437555 30.51037000000001 l </path>
-<path stroke="black"> 108.437555 30.51037000000001 m 47.604265000000005 53.581425 l </path>
-<path stroke="black"> 75.17765 34.54888 m 32.03406 83.247915 l </path>
-<path stroke="black"> 75.17765 34.54888 m 108.437555 30.51037000000001 l </path>
-
-<path stroke="black"> 32.03406 116.752085 m 47.604265000000005 146.418575 l </path>
-<path stroke="black"> 32.03406 116.752085 m 108.437555 169.48962999999998 l </path>
-<path stroke="black"> 47.604265000000005 146.418575 m 108.437555 169.48962999999998 l </path>
-
-<path stroke="black"> 108.437555 169.48962999999998 m 139.764515 42.391119999999994 l </path>
-<path stroke="black"> 108.437555 169.48962999999998 m 161.98192 67.46939 l </path>
-<path stroke="black"> 139.764515 42.391119999999994 m 161.98192 67.46939 l </path>
-
-<path stroke="black"> 108.437555 169.48962999999998 m 139.764515 157.60888 l </path>
-<path stroke="black"> 108.437555 169.48962999999998 m 161.98192 132.53061 l </path>
-<path stroke="black"> 108.437555 169.48962999999998 m 170.0 100.0 l </path>
-<path stroke="black"> 139.764515 157.60888 m 161.98192 132.53061 l </path>
-<path stroke="black"> 139.764515 157.60888 m 170.0 100.0 l </path>
-<path stroke="black"> 161.98192 132.53061 m 170.0 100.0 l </path>
-
-<path stroke="black"> 47.604265000000005 146.418575 m 75.17765 165.45112 l </path>
-
-<path stroke="black" fill="white">5 0 0 5 47.604265000000005 53.581425 e</path>
-<text pos="47.604265000000005 51.651425" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">a</text>
-<path stroke="black" fill="white">5 0 0 5 108.437555 30.51037000000001 e</path>
-<text pos="108.437555 28.58037000000001" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">b</text>
-<path stroke="black" fill="white">5 0 0 5 75.17765 34.54888 e</path>
-<text pos="75.17765 32.61888" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">c</text>
-<path stroke="black" fill="white">5 0 0 5 32.03406 83.247915 e</path>
-<text pos="32.03406 81.317915" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">d</text>
-
-<path stroke="black" fill="white">5 0 0 5 161.98192 67.46939 e</path>
-<text pos="161.98192 65.53939" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">h</text>
-<path stroke="black" fill="white">5 0 0 5 139.764515 42.391119999999994 e</path>
-<text pos="139.764515 40.461119999999994" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">i</text>
-
-<path stroke="black" fill="white">5 0 0 5 170.0 100.0 e</path>
-<text pos="170.0 98.07" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">j</text>
-<path stroke="black" fill="white">5 0 0 5 139.764515 157.60888 e</path>
-<text pos="139.764515 155.67888" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">k</text>
-<path stroke="black" fill="white">5 0 0 5 161.98192 132.53061 e</path>
-<text pos="161.98192 130.60061" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">l</text>
-
-<path stroke="black" fill="white">5 0 0 5 75.17765 165.45112 e</path>
-<text pos="75.17765 163.52112" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">m</text>
-
-<path fill="violet" opacity="10%"> 18.4832 147.57 78.388 82.3459 139.436 14.3848 65.1867 21.8225 17.3067 74.2331 u </path>
-<path fill="yellow" opacity="10%"> 88.5995 161.236 76.9594 179.499 32.9657 149.831 45.0113 132.02 u </path>
-<path fill="green" opacity="10%"> 5.77021 85.2463 41.5815 167.082 72.5975 148.322 100.525 180.993 124.254 172.566 96.9726 144.392 u </path>
-<path fill="blue" opacity="10%"> 100.072 164.593 129.893 46.4091 137.386 25.438 171.456 65.9181 168.067 70.9052 125.221 159.106 114.809 175.757 101.805 175.796 u </path>
-<path fill="red" opacity="10%"> 98.3606 165.712 99.2121 180.836 132.368 170.835 144.494 164.547 171.17 133.663 174.575 122.279 181.008 86.6305 162.377 92.1672 u </path>
-
-<path stroke="black" fill="orange">5 0 0 5 32.03406 116.752085 e</path>
-<text pos="32.03406 114.82208499999999" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">e</text>
-<path stroke="black" fill="orange">5 0 0 5 108.437555 169.48962999999998 e</path>
-<text pos="108.437555 167.55962999999997" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">f</text>
-<path stroke="black" fill="orange">5 0 0 5 47.604265000000005 146.418575 e</path>
-<text pos="47.604265000000005 144.488575" stroke="black" type="label" size="small" halign="center" valign="baseline" style="math">g</text>
-
+<layer name="beta"/>
+<layer name="none"/>
+<layer name="gamma"/>
+<layer name="delta"/>
+<layer name="epsilon"/>
+<layer name="zeta"/>
+<layer name="eta"/>
+<layer name="theta"/>
+<view layers="alpha beta gamma" active="alpha"/>
+<view layers="alpha beta theta" active="alpha"/>
+<view layers="alpha delta zeta theta" active="zeta"/>
+<view layers="alpha delta epsilon theta" active="epsilon"/>
+<view layers="alpha delta epsilon eta theta" active="eta"/>
+<path layer="alpha" stroke="black">
+138.367 67.4418 m
+120.38 88.3066
+96.4794 89.0696 c
+</path>
+<path layer="epsilon" fill="lightyellow">
+97.8142 66.8836
+134.668 79.6673
+164.078 92.4362
+161.352 80.7971
+152.861 69.1935
+122.613 55.7255 u
+</path>
+<path layer="alpha" stroke="black">
+138.378 121.897 m
+135.973 98.5558
+96.0116 95.6401 c
+</path>
+<path layer="epsilon" fill="pink">
+103.78 121.426
+119.403 133.179
+158.778 126.647
+168.345 63.2594
+128.423 108.72 u
+</path>
+<path layer="none" stroke="black">
+32 0 0 32 128 96 e
+</path>
+<path layer="alpha" stroke="black">
+157.397 83.3568 m
+110.379 114.409
+95.9276 101.617 c
+</path>
+<path layer="gamma" stroke="white" fill="white">
+99.5357 115.946
+119.742 121.876
+133.75 103.854
+116.127 69.6033
+97.818 79.2425
+91.64 94.7335 u
+</path>
+<path layer="alpha" fill="lightcyan" opacity="30%" stroke-opacity="opaque">
+93.4042 112.95
+106.255 131.028
+148.307 133.609
+178.804 111.851
+164.155 55.8412
+108.391 52.5186
+98.3774 67.473 u
+</path>
+<path layer="theta" matrix="1 0 0 1 46.5974 9.1777" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path matrix="1 0 0 1 46.6814 3.20066" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path matrix="1 0 0 1 47.1492 -3.3698" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path layer="beta" stroke="gray" fill="gray">
+135.814 117.76
+124.274 129.365
+150.43 130.973
+175.801 90.4816
+155.334 60.9273
+125.782 57.1701
+137.876 93.9537
+138.624 107.941 u
+</path>
+<path layer="zeta" stroke="gray" fill="gray">
+125.465 122.932
+118.29 122.188
+112.193 133.536
+169.358 122.287
+166.585 71.7575
+145.448 112.955 u
+</path>
+<path stroke="gray" fill="gray">
+111.102 67.8294
+138.367 67.4418
+155.125 85.3289
+166.805 77.5551
+150.458 63.2514
+118.345 59.9939 u
+</path>
+<path matrix="1 0 0 1 86.5461 -22.2335" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path matrix="1 0 0 1 87.9168 23.5614" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path layer="epsilon" matrix="1 0 0 1 69.7693 20.6209" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path matrix="1 0 0 1 88.0686 -11.2264" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path matrix="1 0 0 1 84.9414 7.73509" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path stroke="black">
+119.099 113.06 m
+114.505 91.3845
+137.399 81.213 c
+</path>
+<path stroke="black">
+134.272 100.174 m
+122.507 92.4008
+112.031 68.2695 c
+</path>
+<path matrix="1 0 0 1 78.5358 -14.8977" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path matrix="1 0 0 1 79.5526 12.7902" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path layer="delta" stroke="black" fill="lightyellow" dash="dotted">
+112.031 68.2694 m
+157.397 83.3567 l
+</path>
+<path stroke="black" fill="lightyellow" dash="dotted">
+157.397 83.3567 m
+112.189 123.821 l
+</path>
+<path matrix="1 0 0 1 108.066 -9.08265" stroke="black" fill="black">
+0.7 0 0 0.7 49.3302 92.4394 e
+</path>
+<path layer="alpha" matrix="1 0 0 1 62.859 31.3818" stroke="black" fill="black">
+1.02737 0 0 1.02737 49.3302 92.4394 e
+</path>
+<path stroke="black" fill="black" dash="dotted">
+112.189 123.821 m
+112.031 68.2694 l
+</path>
+<path stroke="black">
+112.189 123.821 m
+120.05 95.4499
+112.031 68.2694 c
+</path>
+<path matrix="1 0 0 1 62.7007 -24.17" stroke="black" fill="black">
+1.02737 0 0 1.02737 49.3302 92.4394 e
+</path>
+<use layer="eta" name="mark/box(sx)" pos="115.74 104.2" size="normal" stroke="red"/>
+<use name="mark/box(sx)" pos="118.461 103.465" size="normal" stroke="red"/>
+<use name="mark/box(sx)" pos="119.047 100.058" size="normal" stroke="red"/>
+<use name="mark/box(sx)" pos="116.034 99.0499" size="normal" stroke="red"/>
+<use name="mark/box(sx)" pos="115.44 84.9141" size="normal" stroke="red"/>
+<use name="mark/box(sx)" pos="119.431 83.0042" size="normal" stroke="red"/>
+<use name="mark/box(sx)" pos="124.252 90.279" size="normal" stroke="red"/>
+<use name="mark/box(sx)" pos="131.681 98.2508" size="normal" stroke="red"/>
+<use name="mark/box(sx)" pos="123.274 101.846" size="normal" stroke="red"/>
 </page>
 </ipe>
